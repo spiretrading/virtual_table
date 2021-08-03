@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "outDir": "./build",
+    "preserveConstEnums": true,
+    "removeComments": true,
+    "sourceMap": true,
+    "target": "es2017"
+  },
+  "include": [
+    "./node_modules/kola-signals/dist/signals.d.ts",
+    "./source/*.ts",
+    "./source/*.tsx",
+    "./tests/*.ts"
+  ]
+}
