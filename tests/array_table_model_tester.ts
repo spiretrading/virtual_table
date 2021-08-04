@@ -1,6 +1,6 @@
-import { Expect, Test } from 'alsatian';
-import { AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, UpdateOperation} from '../source';
+import {Expect, Test} from 'alsatian';
+import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
+  RemoveRowOperation, Transaction, UpdateOperation} from '../source';
 
 /** Tests the ArrayTableModel. */
 export class ArrayTableModelTester {
@@ -145,6 +145,31 @@ export class ArrayTableModelTester {
     Expect(firstOperation !== null);
     Expect(firstOperation.row == 0);
     Expect(firstOperation.column == 0);
+    listener.unlisten();
+  }
+
+  /** Tests transactions. */
+  @Test()
+  public testTransaction(): void {
+    const model = new ArrayTableModel();
+    const operations: (Operation | Transaction)[] = [];
+    const listener = model.connect((operation: Operation | Transaction) => {
+      operations.push(operation);
+    });
+    Expect(() => model.push([1, 1])).not.toThrow();
+    Expect(() => model.push([2, 2])).not.toThrow();
+    Expect(operations.length == 2);
+    Expect(() => model.beginTransaction()).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.insert([9, 8], 2)).not.toThrow();
+    Expect(() => model.move(0, 2)).not.toThrow();
+    Expect(() => model.remove(1)).not.toThrow();
+    Expect(() => model.set(2, 0, 0)).not.toThrow();
+    Expect(operations.length == 2);
+    Expect(() => model.endTransaction()).not.toThrow();
+    const thirdOperation = operations.pop() as Transaction;
+    Expect(thirdOperation !== null);
+    Expect(thirdOperation.operations.length).toEqual(5);
     listener.unlisten();
   }
 }
