@@ -1,6 +1,6 @@
 import * as Kola from 'kola-signals';
 import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
-  UpdateOperation} from './operations';
+  Transaction, UpdateOperation} from './operations';
 import {TableModel} from './table_model';
 
 /** Implements a TableModel using an 2-dimensional array. */
@@ -9,8 +9,9 @@ export class ArrayTableModel extends TableModel {
   /** Constructs an empty model. */
   constructor() {
     super();
-    this.dispatcher = new Kola.Dispatcher<Operation>();
+    this.dispatcher = new Kola.Dispatcher<Operation | Transaction>();
     this.table = [];
+    this.transactionArray = null;
   }
 
   /**
@@ -18,10 +19,17 @@ export class ArrayTableModel extends TableModel {
    * already being processed, then the sub-transaction gets consolidated into
    * the parent transaction.
    */
-  public beginTransaction(): void {}
+  public beginTransaction(): void {
+    if(this.transactionArray === null) {
+      this.transactionArray = [];
+    }
+  }
 
   /** Ends a transaction. */
-  public endTransaction(): void {}
+  public endTransaction(): void {
+    this.dispatcher.dispatch(new Transaction(this.transactionArray));
+    this.transactionArray = null;
+  }
 
   /**
    * Appends a row to the table.
@@ -35,7 +43,7 @@ export class ArrayTableModel extends TableModel {
         'exactly equal to this table\'s columnCount.');
     }
     this.table.push(row);
-    this.dispatcher.dispatch(new AddRowOperation(this.table.length - 1));
+    this.processOperation(new AddRowOperation(this.table.length - 1));
   }
 
   /**
@@ -59,7 +67,7 @@ export class ArrayTableModel extends TableModel {
       this.table[i] = this.table[i - 1];
       this.table[i - 1] = row;
     }
-    this.dispatcher.dispatch(new AddRowOperation(index));
+    this.processOperation(new AddRowOperation(index));
   }
 
   /**
@@ -87,7 +95,7 @@ export class ArrayTableModel extends TableModel {
         this.table[i + 1] = row;
       }
     }
-    this.dispatcher.dispatch(new MoveRowOperation(source, destination));
+    this.processOperation(new MoveRowOperation(source, destination));
   }
 
   /**
@@ -104,7 +112,7 @@ export class ArrayTableModel extends TableModel {
       this.table[i] = this.table[i + 1];
     }
     this.table.pop();
-    this.dispatcher.dispatch(new RemoveRowOperation(index));
+    this.processOperation(new RemoveRowOperation(index));
   }
 
   /**
@@ -121,7 +129,7 @@ export class ArrayTableModel extends TableModel {
         'range.');
     }
     this.table[row][column] = value;
-    this.dispatcher.dispatch(new UpdateOperation(row, column));
+    this.processOperation(new UpdateOperation(row, column));
   }
 
   public get rowCount(): number {
@@ -147,6 +155,15 @@ export class ArrayTableModel extends TableModel {
     return this.dispatcher.listen(slot);
   }
 
-  private dispatcher: Kola.Dispatcher<Operation>;
+  private processOperation(operation: Operation) {
+    if(this.transactionArray === null) {
+      this.dispatcher.dispatch(operation);
+    } else {
+      this.transactionArray.push(operation);
+    }
+  }
+
+  private dispatcher: Kola.Dispatcher<Operation | Transaction>;
   private table: any[][];
+  private transactionArray: Operation[];
 }
