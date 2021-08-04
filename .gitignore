@@ -15,3 +15,5 @@ package-lock.json
 .prettierrc
 .DS_STORE
 **/.DS_Store
+
+build/
