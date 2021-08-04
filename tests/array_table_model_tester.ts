@@ -137,7 +137,7 @@ export class ArrayTableModelTester {
     Expect(() => model.set(5, 3, 9)).toThrow();
     Expect(() => model.set(3, 3, 9)).toThrow();
     Expect(() => model.set(0, 0, 9)).not.toThrow();
-    Expect(model.get(0, 0) == 9);
+    Expect(model.get(0, 0)).toEqual(9);
     Expect(() => model.set(2, 0, 0)).not.toThrow();
     Expect(() => model.set(4, 1, 99)).not.toThrow();
     Expect(operations.length == 3);
