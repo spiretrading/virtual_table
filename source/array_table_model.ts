@@ -1,6 +1,7 @@
 import * as Kola from 'kola-signals';
-import { Operation } from './operations';
-import { TableModel } from './table_model';
+import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
+  UpdateOperation} from './operations';
+import {TableModel} from './table_model';
 
 /** Implements a TableModel using an 2-dimensional array. */
 export class ArrayTableModel extends TableModel {
@@ -9,6 +10,7 @@ export class ArrayTableModel extends TableModel {
   constructor() {
     super();
     this.dispatcher = new Kola.Dispatcher<Operation>();
+    this.table = [];
   }
 
   /**
@@ -27,7 +29,14 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The length of the row being added is not exactly equal
    *                      to this table's columnCount.
    */
-  public push(row: any[]): void {}
+  public push(row: any[]): void {
+    if(row.length > this.columnCount && this.columnCount !== 0) {
+      throw new RangeError('The length of the row being added is not ' +
+        'exactly equal to this table\'s columnCount.');
+    }
+    this.table.push(row);
+    this.dispatcher.dispatch(new AddRowOperation(this.table.length - 1));
+  }
 
   /**
    * Inserts a row to the table.
@@ -37,7 +46,21 @@ export class ArrayTableModel extends TableModel {
    *                      to this table's columnCount.
    * @throws RangeError - The index specified is not within range.
    */
-  public insert(row: any[], index: number): void {}
+  public insert(row: any[], index: number): void {
+    if(row.length > this.columnCount) {
+      throw new RangeError('The length of the row being added is not ' +
+        'exactly equal to this table\'s columnCount.');
+    } else if(index >= this.rowCount) {
+      throw new RangeError('The index specified is not within range.');
+    }
+    this.table.push(row);
+    for(let i = this.table.length - 1; i > index; i--) {
+      let row = this.table[i];
+      this.table[i] = this.table[i - 1];
+      this.table[i - 1] = row;
+    }
+    this.dispatcher.dispatch(new AddRowOperation(index));
+  }
 
   /**
    * Moves a row.
@@ -46,14 +69,43 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The source or destination are not within this table's
    *                      range.
    */
-  public move(source: number, destination: number): void {}
+  public move(source: number, destination: number): void {
+    if(source > this.rowCount - 1 || destination > this.rowCount - 1) {
+      throw new RangeError('The source or destination are not within this ' + 
+        'table\'s range.');
+    }
+    if(source > destination) {
+      for(let i = source; i > destination; i--) {
+        let row = this.table[i];
+        this.table[i] = this.table[i - 1];
+        this.table[i - 1] = row;
+      }
+    } else {
+      for(let i = source; i < destination; i++) {
+        let row = this.table[i];
+        this.table[i] = this.table[i + 1];
+        this.table[i + 1] = row;
+      }
+    }
+    this.dispatcher.dispatch(new MoveRowOperation(source, destination));
+  }
 
   /**
    * Removes a row from the table.
    * @param index - The index of the row to remove.
    * @throws RangeError - The index is not within this table's range.
    */
-  public remove(index: number): void {}
+  public remove(index: number): void {
+    if(index > this.rowCount - 1) {
+      throw new RangeError('The index is not within this table\'s range.');
+    }
+    const lastIndex = this.rowCount - 1;
+    for(let i = index; i <= lastIndex; i++) {
+      this.table[i] = this.table[i + 1];
+    }
+    this.table.pop();
+    this.dispatcher.dispatch(new RemoveRowOperation(index));
+  }
 
   /**
    * Sets a value at a specified row and column.
@@ -62,18 +114,32 @@ export class ArrayTableModel extends TableModel {
    * @param value - The value to set at the specified row and column.
    * @throws RangeError - The row or column is not within this table's range.
    */
-  public set(row: number, column: number, value: any): void {}
+  public set(row: number, column: number, value: any): void {
+    const oldValue = this.table[row]?.[column];
+    if(!oldValue && oldValue !== 0) {
+      throw new RangeError('The row or column is not within this table\'s ' +
+        'range.');
+    }
+    this.table[row][column] = value;
+    this.dispatcher.dispatch(new UpdateOperation(row, column));
+  }
 
   public get rowCount(): number {
-    return 0;
+    return this.table.length;
   }
 
   public get columnCount(): number {
-    return 0;
+    return this.table[0]?.length || 0;
   }
 
   public get(row: number, column: number): any {
-    return 0;
+    const value = this.table[row]?.[column];
+    if(!value && value !== 0) {
+      return new RangeError(
+        'Row or column are outside of the table\'s bounds');
+    } else {
+      return value;
+    }
   }
 
   public connect(
@@ -82,4 +148,5 @@ export class ArrayTableModel extends TableModel {
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
+  private table: any[][];
 }
