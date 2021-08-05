@@ -70,8 +70,8 @@ export class ArrayTableModel extends TableModel {
    *                      range.
    */
   public move(source: number, destination: number): void {
-    if(source > this.rowCount - 1 || source < 0 ||
-        destination > this.rowCount - 1 || destination < 0) {
+    if(source >= this.rowCount || source < 0 || destination >= this.rowCount ||
+        destination < 0) {
       throw new RangeError('The source or destination are not within this ' + 
         'table\'s range.');
     }
@@ -85,7 +85,7 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The index is not within this table's range.
    */
   public remove(index: number): void {
-    if(index > this.rowCount - 1 || index < 0) {
+    if(index >= this.rowCount || index < 0) {
       throw new RangeError('The index is not within this table\'s range.');
     }
     this.table.splice(index, 1);
