@@ -123,12 +123,11 @@ export class ArrayTableModel extends TableModel {
   }
 
   public get(row: number, column: number): any {
-    const value = this.table[row]?.[column];
-    if(!value && value !== 0) {
+    if(row >= this.rowCount || column >= this.columnCount) {
       return new RangeError(
         'Row or column are outside of the table\'s bounds');
     } else {
-      return value;
+      return this.table[row][column];
     }
   }
 
