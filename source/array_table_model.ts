@@ -46,7 +46,7 @@ export class ArrayTableModel extends TableModel {
       throw new RangeError('The length of the row being added is not ' +
         'exactly equal to this table\'s columnCount.');
     }
-    this.table.push(row);
+    this.table.push(row.slice());
     this.processOperation(new AddRowOperation(this.table.length - 1));
   }
 
@@ -65,12 +65,7 @@ export class ArrayTableModel extends TableModel {
     } else if(index >= this.rowCount) {
       throw new RangeError('The index specified is not within range.');
     }
-    this.table.push(row);
-    for(let i = this.table.length - 1; i > index; i--) {
-      let row = this.table[i];
-      this.table[i] = this.table[i - 1];
-      this.table[i - 1] = row;
-    }
+    this.table.splice(index, 0, row.slice());
     this.processOperation(new AddRowOperation(index));
   }
 
@@ -86,19 +81,8 @@ export class ArrayTableModel extends TableModel {
       throw new RangeError('The source or destination are not within this ' + 
         'table\'s range.');
     }
-    if(source > destination) {
-      for(let i = source; i > destination; i--) {
-        let row = this.table[i];
-        this.table[i] = this.table[i - 1];
-        this.table[i - 1] = row;
-      }
-    } else {
-      for(let i = source; i < destination; i++) {
-        let row = this.table[i];
-        this.table[i] = this.table[i + 1];
-        this.table[i + 1] = row;
-      }
-    }
+    const row = this.table.splice(source, 1)[0];
+    this.table.splice(destination, 0, row);
     this.processOperation(new MoveRowOperation(source, destination));
   }
 
@@ -111,11 +95,7 @@ export class ArrayTableModel extends TableModel {
     if(index > this.rowCount - 1) {
       throw new RangeError('The index is not within this table\'s range.');
     }
-    const lastIndex = this.rowCount - 1;
-    for(let i = index; i <= lastIndex; i++) {
-      this.table[i] = this.table[i + 1];
-    }
-    this.table.pop();
+    this.table.splice(index, 1);
     this.processOperation(new RemoveRowOperation(index));
   }
 
