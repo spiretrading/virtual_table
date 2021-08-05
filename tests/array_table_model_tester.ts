@@ -182,13 +182,13 @@ export class ArrayTableModelTester {
     Expect(() => model.endTransaction()).not.toThrow();
     const fourthOperation = operations.pop() as Transaction;
     Expect(fourthOperation !== null);
-    Expect(fourthOperation.operations.length).toEqual(4);
+    Expect(fourthOperation.operations.length).toEqual(5);
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.endTransaction()).not.toThrow();
     const fifthOperation = operations.pop() as Transaction;
     Expect(fifthOperation !== null);
-    Expect(fifthOperation.operations.length).toEqual(8);
+    Expect(fifthOperation.operations.length).toEqual(12);
     Expect(operations.length == 2);
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();

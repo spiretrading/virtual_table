@@ -36,7 +36,8 @@ export class ArrayTableModel extends TableModel {
         this.transactionArray, this.transactionDepth - 1);
       const lastNestedArray = lastNestedArrayParent.pop();
       const transaction = new Transaction(lastNestedArray);
-      lastNestedArrayParent.push(transaction);
+      lastNestedArrayParent.splice(lastNestedArrayParent.length, 0,
+        ...lastNestedArray);
       this.transactionDepth -= 1;
       this.dispatcher.dispatch(transaction);      
     } else if(this.transactionDepth === 0){
@@ -169,6 +170,6 @@ export class ArrayTableModel extends TableModel {
 
   private dispatcher: Kola.Dispatcher<Operation | Transaction>;
   private table: any[][];
-  private transactionArray: (Operation | Transaction)[];
+  private transactionArray: Operation[];
   private transactionDepth: number;
 }
