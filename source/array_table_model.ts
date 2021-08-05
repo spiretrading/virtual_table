@@ -81,8 +81,7 @@ export class ArrayTableModel extends TableModel {
       throw new RangeError('The source or destination are not within this ' + 
         'table\'s range.');
     }
-    const row = this.table.splice(source, 1)[0];
-    this.table.splice(destination, 0, row);
+    this.table.splice(destination, 0, this.table.splice(source, 1)[0]);
     this.processOperation(new MoveRowOperation(source, destination));
   }
 
