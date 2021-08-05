@@ -11,7 +11,7 @@ export class ArrayTableModel extends TableModel {
     super();
     this.dispatcher = new Kola.Dispatcher<Operation | Transaction>();
     this.table = [];
-    this.transactionArray = null;
+    this.transactionObject = {};
   }
 
   /**
@@ -20,15 +20,19 @@ export class ArrayTableModel extends TableModel {
    * the parent transaction.
    */
   public beginTransaction(): void {
-    if(this.transactionArray === null) {
-      this.transactionArray = [];
-    }
+    const depth = Object.keys(this.transactionObject).length;
+    this.transactionObject[depth + 1] = [];
   }
 
   /** Ends a transaction. */
   public endTransaction(): void {
-    this.dispatcher.dispatch(new Transaction(this.transactionArray));
-    this.transactionArray = null;
+    const depth = Object.keys(this.transactionObject).length;
+    const transaction = new Transaction(this.transactionObject[depth]);
+    delete this.transactionObject[depth];
+    if(depth > 1) {
+      this.transactionObject[depth - 1].push(transaction);
+    }
+    this.dispatcher.dispatch(transaction);
   }
 
   /**
@@ -156,14 +160,15 @@ export class ArrayTableModel extends TableModel {
   }
 
   private processOperation(operation: Operation) {
-    if(this.transactionArray === null) {
+    const depth = Object.keys(this.transactionObject).length;
+    if(depth === 0) {
       this.dispatcher.dispatch(operation);
     } else {
-      this.transactionArray.push(operation);
+      this.transactionObject[depth].push(operation);
     }
   }
 
   private dispatcher: Kola.Dispatcher<Operation | Transaction>;
   private table: any[][];
-  private transactionArray: Operation[];
+  private transactionObject: {[key: string]: (Operation | Transaction)[]};
 }

@@ -101,14 +101,14 @@ export class Transaction {
    * Constructs a Transaction.
    * @param operations The list of operations executed.
    */
-  constructor(operations: Operation[]) {
+  constructor(operations: (Operation | Transaction)[]) {
     this._operations = operations;
   }
 
   /** Returns the list of operations executed. */
-  public get operations(): Operation[] {
+  public get operations(): (Operation | Transaction)[] {
     return this._operations;
   }
 
-  private _operations: Operation[];
+  private _operations: (Operation | Transaction)[];
 }
