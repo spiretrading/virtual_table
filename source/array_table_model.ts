@@ -9,7 +9,7 @@ export class ArrayTableModel extends TableModel {
   /** Constructs an empty model. */
   constructor() {
     super();
-    this.dispatcher = new Kola.Dispatcher<Operation | Transaction>();
+    this.dispatcher = new Kola.Dispatcher<Operation>();
     this.table = [];
     this.transactionArray = [];
     this.transactionDepth = -1;
