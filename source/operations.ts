@@ -1,6 +1,7 @@
 /** Unifies all operations that can be performed on a TableModel. */
 export type Operation =
-  AddRowOperation | MoveRowOperation | RemoveRowOperation | UpdateOperation;
+  AddRowOperation | MoveRowOperation | RemoveRowOperation | UpdateOperation |
+  Transaction;
 
 /** Indicates a row was added to the model. */
 export class AddRowOperation {
