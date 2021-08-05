@@ -112,6 +112,7 @@ export class ArrayTableModelTester {
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.push([4, 4])).not.toThrow();
     Expect(() => model.push([5, 5])).not.toThrow();
+    Expect(() => model.remove(-1)).toThrow();
     Expect(() => model.remove(5)).toThrow();
     Expect(() => model.remove(1)).not.toThrow();
     Expect(() => model.remove(3)).not.toThrow();
@@ -138,6 +139,8 @@ export class ArrayTableModelTester {
     Expect(() => model.push([5, 5])).not.toThrow();
     Expect(() => model.set(5, 3, 9)).toThrow();
     Expect(() => model.set(3, 3, 9)).toThrow();
+    Expect(() => model.set(-3, 0, 9)).toThrow();
+    Expect(() => model.set(0, -3, 9)).toThrow();
     Expect(() => model.set(0, 0, 9)).not.toThrow();
     Expect(model.get(0, 0)).toEqual(9);
     Expect(() => model.set(2, 0, 0)).not.toThrow();
