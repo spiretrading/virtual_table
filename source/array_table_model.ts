@@ -85,7 +85,7 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The index is not within this table's range.
    */
   public remove(index: number): void {
-    if(index > this.rowCount - 1) {
+    if(index > this.rowCount - 1 || index < 0) {
       throw new RangeError('The index is not within this table\'s range.');
     }
     this.table.splice(index, 1);
@@ -100,7 +100,8 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The row or column is not within this table's range.
    */
   public set(row: number, column: number, value: any): void {
-    if(row >= this.rowCount || column >= this.columnCount) {
+    if(row >= this.rowCount || row < 0 || column >= this.columnCount ||
+        column < 0) {
       throw new RangeError('The row or column is not within this table\'s ' +
         'range.');
     }
@@ -117,7 +118,8 @@ export class ArrayTableModel extends TableModel {
   }
 
   public get(row: number, column: number): any {
-    if(row >= this.rowCount || column >= this.columnCount) {
+    if(row >= this.rowCount || row < 0 || column >= this.columnCount ||
+        column < 0) {
       return new RangeError(
         'Row or column are outside of the table\'s bounds');
     } else {
