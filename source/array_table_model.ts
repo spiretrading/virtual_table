@@ -85,7 +85,8 @@ export class ArrayTableModel extends TableModel {
    *                      range.
    */
   public move(source: number, destination: number): void {
-    if(source > this.rowCount - 1 || destination > this.rowCount - 1) {
+    if(source > this.rowCount - 1 || source < 0 ||
+        destination > this.rowCount - 1 || destination < 0) {
       throw new RangeError('The source or destination are not within this ' + 
         'table\'s range.');
     }
