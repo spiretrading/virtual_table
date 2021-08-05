@@ -107,8 +107,7 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The row or column is not within this table's range.
    */
   public set(row: number, column: number, value: any): void {
-    const oldValue = this.table[row]?.[column];
-    if(!oldValue && oldValue !== 0) {
+    if(row >= this.rowCount || column >= this.columnCount) {
       throw new RangeError('The row or column is not within this table\'s ' +
         'range.');
     }
