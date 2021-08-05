@@ -11,7 +11,8 @@ export class ArrayTableModel extends TableModel {
     super();
     this.dispatcher = new Kola.Dispatcher<Operation | Transaction>();
     this.table = [];
-    this.transactionObject = {};
+    this.transactionArray = [];
+    this.transactionDepth = -1;
   }
 
   /**
@@ -20,19 +21,30 @@ export class ArrayTableModel extends TableModel {
    * the parent transaction.
    */
   public beginTransaction(): void {
-    const depth = Object.keys(this.transactionObject).length;
-    this.transactionObject[depth + 1] = [];
+    if(this.transactionDepth > -1) {
+      const lastNestedArray = this.getLastNestedArray(this.transactionArray,
+        this.transactionDepth);
+      lastNestedArray.push([]);
+    }
+    this.transactionDepth += 1;
   }
 
   /** Ends a transaction. */
   public endTransaction(): void {
-    const depth = Object.keys(this.transactionObject).length;
-    const transaction = new Transaction(this.transactionObject[depth]);
-    delete this.transactionObject[depth];
-    if(depth > 1) {
-      this.transactionObject[depth - 1].push(transaction);
+    if(this.transactionDepth > 0) {
+      const lastNestedArrayParent = this.getLastNestedArray(
+        this.transactionArray, this.transactionDepth - 1);
+      const lastNestedArray = lastNestedArrayParent.pop();
+      const transaction = new Transaction(lastNestedArray);
+      lastNestedArrayParent.push(transaction);
+      this.transactionDepth -= 1;
+      this.dispatcher.dispatch(transaction);      
+    } else if(this.transactionDepth === 0){
+      const transaction = new Transaction(this.transactionArray);
+      this.transactionArray = [];
+      this.transactionDepth -= 1;
+      this.dispatcher.dispatch(transaction);
     }
-    this.dispatcher.dispatch(transaction);
   }
 
   /**
@@ -137,15 +149,26 @@ export class ArrayTableModel extends TableModel {
   }
 
   private processOperation(operation: Operation) {
-    const depth = Object.keys(this.transactionObject).length;
-    if(depth === 0) {
+    if(this.transactionDepth === -1) {
       this.dispatcher.dispatch(operation);
     } else {
-      this.transactionObject[depth].push(operation);
+      const lastNestedArray = this.getLastNestedArray(this.transactionArray,
+        this.transactionDepth);
+      lastNestedArray.push(operation);
+    }
+  }
+
+  private getLastNestedArray(array: any[], depth: number): any[] {
+    const lastElement = array[array.length - 1];
+    if(Array.isArray(lastElement) && depth > 0) {
+      return this.getLastNestedArray(lastElement, depth - 1);
+    } else {
+      return array;
     }
   }
 
   private dispatcher: Kola.Dispatcher<Operation | Transaction>;
   private table: any[][];
-  private transactionObject: {[key: string]: (Operation | Transaction)[]};
+  private transactionArray: (Operation | Transaction)[];
+  private transactionDepth: number;
 }
