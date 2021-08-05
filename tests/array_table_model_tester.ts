@@ -166,10 +166,33 @@ export class ArrayTableModelTester {
     Expect(() => model.remove(1)).not.toThrow();
     Expect(() => model.set(2, 0, 0)).not.toThrow();
     Expect(operations.length == 2);
+    Expect(() => model.beginTransaction()).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(operations.length == 2);
+    Expect(() => model.beginTransaction()).not.toThrow();
+    Expect(() => model.set(5, 1, 9)).not.toThrow();
+    Expect(() => model.set(5, 1, 9)).not.toThrow();
+    Expect(operations.length == 2);
     Expect(() => model.endTransaction()).not.toThrow();
     const thirdOperation = operations.pop() as Transaction;
     Expect(thirdOperation !== null);
-    Expect(thirdOperation.operations.length).toEqual(5);
+    Expect(thirdOperation.operations.length).toEqual(2);
+    Expect(() => model.endTransaction()).not.toThrow();
+    const fourthOperation = operations.pop() as Transaction;
+    Expect(fourthOperation !== null);
+    Expect(fourthOperation.operations.length).toEqual(4);
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.endTransaction()).not.toThrow();
+    const fifthOperation = operations.pop() as Transaction;
+    Expect(fifthOperation !== null);
+    Expect(fifthOperation.operations.length).toEqual(8);
+    Expect(operations.length == 2);
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(() => model.push([3, 3])).not.toThrow();
+    Expect(operations.length == 4);
     listener.unlisten();
   }
 }
