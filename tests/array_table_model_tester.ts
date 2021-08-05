@@ -51,7 +51,7 @@ export class ArrayTableModelTester {
     Expect(() => model.push([4, 4])).not.toThrow();
     Expect(() => model.push([5, 5])).not.toThrow();
     Expect(() => model.insert([9, 8, 7], 2)).toThrow();
-    Expect(() => model.insert([9, 8], 5)).toThrow();
+    Expect(() => model.insert([9, 8], 6)).toThrow();
     Expect(() => model.insert([9, 8], 2)).not.toThrow();
     Expect(model.get(2, 0)).toEqual(9);
     Expect(model.get(2, 1)).toEqual(8);

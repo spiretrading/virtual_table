@@ -55,12 +55,7 @@ export class ArrayTableModel extends TableModel {
    *                      to this table's columnCount.
    */
   public push(row: any[]): void {
-    if(row.length > this.columnCount && this.columnCount !== 0) {
-      throw new RangeError('The length of the row being added is not ' +
-        'exactly equal to this table\'s columnCount.');
-    }
-    this.table.push(row.slice());
-    this.processOperation(new AddRowOperation(this.table.length - 1));
+    this.insert(row, this.rowCount);
   }
 
   /**
@@ -72,10 +67,10 @@ export class ArrayTableModel extends TableModel {
    * @throws RangeError - The index specified is not within range.
    */
   public insert(row: any[], index: number): void {
-    if(row.length > this.columnCount) {
+    if(this.rowCount !== 0 && row.length !== this.columnCount) {
       throw new RangeError('The length of the row being added is not ' +
         'exactly equal to this table\'s columnCount.');
-    } else if(index >= this.rowCount) {
+    } else if(index > this.rowCount || index < 0) {
       throw new RangeError('The index specified is not within range.');
     }
     this.table.splice(index, 0, row.slice());
