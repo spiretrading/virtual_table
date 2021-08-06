@@ -167,19 +167,24 @@ export class ArrayTableModelTester {
     Expect(() => model.beginTransaction()).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.insert([9, 8], 2)).not.toThrow();
+    Expect(() => model.beginTransaction()).not.toThrow();
     Expect(() => model.move(0, 2)).not.toThrow();
     Expect(() => model.remove(1)).not.toThrow();
+    Expect(() => model.endTransaction()).not.toThrow();
+    Expect(operations.length == 2);
     Expect(() => model.set(2, 0, 0)).not.toThrow();
-    Expect(operations.length == 2);
-    Expect(() => model.beginTransaction()).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();
     Expect(() => model.push([3, 3])).not.toThrow();
-    Expect(operations.length == 2);
     Expect(() => model.endTransaction()).not.toThrow();
     const thirdOperation = operations.pop() as Transaction;
+    Expect(operations.length == 2);
     Expect(thirdOperation !== null);
     Expect(thirdOperation.operations.length).toEqual(8);
+    Expect(() => model.endTransaction()).not.toThrow();
+    Expect(() => model.beginTransaction()).not.toThrow();
+    Expect(() => model.endTransaction()).not.toThrow();
+    Expect(operations.length == 2);
     listener.unlisten();
   }
 }
