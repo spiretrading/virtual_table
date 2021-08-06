@@ -184,7 +184,7 @@ export class ArrayTableModelTester {
     Expect(() => model.endTransaction()).not.toThrow();
     Expect(() => model.beginTransaction()).not.toThrow();
     Expect(() => model.endTransaction()).not.toThrow();
-    Expect(operations.length).toEqual(2);
+    Expect(operations.length).toEqual(3);
     listener.unlisten();
   }
 }

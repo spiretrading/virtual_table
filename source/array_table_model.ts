@@ -29,13 +29,11 @@ export class ArrayTableModel extends TableModel {
 
   /** Ends a transaction. */
   public endTransaction(): void {
-    if(this.transactionDepth > 0) {
-      this.transactionDepth -= 1;
-    } else if(this.transactionDepth === 0) {
-      if(this.transactionArray.length) {
-        this.dispatcher.dispatch(new Transaction(this.transactionArray));
-      }
+    if(this.transactionDepth === 0) {
+      this.dispatcher.dispatch(new Transaction(this.transactionArray));
       this.transactionArray = null;
+    }
+    if(this.transactionDepth > -1) {
       this.transactionDepth -= 1;
     }
   }
