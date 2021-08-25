@@ -1,0 +1,19 @@
+## Ignore the Dependencies folder.
+Dependencies/
+**/Dependencies
+
+## Ignore the generated web-app files.
+mod_time.txt
+tests/*/application/
+application/application/
+library/library/
+
+# NPM
+node_modules/
+package-lock.json
+
+.prettierrc
+.DS_STORE
+**/.DS_Store
+
+build/
