@@ -22,6 +22,8 @@ export class TranslatedTableModel extends TableModel {
       }
       this.translatedTable.push(rowCopy);
     }
+    this.sourceRowIndices = [...new Array(model.rowCount)].
+      map((value, index) => index);
     this.transactionArray = null;
     this.transactionDepth = -1;
   }
@@ -60,6 +62,8 @@ export class TranslatedTableModel extends TableModel {
         destination < 0) {
       throw new RangeError('The index specified is not within range.');
     }
+    this.sourceRowIndices.splice(destination, 0,
+      this.sourceRowIndices.splice(source, 1)[0]);
     this.translatedTable.move(source, destination);
     this.processOperation(new MoveRowOperation(source, destination));
   }
@@ -90,6 +94,7 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
+  private sourceRowIndices: number[];
   private translatedTable: ArrayTableModel;
   private transactionArray: Operation[];
   private transactionDepth: number;
