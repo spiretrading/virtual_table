@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { AddRowOperation, MoveRowOperation, Operation,
+  RemoveRowOperation, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
 
 interface Properties {
@@ -40,6 +42,7 @@ export class TableView extends React.Component<Properties, State> {
       rowsToShow: 1,
       topRow: 0
     };
+    this.props.model.connect(this.tableUpdated.bind(this));
     this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
   }
@@ -50,7 +53,7 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   public componentDidUpdate() {
-    if(this.firstRowRef !== null) {
+    if(this.firstRowRef.current !== null) {
       if(this.firstRowRef.current.offsetHeight !== this.state.rowHeight) {
         this.setState({rowHeight: this.firstRowRef.current.offsetHeight});
       }
@@ -140,6 +143,29 @@ export class TableView extends React.Component<Properties, State> {
           </tbody>
         </table>
       </div>);
+  }
+  private tableUpdated = (operation: Operation) => {
+    console.log('update');
+    const start = Math.max(0, this.state.topRow - 1);
+    const end = Math.min(this.props.model.rowCount,
+      Math.abs(this.props.model.rowCount - 1),
+      this.state.topRow + this.state.rowsToShow);
+    if(operation instanceof AddRowOperation ||
+        operation instanceof RemoveRowOperation) {
+      this.forceUpdate();
+      return;
+    } else if(operation instanceof UpdateOperation) {
+      if(start <= operation.row && operation.row <= end) {
+        this.forceUpdate();
+        return;
+      }
+    } else if(operation instanceof MoveRowOperation) {
+      if(!(operation.source < start && operation.destination < start) &&
+          !(end < operation.source && end < operation.destination)) {
+        this.forceUpdate();
+        return;
+      }
+    }
   }
 
   private onScrollHandler = () => {
