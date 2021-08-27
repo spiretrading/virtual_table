@@ -65,4 +65,32 @@ export class TranslatedTableModelTester {
     Expect(secondOperation.destination).toEqual(0);
     listener.unlisten();
   }
+
+  /** Tests transactions. */
+  @Test()
+  public testTransaction(): void {
+    const testTable = getTestTable();
+    const operations: Operation[] = [];
+    const listener = testTable.connect((operation: Operation | Transaction) => {
+      operations.push(operation);
+    });
+    Expect(() => testTable.beginTransaction()).not.toThrow();
+    Expect(() => testTable.move(0, 1)).not.toThrow();
+    Expect(() => testTable.move(0, 2)).not.toThrow();
+    Expect(() => testTable.beginTransaction()).not.toThrow();
+    Expect(() => testTable.move(2, 1)).not.toThrow();
+    Expect(() => testTable.move(1, 0)).not.toThrow();
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    Expect(operations.length).toEqual(0);
+    Expect(() => testTable.move(2, 0)).not.toThrow();
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    const firstOperation = operations.pop() as Transaction;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.operations.length).toEqual(5);
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    Expect(() => testTable.beginTransaction()).not.toThrow();
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    Expect(operations.length).toEqual(1);
+    listener.unlisten();
+  }
 }

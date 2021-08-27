@@ -29,10 +29,23 @@ export class TranslatedTableModel extends TableModel {
    * already being processed, then the sub-transaction gets consolidated into
    * the parent transaction.
    */
-  public beginTransaction(): void {}
+  public beginTransaction(): void {
+    if(this.transactionArray === null) {
+      this.transactionArray = [];
+    }
+    this.transactionDepth += 1;
+  }
 
   /** Ends a transaction. */
-  public endTransaction(): void {}
+  public endTransaction(): void {
+    if(this.transactionDepth === 0) {
+      this.dispatcher.dispatch(new Transaction(this.transactionArray));
+      this.transactionArray = null;
+    }
+    if(this.transactionDepth > -1) {
+      this.transactionDepth -= 1;
+    }
+  }
 
   /**
    * Moves a row.
@@ -77,4 +90,5 @@ export class TranslatedTableModel extends TableModel {
   private dispatcher: Kola.Dispatcher<Operation>;
   private translatedTable: ArrayTableModel;
   private transactionArray: Operation[];
+  private transactionDepth: number;
 }
