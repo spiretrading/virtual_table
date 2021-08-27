@@ -13,13 +13,13 @@ export class TranslatedTableModel extends TableModel {
    */
   constructor(model: TableModel) {
     super();
-    this.sourceTable = new ArrayTableModel();
+    this.translatedTable = new ArrayTableModel();
     for(let row = 0; row < model.rowCount; row++) {
       const rowCopy = [];
       for(let column = 0; column < model.columnCount; column++) {
         rowCopy.push(model.get(row, column));
       }
-      this.sourceTable.push(rowCopy);
+      this.translatedTable.push(rowCopy);
     }
   }
 
@@ -42,15 +42,15 @@ export class TranslatedTableModel extends TableModel {
   public moveRow(source: number, destination: number): void {}
 
   public get rowCount(): number {
-    return this.sourceTable.rowCount;
+    return this.translatedTable.rowCount;
   }
 
   public get columnCount(): number {
-    return this.sourceTable.columnCount;
+    return this.translatedTable.columnCount;
   }
 
   public get(row: number, column: number): any {
-    return this.sourceTable.get(row, column);
+    return this.translatedTable.get(row, column);
   }
 
   public connect(
@@ -59,5 +59,5 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
-  private sourceTable: ArrayTableModel;
+  private translatedTable: ArrayTableModel;
 }
