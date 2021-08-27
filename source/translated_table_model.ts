@@ -22,6 +22,8 @@ export class TranslatedTableModel extends TableModel {
       }
       this.translatedTable.push(rowCopy);
     }
+    this.transactionArray = null;
+    this.transactionDepth = -1;
   }
 
   /**
