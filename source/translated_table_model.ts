@@ -1,4 +1,5 @@
 import * as Kola from 'kola-signals';
+import {ArrayTableModel} from './array_table_model';
 import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
   Transaction, UpdateOperation} from './operations';
 import {TableModel} from './table_model';
@@ -12,6 +13,14 @@ export class TranslatedTableModel extends TableModel {
    */
   constructor(model: TableModel) {
     super();
+    this.sourceTable = new ArrayTableModel();
+    for(let row = 0; row < model.rowCount; row++) {
+      const rowCopy = [];
+      for(let column = 0; column < model.columnCount; column++) {
+        rowCopy.push(model.get(row, column));
+      }
+      this.sourceTable.push(rowCopy);
+    }
   }
 
   /**
@@ -33,15 +42,15 @@ export class TranslatedTableModel extends TableModel {
   public moveRow(source: number, destination: number): void {}
 
   public get rowCount(): number {
-    return 0;
+    return this.sourceTable.rowCount;
   }
 
   public get columnCount(): number {
-    return 0;
+    return this.sourceTable.columnCount;
   }
 
   public get(row: number, column: number): any {
-    return null;
+    return this.sourceTable.get(row, column);
   }
 
   public connect(
@@ -50,4 +59,5 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
+  private sourceTable: ArrayTableModel;
 }
