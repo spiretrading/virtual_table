@@ -44,9 +44,9 @@ function changeValues() {
   const testRow = Math.floor(Math.random() * model.rowCount);
   if(model.rowCount > 500 && diceRoll === 0) {
     model.remove(testRow);
-  } else if(diceRoll === 4) {
+  } else if(diceRoll === 1) {
     const num = Math.floor(Math.random() * 90) + 100;
-    model.insert([model.rowCount, num, num, num], testRow);
+    model.insert([model.rowCount, num, num, num], 0);
   } else {
     const testValue = Math.floor(Math.random() * model.rowCount) + 0.5;
     const testColumn = Math.floor(Math.random() * 4);
@@ -54,7 +54,7 @@ function changeValues() {
   }
 }
 
-setInterval(changeValues, 5000);
+setInterval(changeValues, 2000);
 
 ReactDOM.render(
   <TableView model={model} style={someStyle} labels={header}
