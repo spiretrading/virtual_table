@@ -29,12 +29,6 @@ interface State {
 
 /** Renders a TableModel to HTML. */
 export class TableView extends React.Component<Properties, State> {
-  public static readonly defaultProps = {
-    header: [] as string[],
-    style: {},
-    activeWidth: 20
-  };
-
   constructor(props: Properties) {
     super(props);
     this.state = {
@@ -45,29 +39,6 @@ export class TableView extends React.Component<Properties, State> {
     this.props.model.connect(this.tableUpdated.bind(this));
     this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
-  }
-
-  public componentDidMount() {
-    this.wrapperRef.current.addEventListener('scroll', this.onScrollHandler);
-    this.forceUpdate();
-  }
-
-  public componentDidUpdate() {
-    if(this.firstRowRef.current !== null) {
-      if(this.firstRowRef.current.offsetHeight !== this.state.rowHeight) {
-        this.setState({rowHeight: this.firstRowRef.current.offsetHeight});
-      }
-      if(this.state.rowsToShow !==
-          Math.ceil(this.props.height / this.state.rowHeight)) {
-        this.setState({
-          rowsToShow: Math.ceil(this.props.height / this.state.rowHeight)
-        });
-      }
-    }
-  }
-
-  public componentWillUnmount() {
-    this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
   }
 
   public render(): JSX.Element {
@@ -144,8 +115,31 @@ export class TableView extends React.Component<Properties, State> {
         </table>
       </div>);
   }
+
+  public componentDidMount(): void {
+    this.wrapperRef.current.addEventListener('scroll', this.onScrollHandler);
+    this.forceUpdate();
+  }
+
+  public componentDidUpdate(): void {
+    if(this.firstRowRef.current !== null) {
+      if(this.firstRowRef.current.offsetHeight !== this.state.rowHeight) {
+        this.setState({rowHeight: this.firstRowRef.current.offsetHeight});
+      }
+      if(this.state.rowsToShow !==
+          Math.ceil(this.props.height / this.state.rowHeight)) {
+        this.setState({
+          rowsToShow: Math.ceil(this.props.height / this.state.rowHeight)
+        });
+      }
+    }
+  }
+
+  public componentWillUnmount(): void {
+    this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
+  }
+
   private tableUpdated = (operation: Operation) => {
-    console.log('update');
     const start = Math.max(0, this.state.topRow - 1);
     const end = Math.min(this.props.model.rowCount,
       Math.abs(this.props.model.rowCount - 1),
