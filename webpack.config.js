@@ -8,7 +8,7 @@ const minigyPluginOpts = {
 };
 module.exports = {
   devtool: PROD ? 'none' : 'source-map',
-  entry: path.resolve(process.cwd(), 'source/index.tsx'),
+  entry: path.resolve(process.cwd(), 'source/main.tsx'),
   mode: PROD ? 'production' : 'development',
   module: {
     rules: [
