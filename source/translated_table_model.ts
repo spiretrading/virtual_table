@@ -137,29 +137,19 @@ export class TranslatedTableModel extends TableModel {
       translatedDestinationIndex);
     this.sourceRowIndices.splice(translatedDestinationIndex, 0,
       this.sourceRowIndices.splice(translatedSourceIndex, 1)[0]);
-    if(sourceIndex > destinationIndex) {
-      this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
-        if(translatedIndex >= destinationIndex &&
-            translatedIndex < sourceIndex) {
-          return translatedIndex + 1;
-        } else if(translatedIndex === sourceIndex) {
-          return destinationIndex;
-        } else {
-          return translatedIndex;
-        }
-      });
-    } else {
-      this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
-        if(translatedIndex > sourceIndex &&
-            translatedIndex <= destinationIndex) {
-          return translatedIndex - 1;
-        } else if(translatedIndex === sourceIndex) {
-          return destinationIndex;
-        } else {
-          return translatedIndex;
-        }
-      });
-    }
+    this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
+      if(translatedIndex >= destinationIndex &&
+          translatedIndex < sourceIndex) {
+        return translatedIndex + 1;
+      } else if(translatedIndex > sourceIndex &&
+        translatedIndex <= destinationIndex) {
+      return translatedIndex - 1;
+      } else if(translatedIndex === sourceIndex) {
+        return destinationIndex;
+      } else {
+        return translatedIndex;
+      }
+    });
     this.processOperation(new MoveRowOperation(translatedSourceIndex,
       translatedDestinationIndex));
   }
