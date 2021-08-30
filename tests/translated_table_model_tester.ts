@@ -170,4 +170,32 @@ export class TranslatedTableModelTester {
     Expect(seventhOperation.column).toEqual(1);
     listener.unlisten();
   }
+
+  /** Tests link to source transaction. */
+  @Test()
+  public testSourceTableTransactions(): void {
+    const testTable = getTestTable();
+    const translatedTable = new TranslatedTableModel(testTable);
+    const operations: Operation[] = [];
+    const listener = translatedTable.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => testTable.beginTransaction()).not.toThrow();
+    Expect(() => testTable.insert([9, 9], 1)).not.toThrow();
+    Expect(() => testTable.move(1, 3)).not.toThrow();
+    Expect(() => testTable.insert([7, 7], 2)).not.toThrow();
+    Expect(() => testTable.move(2, 0)).not.toThrow();
+    Expect(() => testTable.remove(4)).not.toThrow();
+    Expect(() => testTable.set(0, 1, 10)).not.toThrow();
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    const firstOperation = operations.pop() as Transaction;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.operations.length).toEqual(6);
+    Expect(() => testTable.beginTransaction()).not.toThrow();
+    Expect(() => testTable.endTransaction()).not.toThrow();
+    const secondOperation = operations.pop() as Transaction;
+    Expect(secondOperation).not.toBeNull();
+    Expect(secondOperation.operations.length).toEqual(0);
+    listener.unlisten();
+  }
 }

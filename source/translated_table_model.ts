@@ -97,7 +97,7 @@ export class TranslatedTableModel extends TableModel {
     }
   }
 
-  private processSourceOperation(operation: Operation) {
+  private processSourceOperation = (operation: Operation) => {
     if(operation instanceof AddRowOperation) {
       this.processSourceAdd(operation);
     } else if(operation instanceof MoveRowOperation) {
@@ -107,7 +107,9 @@ export class TranslatedTableModel extends TableModel {
     } else if(operation instanceof UpdateOperation) {
       this.processSourceUpdate(operation);
     } else if(operation instanceof Transaction) {
-
+      this.beginTransaction();
+      operation.operations.forEach(this.processSourceOperation);
+      this.endTransaction();
     }
   }
 
