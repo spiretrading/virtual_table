@@ -111,10 +111,8 @@ export class TranslatedTableModel extends TableModel {
     const rowIndex = operation.index;
     const row = []      
     for(let column = 0; column < this.sourceTable.columnCount; column++) {
-      row.push(this.sourceTable.get(rowIndex, column));
-    }
     this.sourceRowIndices = this.sourceRowIndices.map(sourceIndex =>
-      sourceIndex >= rowIndex ? sourceIndex + 1 : sourceIndex);
+      sourceIndex >= operation.index ? sourceIndex + 1 : sourceIndex);
     this.sourceRowIndices.push(operation.index);
     this.processOperation(new AddRowOperation(this.rowCount - 1));
   }
