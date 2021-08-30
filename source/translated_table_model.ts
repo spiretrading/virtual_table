@@ -113,12 +113,12 @@ export class TranslatedTableModel extends TableModel {
 
   private processSourceAdd(operation: AddRowOperation) {
     this.translatedToSourceIndices = this.translatedToSourceIndices.
-    map((sourceIndex, index) => {
-      const newSourceIndex = sourceIndex >= operation.index ? sourceIndex + 1 :
-        sourceIndex;
-      this.sourceToTranslatedIndices[newSourceIndex] = index;
-      return newSourceIndex;
-    });
+      map((sourceIndex, index) => {
+        const newSourceIndex = sourceIndex >= operation.index ? sourceIndex + 1
+          : sourceIndex;
+        this.sourceToTranslatedIndices[newSourceIndex] = index;
+        return newSourceIndex;
+      });
     this.translatedToSourceIndices.push(operation.index);
     this.sourceToTranslatedIndices[operation.index] =
       this.translatedToSourceIndices.length - 1;
