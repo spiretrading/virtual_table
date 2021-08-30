@@ -22,6 +22,10 @@ export class TranslatedTableModel extends TableModel {
       }
       this.translatedTable.push(rowCopy);
     }
+    model.connect((operation: Operation | Transaction) => {
+      this.processSourceOperation(operation);
+    });
+    this.sourceTable = model;
     this.sourceRowIndices = [...new Array(model.rowCount)].
       map((value, index) => index);
     this.transactionArray = null;
@@ -93,7 +97,94 @@ export class TranslatedTableModel extends TableModel {
     }
   }
 
+  private processSourceOperation(operation: Operation) {
+    if(operation instanceof AddRowOperation) {
+      this.processSourceAdd(operation);
+    } else if(operation instanceof MoveRowOperation) {
+      this.processSourceMove(operation);
+    } else if(operation instanceof RemoveRowOperation) {
+      this.processSourceRemove(operation);
+    } else if(operation instanceof UpdateOperation) {
+      this.processSourceUpdate(operation);
+    } else if(operation instanceof Transaction) {
+
+    }
+  }
+
+  private processSourceAdd(operation: AddRowOperation) {
+    const rowIndex = operation.index;
+    const row = []      
+    for(let column = 0; column < this.sourceTable.columnCount; column++) {
+      row.push(this.sourceTable.get(rowIndex, column));
+    }
+    this.translatedTable.push(row);
+    this.sourceRowIndices = this.sourceRowIndices.map(sourceIndex =>
+      sourceIndex >= rowIndex ? sourceIndex + 1 : sourceIndex);
+    this.sourceRowIndices.push(operation.index);
+    this.processOperation(new AddRowOperation(this.rowCount - 1));
+  }
+
+  private processSourceMove(operation: MoveRowOperation) {
+    const sourceIndex = operation.source;
+    const destinationIndex = operation.destination;
+    const translatedSourceIndex = this.sourceRowIndices.
+      findIndex(index => index === sourceIndex);
+    const translatedDestinationIndex = this.sourceRowIndices.
+      findIndex(index => index === destinationIndex);
+    this.translatedTable.move(translatedSourceIndex,
+      translatedDestinationIndex);
+    this.sourceRowIndices.splice(translatedDestinationIndex, 0,
+      this.sourceRowIndices.splice(translatedSourceIndex, 1)[0]);
+    if(sourceIndex > destinationIndex) {
+      this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
+        if(translatedIndex >= destinationIndex &&
+            translatedIndex < sourceIndex) {
+          return translatedIndex + 1;
+        } else if(translatedIndex === sourceIndex) {
+          return destinationIndex;
+        } else {
+          return translatedIndex;
+        }
+      });
+    } else {
+      this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
+        if(translatedIndex > sourceIndex &&
+            translatedIndex <= destinationIndex) {
+          return translatedIndex - 1;
+        } else if(translatedIndex === sourceIndex) {
+          return destinationIndex;
+        } else {
+          return translatedIndex;
+        }
+      });
+    }
+    this.processOperation(new MoveRowOperation(translatedSourceIndex,
+      translatedDestinationIndex));
+  }
+
+  private processSourceRemove(operation: RemoveRowOperation) {
+    const rowIndex = operation.index;
+    const translatedIndex = this.sourceRowIndices.findIndex(index =>
+      index === rowIndex);
+    this.translatedTable.remove(translatedIndex);
+    this.sourceRowIndices.splice(translatedIndex, 1);
+    this.sourceRowIndices = this.sourceRowIndices.map((sourceIndex, index) =>
+      index >= rowIndex ? sourceIndex - 1 : sourceIndex);
+    this.processOperation(new RemoveRowOperation(translatedIndex));
+  }
+
+  private processSourceUpdate(operation: UpdateOperation) {
+    const rowIndex = operation.row;
+    const columnIndex = operation.column;
+    const value = this.sourceTable.get(rowIndex, columnIndex);
+    const translatedIndex = this.sourceRowIndices.findIndex(index =>
+      index === rowIndex);
+    this.translatedTable.set(translatedIndex, columnIndex, value);
+    this.processOperation(new UpdateOperation(translatedIndex, columnIndex));
+  }
+
   private dispatcher: Kola.Dispatcher<Operation>;
+  private sourceTable: TableModel;
   private sourceRowIndices: number[];
   private translatedTable: ArrayTableModel;
   private transactionArray: Operation[];
