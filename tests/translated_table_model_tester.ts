@@ -19,6 +19,10 @@ export class TranslatedTableModelTester {
   public testCopy(): void {
     const testTable = getTestTable();
     const translatedTable = new TranslatedTableModel(testTable);
+    Expect(() => translatedTable.get(10, 1)).toThrow();
+    Expect(() => translatedTable.get(-10, 1)).toThrow();
+    Expect(() => translatedTable.get(1, 10)).toThrow();
+    Expect(() => translatedTable.get(1, -10)).toThrow();
     Expect(translatedTable.rowCount).toEqual(testTable.rowCount);
     Expect(translatedTable.columnCount).toEqual(testTable.columnCount);
     Expect(translatedTable.get(0, 0)).toEqual(testTable.get(0, 0));

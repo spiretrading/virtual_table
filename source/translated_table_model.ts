@@ -81,7 +81,13 @@ export class TranslatedTableModel extends TableModel {
   }
 
   public get(row: number, column: number): any {
-    return this.translatedTable.get(row, column);
+    if(row >= this.rowCount || row < 0 || column >= this.columnCount ||
+        column < 0) {
+      throw new RangeError('The row or column is not within this table\'s ' +
+        'range.');
+    } else {
+      return this.translatedTable.get(row, column);
+    }
   }
 
   public connect(
