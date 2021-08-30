@@ -1,5 +1,4 @@
 import * as Kola from 'kola-signals';
-import {ArrayTableModel} from './array_table_model';
 import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
   Transaction, UpdateOperation} from './operations';
 import {TableModel} from './table_model';
@@ -14,14 +13,6 @@ export class TranslatedTableModel extends TableModel {
   constructor(model: TableModel) {
     super();
     this.dispatcher = new Kola.Dispatcher<Operation>();
-    this.translatedTable = new ArrayTableModel();
-    for(let row = 0; row < model.rowCount; row++) {
-      const rowCopy = [];
-      for(let column = 0; column < model.columnCount; column++) {
-        rowCopy.push(model.get(row, column));
-      }
-      this.translatedTable.push(rowCopy);
-    }
     model.connect(this.processSourceOperation);
     this.sourceTable = model;
     this.sourceRowIndices = [...new Array(model.rowCount)].
@@ -66,16 +57,15 @@ export class TranslatedTableModel extends TableModel {
     }
     this.sourceRowIndices.splice(destination, 0,
       this.sourceRowIndices.splice(source, 1)[0]);
-    this.translatedTable.move(source, destination);
     this.processOperation(new MoveRowOperation(source, destination));
   }
 
   public get rowCount(): number {
-    return this.translatedTable.rowCount;
+    return this.sourceTable.rowCount;
   }
 
   public get columnCount(): number {
-    return this.translatedTable.columnCount;
+    return this.sourceTable.columnCount;
   }
 
   public get(row: number, column: number): any {
@@ -84,7 +74,7 @@ export class TranslatedTableModel extends TableModel {
       throw new RangeError('The row or column is not within this table\'s ' +
         'range.');
     } else {
-      return this.translatedTable.get(row, column);
+      return this.sourceTable.get(this.sourceRowIndices[row], column);
     }
   }
 
@@ -123,7 +113,6 @@ export class TranslatedTableModel extends TableModel {
     for(let column = 0; column < this.sourceTable.columnCount; column++) {
       row.push(this.sourceTable.get(rowIndex, column));
     }
-    this.translatedTable.push(row);
     this.sourceRowIndices = this.sourceRowIndices.map(sourceIndex =>
       sourceIndex >= rowIndex ? sourceIndex + 1 : sourceIndex);
     this.sourceRowIndices.push(operation.index);
@@ -137,8 +126,6 @@ export class TranslatedTableModel extends TableModel {
       findIndex(index => index === sourceIndex);
     const translatedDestinationIndex = this.sourceRowIndices.
       findIndex(index => index === destinationIndex);
-    this.translatedTable.move(translatedSourceIndex,
-      translatedDestinationIndex);
     this.sourceRowIndices.splice(translatedDestinationIndex, 0,
       this.sourceRowIndices.splice(translatedSourceIndex, 1)[0]);
     this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
@@ -162,7 +149,6 @@ export class TranslatedTableModel extends TableModel {
     const rowIndex = operation.index;
     const translatedIndex = this.sourceRowIndices.findIndex(index =>
       index === rowIndex);
-    this.translatedTable.remove(translatedIndex);
     this.sourceRowIndices.splice(translatedIndex, 1);
     this.sourceRowIndices = this.sourceRowIndices.map((sourceIndex, index) =>
       index >= rowIndex ? sourceIndex - 1 : sourceIndex);
@@ -170,19 +156,15 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private processSourceUpdate(operation: UpdateOperation) {
-    const rowIndex = operation.row;
-    const columnIndex = operation.column;
-    const value = this.sourceTable.get(rowIndex, columnIndex);
     const translatedIndex = this.sourceRowIndices.findIndex(index =>
-      index === rowIndex);
-    this.translatedTable.set(translatedIndex, columnIndex, value);
-    this.processOperation(new UpdateOperation(translatedIndex, columnIndex));
+      index === operation.row);
+    this.processOperation(new UpdateOperation(translatedIndex,
+      operation.column));
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
   private sourceTable: TableModel;
   private sourceRowIndices: number[];
-  private translatedTable: ArrayTableModel;
   private transactionArray: Operation[];
   private transactionDepth: number;
 }
