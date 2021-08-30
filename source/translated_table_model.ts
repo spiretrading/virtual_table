@@ -17,6 +17,7 @@ export class TranslatedTableModel extends TableModel {
     this.sourceTable = model;
     this.sourceRowIndices = [...new Array(model.rowCount)].
       map((value, index) => index);
+    this.sourceToTranslatedIndices = this.sourceRowIndices.slice();
     this.transactionArray = null;
     this.transactionDepth = -1;
   }
@@ -57,6 +58,9 @@ export class TranslatedTableModel extends TableModel {
     }
     this.sourceRowIndices.splice(destination, 0,
       this.sourceRowIndices.splice(source, 1)[0]);
+    this.sourceRowIndices.forEach((sourceRowIndex, index) => {
+      this.sourceToTranslatedIndices[sourceRowIndex] = index;
+    });
     this.processOperation(new MoveRowOperation(source, destination));
   }
 
@@ -108,54 +112,62 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private processSourceAdd(operation: AddRowOperation) {
-    const rowIndex = operation.index;
-    const row = []      
-    for(let column = 0; column < this.sourceTable.columnCount; column++) {
-    this.sourceRowIndices = this.sourceRowIndices.map(sourceIndex =>
-      sourceIndex >= operation.index ? sourceIndex + 1 : sourceIndex);
+    this.sourceRowIndices = this.sourceRowIndices.map((sourceIndex, index) => {
+      const newSourceIndex = sourceIndex >= operation.index ? sourceIndex + 1 :
+        sourceIndex;
+      this.sourceToTranslatedIndices[newSourceIndex] = index;
+      return newSourceIndex;
+    });
     this.sourceRowIndices.push(operation.index);
+    this.sourceToTranslatedIndices[operation.index] =
+      this.sourceRowIndices.length - 1;
     this.processOperation(new AddRowOperation(this.rowCount - 1));
   }
 
   private processSourceMove(operation: MoveRowOperation) {
     const sourceIndex = operation.source;
     const destinationIndex = operation.destination;
-    const translatedSourceIndex = this.sourceRowIndices.
-      findIndex(index => index === sourceIndex);
-    const translatedDestinationIndex = this.sourceRowIndices.
-      findIndex(index => index === destinationIndex);
+    const translatedSourceIndex = this.sourceToTranslatedIndices[sourceIndex];
+    const translatedDestinationIndex = this.sourceToTranslatedIndices[
+      destinationIndex];
     this.sourceRowIndices.splice(translatedDestinationIndex, 0,
       this.sourceRowIndices.splice(translatedSourceIndex, 1)[0]);
-    this.sourceRowIndices = this.sourceRowIndices.map(translatedIndex => {
-      if(translatedIndex >= destinationIndex &&
-          translatedIndex < sourceIndex) {
-        return translatedIndex + 1;
-      } else if(translatedIndex > sourceIndex &&
-        translatedIndex <= destinationIndex) {
-      return translatedIndex - 1;
-      } else if(translatedIndex === sourceIndex) {
-        return destinationIndex;
-      } else {
-        return translatedIndex;
-      }
-    });
+    this.sourceRowIndices = this.sourceRowIndices.
+      map((translatedIndex, index) => {
+        const newTranslatedIndex = (() => {
+          if(translatedIndex >= destinationIndex &&
+              translatedIndex < sourceIndex) {
+            return translatedIndex + 1;
+          } else if(translatedIndex > sourceIndex &&
+            translatedIndex <= destinationIndex) {
+          return translatedIndex - 1;
+          } else if(translatedIndex === sourceIndex) {
+            return destinationIndex;
+          } else {
+            return translatedIndex;
+          }
+        })();
+        this.sourceToTranslatedIndices[newTranslatedIndex] = index;
+        return newTranslatedIndex;
+      });
     this.processOperation(new MoveRowOperation(translatedSourceIndex,
       translatedDestinationIndex));
   }
 
   private processSourceRemove(operation: RemoveRowOperation) {
     const rowIndex = operation.index;
-    const translatedIndex = this.sourceRowIndices.findIndex(index =>
-      index === rowIndex);
+    const translatedIndex = this.sourceToTranslatedIndices[rowIndex];
     this.sourceRowIndices.splice(translatedIndex, 1);
-    this.sourceRowIndices = this.sourceRowIndices.map((sourceIndex, index) =>
-      index >= rowIndex ? sourceIndex - 1 : sourceIndex);
+    this.sourceRowIndices = this.sourceRowIndices.map((sourceIndex, index) => {
+      const newSourceIndex = index >= rowIndex ? sourceIndex - 1 : sourceIndex;
+      this.sourceToTranslatedIndices[newSourceIndex] = index;
+      return newSourceIndex;
+    });
     this.processOperation(new RemoveRowOperation(translatedIndex));
   }
 
   private processSourceUpdate(operation: UpdateOperation) {
-    const translatedIndex = this.sourceRowIndices.findIndex(index =>
-      index === operation.row);
+    const translatedIndex = this.sourceToTranslatedIndices[operation.row];
     this.processOperation(new UpdateOperation(translatedIndex,
       operation.column));
   }
@@ -163,6 +175,7 @@ export class TranslatedTableModel extends TableModel {
   private dispatcher: Kola.Dispatcher<Operation>;
   private sourceTable: TableModel;
   private sourceRowIndices: number[];
+  private sourceToTranslatedIndices: number[];
   private transactionArray: Operation[];
   private transactionDepth: number;
 }
