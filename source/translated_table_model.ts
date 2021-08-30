@@ -22,9 +22,7 @@ export class TranslatedTableModel extends TableModel {
       }
       this.translatedTable.push(rowCopy);
     }
-    model.connect((operation: Operation | Transaction) => {
-      this.processSourceOperation(operation);
-    });
+    model.connect(this.processSourceOperation);
     this.sourceTable = model;
     this.sourceRowIndices = [...new Array(model.rowCount)].
       map((value, index) => index);
