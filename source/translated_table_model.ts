@@ -140,8 +140,8 @@ export class TranslatedTableModel extends TableModel {
               translatedIndex < sourceIndex) {
             return translatedIndex + 1;
           } else if(translatedIndex > sourceIndex &&
-            translatedIndex <= destinationIndex) {
-          return translatedIndex - 1;
+              translatedIndex <= destinationIndex) {
+            return translatedIndex - 1;
           } else if(translatedIndex === sourceIndex) {
             return destinationIndex;
           } else {
@@ -165,7 +165,7 @@ export class TranslatedTableModel extends TableModel {
           sourceIndex;
         this.sourceToTranslatedIndices[newSourceIndex] = index;
         return newSourceIndex;
-    });
+      });
     this.processOperation(new RemoveRowOperation(translatedIndex));
   }
 
