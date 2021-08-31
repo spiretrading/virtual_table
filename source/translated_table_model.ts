@@ -132,7 +132,10 @@ export class TranslatedTableModel extends TableModel {
       }
       index++;
     }
-    this.processOperation(new AddRowOperation(this.rowCount - 1));
+    this.translatedToSourceIndices.push(operation.index);
+    this.sourceToTranslatedIndices[operation.index] = 
+      this.translatedToSourceIndices.length - 1;
+    this.processOperation(new AddRowOperation(rowCount));
   }
 
   private sourceMove(operation: MoveRowOperation) {
