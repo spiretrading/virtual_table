@@ -59,11 +59,19 @@ export class TranslatedTableModel extends TableModel {
         destination < 0) {
       throw new RangeError('The index specified is not within range.');
     }
-    this.translatedToSourceIndices.splice(destination, 0,
-      this.translatedToSourceIndices.splice(source, 1)[0]);
-    this.translatedToSourceIndices.forEach((sourceRowIndex, index) => {
-      this.sourceToTranslatedIndices[sourceRowIndex] = index;
-    });
+    const sourceValue = this.translatedToSourceIndices[source];
+    const iterations = Math.abs(source - destination);
+    const multiplier = source < destination ? 1 : -1;
+    for(let i = 0; i < iterations; i++) {
+      const updatedIndex = source + i * multiplier;
+      this.translatedToSourceIndices[updatedIndex] =
+        this.translatedToSourceIndices[updatedIndex + multiplier];
+      this.sourceToTranslatedIndices[
+        this.translatedToSourceIndices[updatedIndex]] = updatedIndex;
+    }
+    this.translatedToSourceIndices[destination] = sourceValue;
+    this.sourceToTranslatedIndices[
+      this.translatedToSourceIndices[destination]] = destination;
     this.processOperation(new MoveRowOperation(source, destination));
   }
 
