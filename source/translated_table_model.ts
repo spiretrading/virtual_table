@@ -169,16 +169,23 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private sourceRemove(operation: RemoveRowOperation) {
-    const rowIndex = operation.index;
-    const translatedIndex = this.sourceToTranslatedIndices[rowIndex];
-    this.translatedToSourceIndices.splice(translatedIndex, 1);
-    this.translatedToSourceIndices = this.translatedToSourceIndices.
-      map((sourceIndex, index) => {
-        const newSourceIndex = index >= rowIndex ? sourceIndex - 1 :
-          sourceIndex;
-        this.sourceToTranslatedIndices[newSourceIndex] = index;
-        return newSourceIndex;
-      });
+    const translatedIndex = this.sourceToTranslatedIndices[operation.index];
+    const rowCount = this.translatedToSourceIndices.length;
+    for(let index = 0; index < rowCount - 1; index++) {
+      if(index >= translatedIndex) {
+        this.translatedToSourceIndices[index] =
+          this.translatedToSourceIndices[index + 1];
+        this.sourceToTranslatedIndices[this.translatedToSourceIndices[index]] =
+          index;
+      }
+      const indexValue = this.translatedToSourceIndices[index];
+      if(indexValue >= operation.index) {
+        this.translatedToSourceIndices[index] = indexValue - 1;
+        this.sourceToTranslatedIndices[indexValue - 1] = index;
+      }
+    }
+    this.translatedToSourceIndices.pop();
+    this.sourceToTranslatedIndices.pop();
     this.processOperation(new RemoveRowOperation(translatedIndex));
   }
 
