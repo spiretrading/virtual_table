@@ -15,9 +15,12 @@ export class TranslatedTableModel extends TableModel {
     this.dispatcher = new Kola.Dispatcher<Operation>();
     model.connect(this.processSourceOperation);
     this.sourceTable = model;
-    this.translatedToSourceIndices = [...new Array(model.rowCount)].
-      map((value, index) => index);
-    this.sourceToTranslatedIndices = this.translatedToSourceIndices.slice();
+    this.translatedToSourceIndices = [];
+    this.sourceToTranslatedIndices = [];
+    for(let index = 0; index < model.rowCount; index++) {
+      this.translatedToSourceIndices.push(index);
+      this.sourceToTranslatedIndices.push(index);
+    }
     this.transactionArray = null;
     this.transactionDepth = -1;
   }
