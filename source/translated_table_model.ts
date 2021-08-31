@@ -75,9 +75,8 @@ export class TranslatedTableModel extends TableModel {
   public get(row: number, column: number): any {
     if(row >= this.rowCount || row < 0) {
       throw new RangeError('Row or column are outside of the table\'s bounds');
-    } else {
-      return this.sourceTable.get(this.translatedToSourceIndices[row], column);
-    }
+    } 
+    return this.sourceTable.get(this.translatedToSourceIndices[row], column);
   }
 
   public connect(
