@@ -59,20 +59,7 @@ export class TranslatedTableModel extends TableModel {
         destination < 0) {
       throw new RangeError('The index specified is not within range.');
     }
-    const sourceValue = this.translatedToSourceIndices[source];
-    const iterations = Math.abs(source - destination);
-    const multiplier = source < destination ? 1 : -1;
-    for(let i = 0; i < iterations; i++) {
-      const updatedIndex = source + i * multiplier;
-      this.translatedToSourceIndices[updatedIndex] =
-        this.translatedToSourceIndices[updatedIndex + multiplier];
-      this.sourceToTranslatedIndices[
-        this.translatedToSourceIndices[updatedIndex]] = updatedIndex;
-    }
-    this.translatedToSourceIndices[destination] = sourceValue;
-    this.sourceToTranslatedIndices[
-      this.translatedToSourceIndices[destination]] = destination;
-    this.processOperation(new MoveRowOperation(source, destination));
+    this.moveRowHelper(source, destination);
   }
 
   public get rowCount(): number {
@@ -167,19 +154,7 @@ export class TranslatedTableModel extends TableModel {
     }
     this.translatedToSourceIndices[sourceIndex] = destination;
     this.sourceToTranslatedIndices[destination] = sourceIndex;
-    const newSourceValue = this.translatedToSourceIndices[sourceIndex]
-    const iterations = Math.abs(sourceIndex - destinationIndex);
-    const multiplier = sourceIndex < destinationIndex ? 1 : -1;
-    for(let i = 0; i < iterations; i++) {
-      const updatedIndex = sourceIndex + i * multiplier;
-      this.translatedToSourceIndices[updatedIndex] =
-        this.translatedToSourceIndices[updatedIndex + multiplier];
-      this.sourceToTranslatedIndices[
-        this.translatedToSourceIndices[updatedIndex]] = updatedIndex;
-    }
-    this.translatedToSourceIndices[destinationIndex] = newSourceValue
-    this.sourceToTranslatedIndices[newSourceValue] = destinationIndex;
-    this.processOperation(new MoveRowOperation(sourceIndex, destinationIndex));
+    this.moveRowHelper(sourceIndex, destinationIndex);
   }
 
   private sourceRemove(operation: RemoveRowOperation) {
@@ -207,6 +182,22 @@ export class TranslatedTableModel extends TableModel {
     const translatedIndex = this.sourceToTranslatedIndices[operation.row];
     this.processOperation(new UpdateOperation(translatedIndex,
       operation.column));
+  }
+
+  private moveRowHelper = (source: number, destination: number) => {
+    const sourceValue = this.translatedToSourceIndices[source];
+    const iterations = Math.abs(source - destination);
+    const multiplier = source < destination ? 1 : -1;
+    for(let i = 0; i < iterations; i++) {
+      const updatedIndex = source + i * multiplier;
+      this.translatedToSourceIndices[updatedIndex] =
+        this.translatedToSourceIndices[updatedIndex + multiplier];
+      this.sourceToTranslatedIndices[
+        this.translatedToSourceIndices[updatedIndex]] = updatedIndex;
+    }
+    this.translatedToSourceIndices[destination] = sourceValue;
+    this.sourceToTranslatedIndices[sourceValue] = destination;
+    this.processOperation(new MoveRowOperation(source, destination));
   }
 
   private dispatcher: Kola.Dispatcher<Operation>;
