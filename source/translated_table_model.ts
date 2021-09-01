@@ -130,24 +130,17 @@ export class TranslatedTableModel extends TableModel {
     const sourceIndex = this.sourceToTranslatedIndices[source];
     const destinationIndex = this.sourceToTranslatedIndices[destination];
     const originalIndices = {} as {[key: string]: number};
-    if(source > destination) {
-      for(let index = destination; index < source; ++index) {
-        const translatedIndex = originalIndices[index] ||
-          this.sourceToTranslatedIndices[index];
-        ++this.translatedToSourceIndices[translatedIndex];
-        const newIndex = this.translatedToSourceIndices[translatedIndex];
-        originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
-        this.sourceToTranslatedIndices[newIndex] = translatedIndex;
-      }
-    } else {
-      for(let index = source + 1; index <= destination; ++index) {
-        const translatedIndex = originalIndices[index] ||
-          this.sourceToTranslatedIndices[index];
-        --this.translatedToSourceIndices[translatedIndex];
-        const newIndex = this.translatedToSourceIndices[translatedIndex];
-        originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
-        this.sourceToTranslatedIndices[newIndex] = translatedIndex;
-      }
+    let index = source > destination ? destination : source + 1;
+    const loopEnd = source > destination ? source : destination + 1;
+    const increment = source > destination ? 1 : -1;
+    for(index; index < loopEnd; ++index) {
+      const translatedIndex = originalIndices[index] ||
+        this.sourceToTranslatedIndices[index];
+      this.translatedToSourceIndices[translatedIndex] =
+        this.translatedToSourceIndices[translatedIndex] + increment;
+      const newIndex = this.translatedToSourceIndices[translatedIndex];
+      originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
+      this.sourceToTranslatedIndices[newIndex] = translatedIndex;
     }
     this.translatedToSourceIndices[sourceIndex] = destination;
     this.sourceToTranslatedIndices[destination] = sourceIndex;
