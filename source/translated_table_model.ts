@@ -135,23 +135,21 @@ export class TranslatedTableModel extends TableModel {
     const originalIndices = {} as {[key: string]: number};
     if(source > destination) {
       for(let index = destination; index < source; ++index) {
-        originalIndices[index] = this.sourceToTranslatedIndices[index];
-      }
-      for(let index = destination; index < source; ++index) {
-        const translatedIndex = originalIndices[index];
+        const translatedIndex = originalIndices[index] ||
+          this.sourceToTranslatedIndices[index];
         ++this.translatedToSourceIndices[translatedIndex];
-        this.sourceToTranslatedIndices[
-          this.translatedToSourceIndices[translatedIndex]] = translatedIndex;
+        const newIndex = this.translatedToSourceIndices[translatedIndex];
+        originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
+        this.sourceToTranslatedIndices[newIndex] = translatedIndex;
       }
     } else {
       for(let index = source + 1; index <= destination; ++index) {
-        originalIndices[index] = this.sourceToTranslatedIndices[index];
-      }
-      for(let index = source + 1; index <= destination; ++index) {
-        const translatedIndex = originalIndices[index];
+        const translatedIndex = originalIndices[index] ||
+          this.sourceToTranslatedIndices[index];
         --this.translatedToSourceIndices[translatedIndex];
-        this.sourceToTranslatedIndices[
-          this.translatedToSourceIndices[translatedIndex]] = translatedIndex;
+        const newIndex = this.translatedToSourceIndices[translatedIndex];
+        originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
+        this.sourceToTranslatedIndices[newIndex] = translatedIndex;
       }
     }
     this.translatedToSourceIndices[sourceIndex] = destination;
