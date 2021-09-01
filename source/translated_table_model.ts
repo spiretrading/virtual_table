@@ -109,7 +109,7 @@ export class TranslatedTableModel extends TableModel {
 
   private sourceAdd(operation: AddRowOperation) {
     const rowCount = this.translatedToSourceIndices.length;
-    const originalIndices = {} as {[key: string]: number};
+    const originalIndices = {} as {[key: number]: number};
     for(let index = operation.index; index < rowCount; ++index) {
       const translatedIndex = originalIndices[index] ||
         this.sourceToTranslatedIndices[index];
@@ -129,10 +129,13 @@ export class TranslatedTableModel extends TableModel {
     const destination = operation.destination;
     const sourceIndex = this.sourceToTranslatedIndices[source];
     const destinationIndex = this.sourceToTranslatedIndices[destination];
-    const originalIndices = {} as {[key: string]: number};
-    let index = source > destination ? destination : source + 1;
-    const loopEnd = source > destination ? source : destination + 1;
-    const increment = source > destination ? 1 : -1;
+    const originalIndices = {} as {[key: number]: number};
+    let {index, loopEnd, increment} = (() => {
+      if(source > destination) {
+        return {index: destination, loopEnd: source, increment: 1};
+      }
+      return {index: source + 1, loopEnd: destination + 1, increment: -1};
+    })();
     for(index; index < loopEnd; ++index) {
       const translatedIndex = originalIndices[index] ||
         this.sourceToTranslatedIndices[index];
