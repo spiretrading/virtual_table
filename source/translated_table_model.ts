@@ -131,7 +131,7 @@ export class TranslatedTableModel extends TableModel {
     const destination = operation.destination;
     const sourceIndex = this.sourceToTranslatedIndices[source];
     const destinationIndex = this.sourceToTranslatedIndices[destination];
-    const originalIndices = {} as any;
+    const originalIndices = {} as {[key: string]: number};
     if(source > destination) {
       for(let index = destination; index < source; index++) {
         originalIndices[index] = this.sourceToTranslatedIndices[index];
