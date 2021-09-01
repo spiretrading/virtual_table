@@ -108,16 +108,17 @@ export class TranslatedTableModel extends TableModel {
 
   private sourceAdd(operation: AddRowOperation) {
     let updatedIndices = 0;
-    let index = 0;
     const rowCount = this.translatedToSourceIndices.length;
-    while(updatedIndices < (rowCount - operation.index)) {
+    for(let index = 0; index < rowCount; index++) {
+      if(updatedIndices >= rowCount - operation.index) {
+        break;
+      }
       const indexValue = this.translatedToSourceIndices[index];
       if(indexValue >= operation.index) {
         this.translatedToSourceIndices[index] = indexValue + 1;
         this.sourceToTranslatedIndices[indexValue + 1] = index;
         updatedIndices++;
       }
-      index++;
     }
     this.translatedToSourceIndices.push(operation.index);
     this.sourceToTranslatedIndices[operation.index] = 
