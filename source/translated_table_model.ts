@@ -108,18 +108,15 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private sourceAdd(operation: AddRowOperation) {
-    let updatedIndices = 0;
     const rowCount = this.translatedToSourceIndices.length;
-    for(let index = 0; index < rowCount; ++index) {
-      if(updatedIndices >= rowCount - operation.index) {
-        break;
-      }
-      const indexValue = this.translatedToSourceIndices[index];
-      if(indexValue >= operation.index) {
-        this.translatedToSourceIndices[index] = indexValue + 1;
-        this.sourceToTranslatedIndices[indexValue + 1] = index;
-        ++updatedIndices;
-      }
+    const originalIndices = {} as {[key: string]: number};
+    for(let index = operation.index; index < rowCount; ++index) {
+      const translatedIndex = originalIndices[index] ||
+        this.sourceToTranslatedIndices[index];
+      ++this.translatedToSourceIndices[translatedIndex];
+      const newIndex = this.translatedToSourceIndices[translatedIndex];
+      originalIndices[newIndex] = this.sourceToTranslatedIndices[newIndex];
+      this.sourceToTranslatedIndices[newIndex] = translatedIndex;
     }
     this.translatedToSourceIndices.push(operation.index);
     this.sourceToTranslatedIndices[operation.index] = 
