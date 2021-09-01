@@ -188,14 +188,12 @@ export class TranslatedTableModel extends TableModel {
 
   private moveRowHelper(source: number, destination: number) {
     const sourceValue = this.translatedToSourceIndices[source];
-    const iterations = Math.abs(source - destination);
     const multiplier = source < destination ? 1 : -1;
-    for(let index = 0; index < iterations; ++index) {
-      const updatedIndex = source + index * multiplier;
-      this.translatedToSourceIndices[updatedIndex] =
-        this.translatedToSourceIndices[updatedIndex + multiplier];
+    for(let index = source; index != destination; index += multiplier) {
+      this.translatedToSourceIndices[index] =
+        this.translatedToSourceIndices[index + multiplier];
       this.sourceToTranslatedIndices[
-        this.translatedToSourceIndices[updatedIndex]] = updatedIndex;
+        this.translatedToSourceIndices[index]] = index;
     }
     this.translatedToSourceIndices[destination] = sourceValue;
     this.sourceToTranslatedIndices[sourceValue] = destination;
