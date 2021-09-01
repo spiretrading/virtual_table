@@ -17,7 +17,7 @@ export class TranslatedTableModel extends TableModel {
     this.sourceTable = model;
     this.translatedToSourceIndices = [];
     this.sourceToTranslatedIndices = [];
-    for(let index = 0; index < model.rowCount; index++) {
+    for(let index = 0; index < model.rowCount; ++index) {
       this.translatedToSourceIndices.push(index);
       this.sourceToTranslatedIndices.push(index);
     }
@@ -72,7 +72,8 @@ export class TranslatedTableModel extends TableModel {
 
   public get(row: number, column: number): any {
     if(row >= this.rowCount || row < 0) {
-      throw new RangeError('Row or column are outside of the table\'s bounds');
+      throw new RangeError(
+        'Row or column are outside of the table\'s bounds.');
     } 
     return this.sourceTable.get(this.translatedToSourceIndices[row], column);
   }
@@ -109,7 +110,7 @@ export class TranslatedTableModel extends TableModel {
   private sourceAdd(operation: AddRowOperation) {
     let updatedIndices = 0;
     const rowCount = this.translatedToSourceIndices.length;
-    for(let index = 0; index < rowCount; index++) {
+    for(let index = 0; index < rowCount; ++index) {
       if(updatedIndices >= rowCount - operation.index) {
         break;
       }
@@ -133,20 +134,20 @@ export class TranslatedTableModel extends TableModel {
     const destinationIndex = this.sourceToTranslatedIndices[destination];
     const originalIndices = {} as {[key: string]: number};
     if(source > destination) {
-      for(let index = destination; index < source; index++) {
+      for(let index = destination; index < source; ++index) {
         originalIndices[index] = this.sourceToTranslatedIndices[index];
       }
-      for(let index = destination; index < source; index++) {
+      for(let index = destination; index < source; ++index) {
         const translatedIndex = originalIndices[index];
         this.translatedToSourceIndices[translatedIndex]++;
         this.sourceToTranslatedIndices[
           this.translatedToSourceIndices[translatedIndex]] = translatedIndex;
       }
     } else {
-      for(let index = source + 1; index <= destination; index++) {
+      for(let index = source + 1; index <= destination; ++index) {
         originalIndices[index] = this.sourceToTranslatedIndices[index];
       }
-      for(let index = source + 1; index <= destination; index++) {
+      for(let index = source + 1; index <= destination; ++index) {
         const translatedIndex = originalIndices[index];
         this.translatedToSourceIndices[translatedIndex]--;
         this.sourceToTranslatedIndices[
@@ -161,7 +162,7 @@ export class TranslatedTableModel extends TableModel {
   private sourceRemove(operation: RemoveRowOperation) {
     const translatedIndex = this.sourceToTranslatedIndices[operation.index];
     const rowCount = this.translatedToSourceIndices.length;
-    for(let index = 0; index < rowCount - 1; index++) {
+    for(let index = 0; index < rowCount - 1; ++index) {
       if(index >= translatedIndex) {
         this.translatedToSourceIndices[index] =
           this.translatedToSourceIndices[index + 1];
@@ -185,12 +186,12 @@ export class TranslatedTableModel extends TableModel {
       operation.column));
   }
 
-  private moveRowHelper = (source: number, destination: number) => {
+  private moveRowHelper(source: number, destination: number) {
     const sourceValue = this.translatedToSourceIndices[source];
     const iterations = Math.abs(source - destination);
     const multiplier = source < destination ? 1 : -1;
-    for(let i = 0; i < iterations; i++) {
-      const updatedIndex = source + i * multiplier;
+    for(let index = 0; index < iterations; ++index) {
+      const updatedIndex = source + index * multiplier;
       this.translatedToSourceIndices[updatedIndex] =
         this.translatedToSourceIndices[updatedIndex + multiplier];
       this.sourceToTranslatedIndices[
