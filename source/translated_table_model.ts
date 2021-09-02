@@ -120,8 +120,7 @@ export class TranslatedTableModel extends TableModel {
   private sourceAdd(operation: AddRowOperation) {
     const rowCount = this.translatedToSourceIndices.length;
     for(let index = operation.index; index < rowCount; ++index) {
-      const translatedIndex = this.sourceToTranslatedIndices[index];
-      ++this.translatedToSourceIndices[translatedIndex];
+      ++this.translatedToSourceIndices[this.sourceToTranslatedIndices[index]];
     }
     this.sourceToTranslatedIndices.splice(operation.index, 0, rowCount);
     this.translatedToSourceIndices.push(operation.index);
