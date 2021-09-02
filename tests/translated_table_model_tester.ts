@@ -100,7 +100,126 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests link to source operations. */
+  /** Tests link to add operations from source. */
+  @Test()
+  public testSourceAdd(): void {
+    const source = new ArrayTableModel();
+    Expect(() => source.push([1])).not.toThrow();
+    Expect(() => source.push([2])).not.toThrow();
+    Expect(() => source.push([3])).not.toThrow();
+    Expect(() => source.push([4])).not.toThrow();
+    const translation = new TranslatedTableModel(source);
+    Expect(() => translation.moveRow(3, 0)).not.toThrow();
+    Expect(() => translation.moveRow(3, 1)).not.toThrow();
+    Expect(() => translation.moveRow(3, 2)).not.toThrow();
+    Expect(() => source.push([5])).not.toThrow();
+    Expect(translation.get(0, 0)).toEqual(4);
+    Expect(translation.get(1, 0)).toEqual(3);
+    Expect(translation.get(2, 0)).toEqual(2);
+    Expect(translation.get(3, 0)).toEqual(1);
+    Expect(translation.get(4, 0)).toEqual(5);
+    Expect(() => source.insert([10], 0)).not.toThrow();
+    Expect(translation.get(5, 0)).toEqual(10);
+    Expect(() => source.insert([20], 3)).not.toThrow();
+    Expect(translation.get(6, 0)).toEqual(20);
+    Expect(() => source.insert([40], 7)).not.toThrow();
+    Expect(translation.get(7, 0)).toEqual(40);
+    Expect(() => source.insert([40], 10)).toThrow();
+  }
+
+  /** Tests link to move operations from source. */
+  @Test()
+  public testSourceMove(): void {
+    const source = new ArrayTableModel();
+    Expect(() => source.push([1])).not.toThrow();
+    Expect(() => source.push([2])).not.toThrow();
+    Expect(() => source.push([10])).not.toThrow();
+    Expect(() => source.push([3])).not.toThrow();
+    Expect(() => source.push([4])).not.toThrow();
+    const translation = new TranslatedTableModel(source);
+    const operations: (Operation | Transaction)[] = [];
+    const listener = translation.connect((
+      operation: Operation | Transaction) => {operations.push(operation);});
+    Expect(() => source.move(2, 0)).not.toThrow();
+    Expect(source.get(0, 0)).toEqual(10);
+    Expect(translation.get(0, 0)).toEqual(10);
+    Expect(() => source.move(0, 4)).not.toThrow();
+    Expect(source.get(4, 0)).toEqual(10);
+    Expect(translation.get(4, 0)).toEqual(10);
+    Expect(() => source.move(4, 2)).not.toThrow();
+    Expect(source.get(2, 0)).toEqual(10);
+    Expect(translation.get(2, 0)).toEqual(10);
+    Expect(() => translation.moveRow(2, 0)).not.toThrow();
+    Expect(translation.get(0, 0)).toEqual(10);
+    Expect(() => source.move(2, 0)).not.toThrow();
+    Expect(source.get(0, 0)).toEqual(10);
+    Expect(translation.get(1, 0)).toEqual(10);
+    Expect(() => source.move(0, 3)).not.toThrow();
+    Expect(source.get(3, 0)).toEqual(10);
+    Expect(translation.get(3, 0)).toEqual(10);
+    listener.unlisten();
+  }
+
+  /** Tests link to remove operations from source. */
+  @Test()
+  public testSourceRemove(): void {
+    const source = new ArrayTableModel();
+    Expect(() => source.push([10])).not.toThrow();
+    Expect(() => source.push([1])).not.toThrow();
+    Expect(() => source.push([2])).not.toThrow();
+    Expect(() => source.push([3])).not.toThrow();
+    Expect(() => source.push([4])).not.toThrow();
+    const translation = new TranslatedTableModel(source);
+    const operations: Operation[] = [];
+    const listener = translation.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => translation.moveRow(0, 4)).not.toThrow();
+    Expect(() => source.remove(0)).not.toThrow();
+    Expect(translation.get(3, 0)).toEqual(4);
+    const firstOperation = operations.pop() as RemoveRowOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.index).toEqual(4);
+    Expect(() => source.push([10])).not.toThrow();
+    Expect(() => translation.moveRow(4, 0)).not.toThrow();
+    Expect(() => source.remove(4)).not.toThrow();
+    Expect(translation.get(0, 0)).toEqual(1);
+    const secondOperation = operations.pop() as RemoveRowOperation;
+    Expect(secondOperation).not.toBeNull();
+    Expect(secondOperation.index).toEqual(0);
+    listener.unlisten();
+  }
+
+  /** Tests link to update operations from source. */
+  @Test()
+  public testSourceUpdate(): void {
+    const source = new ArrayTableModel();
+    Expect(() => source.push([0])).not.toThrow();
+    Expect(() => source.push([1])).not.toThrow();
+    Expect(() => source.push([2])).not.toThrow();
+    Expect(() => source.push([3])).not.toThrow();
+    Expect(() => source.push([4])).not.toThrow();
+    const translation = new TranslatedTableModel(source);
+    const operations: Operation[] = [];
+    const listener = translation.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => translation.moveRow(0, 4)).not.toThrow();
+    Expect(() => source.set(0, 0, 10)).not.toThrow();
+    Expect(translation.get(4, 0)).toEqual(10);
+    const firstOperation = operations.pop() as UpdateOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.row).toEqual(4);
+    Expect(() => translation.moveRow(3, 0)).not.toThrow();
+    Expect(() => source.set(4, 0, 10)).not.toThrow();
+    Expect(translation.get(4, 0)).toEqual(10);
+    const secondOperation = operations.pop() as UpdateOperation;
+    Expect(secondOperation).not.toBeNull();
+    Expect(secondOperation.row).toEqual(0);
+    listener.unlisten();
+  }
+
+  /** Tests link to combinations of source operations. */
   @Test()
   public testSourceTableUpdates(): void {
     const testTable = getTestTable();
