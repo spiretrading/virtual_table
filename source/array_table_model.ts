@@ -125,8 +125,8 @@ export class ArrayTableModel extends TableModel {
   public get(row: number, column: number): any {
     if(row >= this.rowCount || row < 0 || column >= this.columnCount ||
         column < 0) {
-      return new RangeError(
-        'Row or column are outside of the table\'s bounds');
+      throw new RangeError(
+        'Row or column are outside of the table\'s bounds.');
     } else {
       return this.table[row][column];
     }
