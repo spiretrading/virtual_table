@@ -2,6 +2,7 @@ import * as Kola from 'kola-signals';
 import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
   Transaction, UpdateOperation} from './operations';
 import {TableModel} from './table_model';
+import {TransactionLog} from './transaction_log';
 
 /** Adapts an existing TableModel with the ability to rearrange rows. */
 export class TranslatedTableModel extends TableModel {
@@ -12,7 +13,6 @@ export class TranslatedTableModel extends TableModel {
    */
   constructor(model: TableModel) {
     super();
-    this.dispatcher = new Kola.Dispatcher<Operation>();
     model.connect(this.handleSourceOperation);
     this.sourceTable = model;
     this.translatedToSourceIndices = [];
@@ -21,8 +21,7 @@ export class TranslatedTableModel extends TableModel {
       this.translatedToSourceIndices.push(index);
       this.sourceToTranslatedIndices.push(index);
     }
-    this.transactionArray = null;
-    this.transactionDepth = -1;
+    this.transactionLog = new TransactionLog();
   }
 
   /**
@@ -31,21 +30,12 @@ export class TranslatedTableModel extends TableModel {
    * the parent transaction.
    */
   public beginTransaction(): void {
-    if(this.transactionArray === null) {
-      this.transactionArray = [];
-    }
-    this.transactionDepth += 1;
+    this.transactionLog.beginTransaction();
   }
 
   /** Ends a transaction. */
   public endTransaction(): void {
-    if(this.transactionDepth === 0) {
-      this.dispatcher.dispatch(new Transaction(this.transactionArray));
-      this.transactionArray = null;
-    }
-    if(this.transactionDepth > -1) {
-      this.transactionDepth -= 1;
-    }
+    this.transactionLog.endTransaction();
   }
 
   /**
@@ -69,7 +59,7 @@ export class TranslatedTableModel extends TableModel {
     }
     this.translatedToSourceIndices[destination] = sourceValue;
     this.sourceToTranslatedIndices[sourceValue] = destination;
-    this.processOperation(new MoveRowOperation(source, destination));
+    this.transactionLog.push(new MoveRowOperation(source, destination));
   }
 
   public get rowCount(): number {
@@ -90,15 +80,7 @@ export class TranslatedTableModel extends TableModel {
 
   public connect(
       slot: (operations: Operation) => void): Kola.Listener<Operation> {
-    return this.dispatcher.listen(slot);
-  }
-
-  private processOperation(operation: Operation) {
-    if(this.transactionArray === null) {
-      this.dispatcher.dispatch(operation);
-    } else {
-      this.transactionArray.push(operation);
-    }
+    return this.transactionLog.connect(slot);
   }
 
   private handleSourceOperation = (operation: Operation) => {
@@ -129,7 +111,7 @@ export class TranslatedTableModel extends TableModel {
       this.sourceToTranslatedIndices.splice(operation.index, 0, rowCount);
     }
     this.translatedToSourceIndices.push(operation.index);
-    this.processOperation(new AddRowOperation(rowCount));
+    this.transactionLog.push(new AddRowOperation(rowCount));
   }
 
   private sourceMove(operation: MoveRowOperation) {
@@ -174,19 +156,17 @@ export class TranslatedTableModel extends TableModel {
     }
     this.translatedToSourceIndices.pop();
     this.sourceToTranslatedIndices.pop();
-    this.processOperation(new RemoveRowOperation(translatedIndex));
+    this.transactionLog.push(new RemoveRowOperation(translatedIndex));
   }
 
   private sourceUpdate(operation: UpdateOperation) {
     const translatedIndex = this.sourceToTranslatedIndices[operation.row];
-    this.processOperation(new UpdateOperation(translatedIndex,
+    this.transactionLog.push(new UpdateOperation(translatedIndex,
       operation.column));
   }
 
-  private dispatcher: Kola.Dispatcher<Operation>;
   private sourceTable: TableModel;
   private translatedToSourceIndices: number[];
   private sourceToTranslatedIndices: number[];
-  private transactionArray: Operation[];
-  private transactionDepth: number;
+  private transactionLog: TransactionLog;
 }
