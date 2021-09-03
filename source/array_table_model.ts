@@ -1,7 +1,8 @@
 import * as Kola from 'kola-signals';
 import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
-  Transaction, UpdateOperation} from './operations';
+  UpdateOperation} from './operations';
 import {TableModel} from './table_model';
+import {TransactionLog} from './transaction_log';
 
 /** Implements a TableModel using an 2-dimensional array. */
 export class ArrayTableModel extends TableModel {
@@ -9,10 +10,8 @@ export class ArrayTableModel extends TableModel {
   /** Constructs an empty model. */
   constructor() {
     super();
-    this.dispatcher = new Kola.Dispatcher<Operation>();
     this.table = [];
-    this.transactionArray = null;
-    this.transactionDepth = -1;
+    this.transactionLog = new TransactionLog();
   }
 
   /**
@@ -21,21 +20,12 @@ export class ArrayTableModel extends TableModel {
    * the parent transaction.
    */
   public beginTransaction(): void {
-    if(this.transactionArray === null) {
-      this.transactionArray = [];
-    }
-    this.transactionDepth += 1;
+    this.transactionLog.beginTransaction();
   }
 
   /** Ends a transaction. */
   public endTransaction(): void {
-    if(this.transactionDepth === 0) {
-      this.dispatcher.dispatch(new Transaction(this.transactionArray));
-      this.transactionArray = null;
-    }
-    if(this.transactionDepth > -1) {
-      this.transactionDepth -= 1;
-    }
+    this.transactionLog.endTransaction();
   }
 
   /**
@@ -64,7 +54,7 @@ export class ArrayTableModel extends TableModel {
       throw new RangeError('The index specified is not within range.');
     }
     this.table.splice(index, 0, row.slice());
-    this.processOperation(new AddRowOperation(index));
+    this.transactionLog.push(new AddRowOperation(index));
   }
 
   /**
@@ -81,7 +71,7 @@ export class ArrayTableModel extends TableModel {
         'table\'s range.');
     }
     this.table.splice(destination, 0, this.table.splice(source, 1)[0]);
-    this.processOperation(new MoveRowOperation(source, destination));
+    this.transactionLog.push(new MoveRowOperation(source, destination));
   }
 
   /**
@@ -94,7 +84,7 @@ export class ArrayTableModel extends TableModel {
       throw new RangeError('The index is not within this table\'s range.');
     }
     this.table.splice(index, 1);
-    this.processOperation(new RemoveRowOperation(index));
+    this.transactionLog.push(new RemoveRowOperation(index));
   }
 
   /**
@@ -111,7 +101,7 @@ export class ArrayTableModel extends TableModel {
         'range.');
     }
     this.table[row][column] = value;
-    this.processOperation(new UpdateOperation(row, column));
+    this.transactionLog.push(new UpdateOperation(row, column));
   }
 
   public get rowCount(): number {
@@ -133,20 +123,10 @@ export class ArrayTableModel extends TableModel {
   }
 
   public connect(
-      slot: (operations: Operation) => void): Kola.Listener<Operation> {
-    return this.dispatcher.listen(slot);
-  }
+    slot: (operations: Operation) => void): Kola.Listener<Operation> {
+  return this.transactionLog.connect(slot);
+}
 
-  private processOperation(operation: Operation) {
-    if(this.transactionArray === null) {
-      this.dispatcher.dispatch(operation);
-    } else {
-      this.transactionArray.push(operation);
-    }
-  }
-
-  private dispatcher: Kola.Dispatcher<Operation>;
   private table: any[][];
-  private transactionArray: Operation[];
-  private transactionDepth: number;
+  private transactionLog: TransactionLog;
 }
