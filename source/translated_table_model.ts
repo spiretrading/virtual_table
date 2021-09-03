@@ -119,10 +119,15 @@ export class TranslatedTableModel extends TableModel {
 
   private sourceAdd(operation: AddRowOperation) {
     const rowCount = this.translatedToSourceIndices.length;
-    for(let index = operation.index; index < rowCount; ++index) {
-      ++this.translatedToSourceIndices[this.sourceToTranslatedIndices[index]];
+    if(operation.index === rowCount) {
+      this.sourceToTranslatedIndices.push(operation.index);
+    } else {
+      for(let index = operation.index; index < rowCount; ++index) {
+        ++this.translatedToSourceIndices[
+          this.sourceToTranslatedIndices[index]];
+      }
+      this.sourceToTranslatedIndices.splice(operation.index, 0, rowCount);
     }
-    this.sourceToTranslatedIndices.splice(operation.index, 0, rowCount);
     this.translatedToSourceIndices.push(operation.index);
     this.processOperation(new AddRowOperation(rowCount));
   }
