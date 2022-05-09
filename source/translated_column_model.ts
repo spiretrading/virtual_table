@@ -8,6 +8,7 @@ import {TransactionLog} from './transaction_log';
 export class TranslatedColumnModel extends TableModel {
   constructor(model: TableModel) {
     super();
+    model.connect(this.handleSourceOperation);
     this.sourceTable = model;
     this.columnOrder = [];
     for(let index = 0; index < model.columnCount; ++index) {
@@ -33,6 +34,11 @@ export class TranslatedColumnModel extends TableModel {
     return this.sourceTable.get(row, this.columnOrder[column]);
   }
 
+  public connect(
+      slot: (operations: Operation) => void): Kola.Listener<Operation> {
+    return this.transactionLog.connect(slot);
+  }
+
   /** Moves a column.
    * @param source - The original position of the column.
    * @param dest - The new position of the column.
@@ -49,9 +55,46 @@ export class TranslatedColumnModel extends TableModel {
     this.columnOrder.splice(dest, 1, sourceValue);
   }
 
-  public connect(
-      slot: (operations: Operation) => void): Kola.Listener<Operation> {
-    return this.transactionLog.connect(slot);
+  private handleSourceOperation = (operation: Operation) => {
+    if(operation instanceof AddRowOperation) {
+      this.sourceAdd(operation);
+    } else if(operation instanceof MoveRowOperation) {
+      this.sourceMove(operation);
+    } else if(operation instanceof RemoveRowOperation) {
+      this.sourceRemove(operation);
+    } else if(operation instanceof UpdateOperation) {
+      this.sourceUpdate(operation);
+    } else if(operation instanceof Transaction) {
+      this.beginTransaction();
+      operation.operations.forEach(this.handleSourceOperation);
+      this.endTransaction();
+    }
+  }
+
+  beginTransaction() {
+    this.transactionLog.beginTransaction();
+  }
+
+  endTransaction() {
+    this.transactionLog.endTransaction();
+  }
+
+  sourceUpdate(operation: UpdateOperation) {
+    const translatedIndex = this.columnOrder.indexOf(operation.column);
+    this.transactionLog.push(new UpdateOperation(operation.row,
+      translatedIndex));
+  }
+
+  sourceRemove(operation: RemoveRowOperation) {
+    this.transactionLog.push(operation);
+  }
+
+  sourceMove(operation: MoveRowOperation) {
+    this.transactionLog.push(operation);
+  }
+
+  sourceAdd(operation: AddRowOperation) {
+    this.transactionLog.push(operation);
   }
 
   columnOrder: number[];
