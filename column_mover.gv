@@ -36,7 +36,6 @@ initialYPositon: number;
 currentXPosition: number;
 currentYPositon: number;
 
-
 States:
 s0: Rest State
 - isMoving = false
@@ -61,6 +60,7 @@ s3: Evaluate Move
     currentX - initialXPosition
   movingColumnYPosition = Math.min(header_height, currentY - initialYPositon)
 - Determine if movingColumn should move to a new index
+  movingColumnIndex = newIndex
 
 E0 - mouseDown(columnIndex: number, currentX:number, currentY: number)
 E1 - mouseMove(currentX:number, currentY: number)
