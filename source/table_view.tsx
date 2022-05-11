@@ -80,7 +80,7 @@ export class TableView extends React.Component<Properties, State> {
           <th style={this.props.style.th}
               className={this.props.className}
               key={this.props.labels[index]}
-              ref={this.columnRefs[index]}
+              ref={this.columnRefs[i]}
               onMouseDown={(event) => this.onLabelMouseDown(event, i)}>
             {this.props.labels[index]}
           </th>);
@@ -336,6 +336,7 @@ class MovingColumn extends React.Component<SlidingColProperties> {
     }
     return (
       <div style={{
+          boxSizing: 'border-box',
           left: this.props.leftPosition,
           top: this.props.topPosition,
           position:'absolute',
@@ -344,8 +345,8 @@ class MovingColumn extends React.Component<SlidingColProperties> {
         <table style={{
             ...this.props.style.table,
             ...{opacity: 0.8,
-              backgroundColor: 'white',
               width: this.props.width,
+              backgroundColor: 'white',
               border: 'none'}}}>
           <thead>
             <tr style={this.props.style.tr}>
