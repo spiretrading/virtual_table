@@ -49,7 +49,7 @@ export class TableView extends React.Component<Properties, State> {
       topRow: 0,
       isMoving: false,
       headerOrder: [1, 2, 3, 0],
-      movingColumnIndex: 0,
+      movingColumnIndex: -1,
       colLeft: 0,
       colTop: 0,
       mouseXStart: 0,
@@ -58,10 +58,10 @@ export class TableView extends React.Component<Properties, State> {
     this.props.model.connect(this.tableUpdated.bind(this));
     this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
-    this.columnRefs = [];
+    this.labelRefs = [];
     this.columnWidths = [];
     for(let i = 0; i< this.props.labels.length; ++i) {
-      this.columnRefs.push(React.createRef<HTMLTableCellElement>());
+      this.labelRefs.push(React.createRef<HTMLTableCellElement>());
       this.columnWidths[i] = 0;
     }
   }
@@ -72,15 +72,19 @@ export class TableView extends React.Component<Properties, State> {
       const index = this.state.headerOrder[i];
       if(this.state.isMoving && this.state.movingColumnIndex === i) {
         header.push(<th key='filler'
+              ref={this.labelRefs[i]}
               style={{...this.props.style.th,
-                ...{opacity: 0, border: 'none'}}}
-              className={this.props.className}>{this.props.labels[index]}</th>);
+                ...{opacity: 0, border: 'none', width: this.columnWidths[i]}}}
+              className={this.props.className}>
+                {
+                  //this.props.labels[index]
+                }</th>);
       } else {
         header.push(
           <th style={this.props.style.th}
               className={this.props.className}
               key={this.props.labels[index]}
-              ref={this.columnRefs[i]}
+              ref={this.labelRefs[i]}
               onMouseDown={(event) => this.onLabelMouseDown(event, i)}>
             {this.props.labels[index]}
           </th>);
@@ -107,7 +111,9 @@ export class TableView extends React.Component<Properties, State> {
                   ...{opacity: 0, border: 'none'}}}
                 className={this.props.className}
                 key={(i * this.props.model.columnCount) + j}>
-              {this.props.model.get(i, index)}
+              {
+                //this.props.model.get(i, index)
+              }
             </td>);
         } else {
           row.push(
@@ -226,13 +232,17 @@ export class TableView extends React.Component<Properties, State> {
   private checkAndUpdateColumnWidths = () => {
     const widths = [];
     let hasChanged = false;
-    for(let i = 0; i < this.columnRefs.length; ++i) {
+    for(let i = 0; i < this.labelRefs.length; ++i) {
       const widthChanged = this.columnWidths[i] !==
-        this.columnRefs[i].current?.getBoundingClientRect().width;
-      if(widthChanged && this.columnRefs[i].current) {
+        this.labelRefs[i].current?.getBoundingClientRect().width;
+      if(widthChanged && this.labelRefs[i].current) {
         hasChanged = true;
       }
-      widths[i] = this.columnRefs[i].current.getBoundingClientRect().width;
+      if(i === this.state.movingColumnIndex) {
+        widths[i] = this.columnWidths[i];
+      } else {
+        widths[i] = this.labelRefs[i].current.getBoundingClientRect().width;
+      }
     }
     if(hasChanged) {
       this.columnWidths = widths;
@@ -254,8 +264,6 @@ export class TableView extends React.Component<Properties, State> {
     for(let i = 0; i < index; ++i) {
       initialLeft += this.columnWidths[i];
     }
-    console.log('col widths', this.columnWidths);
-    console.log('colLeft', initialLeft);
     this.originalColumn = index;
     this.setState({
       isMoving: true,
@@ -319,7 +327,6 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
-
   private swapColumns = (source: number, dest: number) => {
     if(dest >= this.state.headerOrder.length || dest < 0) {
       return;
@@ -330,6 +337,7 @@ export class TableView extends React.Component<Properties, State> {
     this.state.headerOrder[dest] = sourceValue;
     this.setState({headerOrder: this.state.headerOrder,
       movingColumnIndex: dest});
+    this.startAnimation(dest, source);
   }
 
   private onMouseUp = () => {
@@ -338,9 +346,28 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
+  private startAnimation = (dest: number, source: number) => {
+    this.labelRefs[dest].current?.animate(this.widthKeyframes, this.widthTiming);
+    if(source < dest) {
+      
+    } else if(dest > source ){
+    }
+  }
+
+  private widthKeyframes = [
+    { width: '0px', overflow: 'hidden', boxSixing: 'border-box'},,
+    { width: '400px', overflow: 'hidden', boxSixing: 'border-box'}
+  ] as Keyframe[];
+
+  private widthTiming = {
+    duration: 5000,
+    iterations: 1,
+    fill: 'forwards'
+  } as KeyframeAnimationOptions;
+
   private firstRowRef: React.RefObject<HTMLTableRowElement>;
   private wrapperRef: React.RefObject<HTMLDivElement>;
-  private columnRefs: React.RefObject<HTMLTableCellElement>[];
+  private labelRefs: React.RefObject<HTMLTableCellElement>[];
   private columnWidths: number[];
   private originalColumn: number;
 }
