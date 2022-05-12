@@ -59,9 +59,11 @@ export class TableView extends React.Component<Properties, State> {
     this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
     this.labelRefs = [];
+    this.columnRefs = [];
     this.columnWidths = [];
     for(let i = 0; i< this.props.labels.length; ++i) {
       this.labelRefs.push(React.createRef<HTMLTableCellElement>());
+      this.columnRefs.push(React.createRef<HTMLTableCellElement>());
       this.columnWidths[i] = 0;
     }
   }
@@ -110,6 +112,7 @@ export class TableView extends React.Component<Properties, State> {
             <td style={{...this.props.style.td,
                   ...{opacity: 0, border: 'none'}}}
                 className={this.props.className}
+                ref={i === startRow && this.columnRefs[j]}
                 key={(i * this.props.model.columnCount) + j}>
               {
                 //this.props.model.get(i, index)
@@ -119,6 +122,7 @@ export class TableView extends React.Component<Properties, State> {
           row.push(
             <td style={{...this.props.style.td}}
                 className={this.props.className}
+                ref={i === startRow && this.columnRefs[j]}
                 key={(i * this.props.model.columnCount) + j}>
               {this.props.model.get(i, index)}
             </td>);
@@ -308,12 +312,10 @@ export class TableView extends React.Component<Properties, State> {
         lower = lower + (this.columnWidths[i]);
       }
     } else if(delta > 0) {
-      console.log('Moved right');
       const newRight = newLeft + this.columnWidths[this.state.movingColumnIndex];
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
         let bar = lower + (this.columnWidths[i] / 2);
-        console.log('right move', newRight, bar);
         if(bar <= newRight && newRight <= lower + this.columnWidths[i] ) {
           dest = i;
           break;
@@ -347,20 +349,49 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private startAnimation = (dest: number, source: number) => {
-    this.labelRefs[dest].current?.animate(this.widthKeyframes, this.widthTiming);
+    const width = this.columnWidths[dest];
+    const growFrames = this.getGrowKeyFrames(width);
+    this.labelRefs[dest].current?.animate(growFrames, this.widthTiming);
+    this.columnRefs[dest].current?.animate(growFrames, this.widthTiming);
+    const headerElement = document.createElement('th');
+    headerElement.style
+    const rowElement = document.createElement('td');
+    rowElement.rowSpan = 0;
     if(source < dest) {
-      
+      const shrinkKeyframes = this.getShrinkKeyFrames(width);
+      const currentHeader = this.labelRefs[source].current.insertAdjacentElement('beforebegin', headerElement);
+      const shrinkAnimation1 = currentHeader.animate(shrinkKeyframes, this.widthTiming)
+      const current = this.columnRefs[source].current.insertAdjacentElement('beforebegin', rowElement);
+      const shrinkAnimation2 = current.animate(shrinkKeyframes, this.widthTiming);
+      shrinkAnimation1.onfinish = () => this.onAnimationFinish(headerElement);
+      shrinkAnimation2.onfinish = () => this.onAnimationFinish(rowElement);
     } else if(dest > source ){
     }
   }
 
-  private widthKeyframes = [
-    { width: '0px', overflow: 'hidden', boxSixing: 'border-box'},,
-    { width: '400px', overflow: 'hidden', boxSixing: 'border-box'}
-  ] as Keyframe[];
+  onAnimationFinish(element: Element) {
+    element.parentNode.removeChild(element);
+  }
+
+
+
+  private getGrowKeyFrames = (width: number) => {
+    return[
+      { width: '0px'},
+      { width: width + 'px'}
+    ] as Keyframe[];
+  }
+
+  private getShrinkKeyFrames = (width: number) => {
+    console.log('width', width);
+    return[
+      {width: width + 'px'},
+      {width: '0px'}
+    ] as Keyframe[];
+  }
 
   private widthTiming = {
-    duration: 5000,
+    duration: 200,
     iterations: 1,
     fill: 'forwards'
   } as KeyframeAnimationOptions;
@@ -368,6 +399,7 @@ export class TableView extends React.Component<Properties, State> {
   private firstRowRef: React.RefObject<HTMLTableRowElement>;
   private wrapperRef: React.RefObject<HTMLDivElement>;
   private labelRefs: React.RefObject<HTMLTableCellElement>[];
+  private columnRefs: React.RefObject<HTMLTableCellElement>[];
   private columnWidths: number[];
   private originalColumn: number;
 }
