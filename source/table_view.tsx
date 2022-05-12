@@ -77,10 +77,7 @@ export class TableView extends React.Component<Properties, State> {
               ref={this.labelRefs[i]}
               style={{...this.props.style.th,
                 ...{opacity: 0, border: 'none', width: this.columnWidths[i]}}}
-              className={this.props.className}>
-                {
-                  //this.props.labels[index]
-                }</th>);
+              className={this.props.className}/>);
       } else {
         header.push(
           <th style={this.props.style.th}
@@ -113,11 +110,7 @@ export class TableView extends React.Component<Properties, State> {
                   ...{opacity: 0, border: 'none'}}}
                 className={this.props.className}
                 ref={i === startRow && this.columnRefs[j]}
-                key={(i * this.props.model.columnCount) + j}>
-              {
-                //this.props.model.get(i, index)
-              }
-            </td>);
+                key={(i * this.props.model.columnCount) + j}/>);
         } else {
           row.push(
             <td style={{...this.props.style.td}}
@@ -165,7 +158,8 @@ export class TableView extends React.Component<Properties, State> {
           style={this.props.style}
           label={this.props.labels}
           rowsToShow={this.state.rowsToShow}
-          tableModel={this.props.model}/>
+          tableModel={this.props.model}
+          onWidthChange={this.updateMovingColumnWidth}/>
         <table style={{...this.props.style.table}}
             className={this.props.className}>
           <thead style={this.props.style.thead}
@@ -339,6 +333,7 @@ export class TableView extends React.Component<Properties, State> {
     this.state.headerOrder[dest] = sourceValue;
     this.setState({headerOrder: this.state.headerOrder,
       movingColumnIndex: dest});
+    this.checkAndUpdateColumnWidths();
     this.startAnimation(dest, source);
   }
 
@@ -349,7 +344,7 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private startAnimation = (dest: number, source: number) => {
-    const width = this.columnWidths[dest];
+    const width = this.columnWidths[this.state.movingColumnIndex];
     const growFrames = this.getGrowKeyFrames(width);
     this.labelRefs[dest].current?.animate(growFrames, this.widthTiming);
     this.columnRefs[dest].current?.animate(growFrames, this.widthTiming);
@@ -365,15 +360,15 @@ export class TableView extends React.Component<Properties, State> {
       const shrinkAnimation2 = current.animate(shrinkKeyframes, this.widthTiming);
       shrinkAnimation1.onfinish = () => this.onAnimationFinish(headerElement);
       shrinkAnimation2.onfinish = () => this.onAnimationFinish(rowElement);
-    } else if(dest > source ){
+    } else if(dest > source ) {
+    
     }
   }
 
   onAnimationFinish(element: Element) {
+    console.log('Remove element');
     element.parentNode.removeChild(element);
   }
-
-
 
   private getGrowKeyFrames = (width: number) => {
     return[
@@ -385,13 +380,17 @@ export class TableView extends React.Component<Properties, State> {
   private getShrinkKeyFrames = (width: number) => {
     console.log('width', width);
     return[
-      {width: width + 'px'},
-      {width: '0px'}
+      {width: width + 'px', padding: 0},
+      {width: '0px', padding: 0}
     ] as Keyframe[];
   }
 
+  private updateMovingColumnWidth = (width: number) => {
+    this.columnWidths[this.state.movingColumnIndex] = width;
+  }
+
   private widthTiming = {
-    duration: 200,
+    duration: 500,
     iterations: 1,
     fill: 'forwards'
   } as KeyframeAnimationOptions;
@@ -416,9 +415,15 @@ interface SlidingColProperties {
   tableModel: TableModel;
   className?: string;
   style?: any;
+  onWidthChange: (width: number) => void;
 }
 
 class MovingColumn extends React.Component<SlidingColProperties> {
+  constructor(props: SlidingColProperties) {
+    super(props);
+    this.widthRef = React.createRef<HTMLTableCellElement>();
+  }
+
   public render(): JSX.Element {
     if(!this.props.show) {
       return <div style={{display: 'none'}}/>
@@ -443,12 +448,11 @@ class MovingColumn extends React.Component<SlidingColProperties> {
         <table style={{
             ...this.props.style.table,
             ...{opacity: 0.8,
-              width: this.props.width,
               backgroundColor: 'white',
               border: 'none'}}}>
           <thead>
             <tr style={this.props.style.tr}>
-              <th style={this.props.style.th}>
+              <th style={this.props.style.th} ref={this.widthRef}>
                 {this.props.label[this.props.columnIndex]}
               </th>
             </tr>
@@ -459,4 +463,13 @@ class MovingColumn extends React.Component<SlidingColProperties> {
         </table>
       </div>);
   }
+
+  public onComponentDidUpdate = () => {
+    const currentWidth = this.widthRef.current.getBoundingClientRect().width;
+    if(this.props.width !== currentWidth) {
+      this.props.onWidthChange(currentWidth);
+    }
+  }
+
+  private widthRef: React.RefObject<HTMLTableCellElement>;
 }

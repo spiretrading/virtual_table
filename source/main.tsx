@@ -37,8 +37,8 @@ const someStyle = {
   td: {
     boxSizing: 'border-box',
     border: '2px solid #000000',
-    //paddingLeft: '30px',
-    //paddingRight: '30px',
+    // paddingLeft: '30px',
+    // paddingRight: '30px',
     color: '#4b23a0'
   } as React.CSSProperties
 };
