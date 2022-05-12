@@ -178,7 +178,7 @@ export class TableView extends React.Component<Properties, State> {
     window.addEventListener('mouseup', this.onMouseUp);
     window.addEventListener('mousemove', this.onMouseMove);
     this.forceUpdate();
-    this.checkColumnWidths();
+    this.checkAndUpdateColumnWidths();
   }
 
   public componentDidUpdate(): void {
@@ -223,7 +223,7 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
-  private checkColumnWidths = () => {
+  private checkAndUpdateColumnWidths = () => {
     const widths = [];
     let hasChanged = false;
     for(let i = 0; i < this.columnRefs.length; ++i) {
@@ -249,13 +249,14 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private onLabelMouseDown = (event: React.MouseEvent, index: number) => {
-    this.checkColumnWidths();
+    this.checkAndUpdateColumnWidths();
     let initialLeft = 0;
     for(let i = 0; i < index; ++i) {
       initialLeft += this.columnWidths[i];
     }
     console.log('col widths', this.columnWidths);
     console.log('colLeft', initialLeft);
+    this.originalColumn = index;
     this.setState({
       isMoving: true,
       movingColumnIndex: index,
@@ -269,11 +270,12 @@ export class TableView extends React.Component<Properties, State> {
     if(!this.state.isMoving) {
       return;
     }
-    let initialLeft = 0;
-    for(let i = 0; i < this.state.movingColumnIndex; ++i) {
-      initialLeft += this.columnWidths[i];
+    let originalLeft = 0;
+    for(let i = 0; i < this.originalColumn; ++i) {
+      originalLeft += this.columnWidths[i];
     }
-    const newLeft = initialLeft + event.clientX - this.state.mouseXStart;
+    const newLeft = originalLeft + event.clientX - this.state.mouseXStart;
+    this.checkForThresholdCross(newLeft);
     const newTop = Math.min(
       Math.max(0, event.clientY - this.state.mouseYStart),
       this.state.rowHeight);
@@ -283,6 +285,41 @@ export class TableView extends React.Component<Properties, State> {
     });
   }
 
+  private checkForThresholdCross = (newLeft: number) => {
+    const oldLeft = this.state.colLeft;
+    const delta = newLeft - oldLeft;
+    let dest = -1;
+    if(delta < 0) { //move left
+      let lower = 0;
+      for(let i = 0; i < this.props.model.columnCount; ++i) {
+        let upper = lower + (this.columnWidths[i] / 2);
+        if(newLeft <= upper) {
+          dest = i;
+          break;
+        }
+        lower = lower + (this.columnWidths[i]);
+      }
+    } else if(delta > 0) {
+      console.log('Moved right');
+      const newRight = newLeft + this.columnWidths[this.state.movingColumnIndex];
+      let lower = 0;
+      for(let i = 0; i < this.props.model.columnCount; ++i) {
+        let bar = lower + (this.columnWidths[i] / 2);
+        console.log('right move', newRight, bar);
+        if(bar <= newRight && newRight <= lower + this.columnWidths[i] ) {
+          dest = i;
+          break;
+        }
+        lower = lower + (this.columnWidths[i]);
+      }
+    }
+    if(dest >= 0 && this.state.movingColumnIndex != dest) {
+      console.log('swap', this.state.movingColumnIndex, dest);
+      this.swapColumns(this.state.movingColumnIndex, dest)
+    }
+  }
+
+
   private swapColumns = (source: number, dest: number) => {
     if(dest >= this.state.headerOrder.length || dest < 0) {
       return;
@@ -291,7 +328,8 @@ export class TableView extends React.Component<Properties, State> {
     const destValue = this.state.headerOrder[dest];
     this.state.headerOrder[source] = destValue;
     this.state.headerOrder[dest] = sourceValue;
-    this.setState({headerOrder: this.state.headerOrder});
+    this.setState({headerOrder: this.state.headerOrder,
+      movingColumnIndex: dest});
   }
 
   private onMouseUp = () => {
@@ -304,6 +342,7 @@ export class TableView extends React.Component<Properties, State> {
   private wrapperRef: React.RefObject<HTMLDivElement>;
   private columnRefs: React.RefObject<HTMLTableCellElement>[];
   private columnWidths: number[];
+  private originalColumn: number;
 }
 
 interface SlidingColProperties {
