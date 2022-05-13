@@ -29,11 +29,15 @@ const someStyle = {
     border: '5px solid #000000'
   } as React.CSSProperties,
   th: {
-    border: '2px solid #000000',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: '#000000',
     color: '#4b23a0'
   } as React.CSSProperties,
   td: {
-    border: '2px solid #000000',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: '#000000',
     paddingLeft: '30px',
     paddingRight: '30px',
     color: '#4b23a0'

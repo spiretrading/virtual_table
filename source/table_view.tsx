@@ -28,12 +28,10 @@ interface State {
   topRow: number;
   headerOrder: number[];
   isMoving: boolean;
-  movingColumnIndex: number;
-  movingColumnWidth: number;
-  colTop: number;
-  colLeft: number;
-  mouseXStart: number;
-  mouseYStart: number;
+  floatingColumnIndex: number;
+  floatingColumnWidth: number;
+  floatingColumnTop: number;
+  floatingColumnLeft: number;
 }
 
 /** Renders a TableModel to HTML. */
@@ -49,22 +47,18 @@ export class TableView extends React.Component<Properties, State> {
       rowsToShow: 1,
       topRow: 0,
       isMoving: false,
-      headerOrder: [1, 2, 3, 0],
-      movingColumnIndex: -1,
-      movingColumnWidth: 0,
-      colLeft: 0,
-      colTop: 0,
-      mouseXStart: 0,
-      mouseYStart: 0
+      headerOrder: headerOrder,
+      floatingColumnIndex: -1,
+      floatingColumnWidth: 0,
+      floatingColumnLeft: 0,
+      floatingColumnTop: 0
     };
     this.props.model.connect(this.tableUpdated.bind(this));
     this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
-    this.labelRefs = [];
     this.columnRefs = [];
     this.columnWidths = [];
     for(let i = 0; i< this.props.labels.length; ++i) {
-      this.labelRefs.push(React.createRef<HTMLTableCellElement>());
       this.columnRefs.push(React.createRef<HTMLTableCellElement>());
       this.columnWidths[i] = 0;
     }
@@ -74,19 +68,16 @@ export class TableView extends React.Component<Properties, State> {
     const header = [];
     for(let i = 0; i < this.props.labels.length; ++i) {
       const index = this.state.headerOrder[i];
-      if(this.state.isMoving && this.state.movingColumnIndex === i) {
+      if(this.state.isMoving && this.state.floatingColumnIndex === i) {
         header.push(
-          <th
-            style={{boxSizing: 'border-box',
-              width: this.state.movingColumnWidth}}
-            key={'moving-column'}
-            ref={this.labelRefs[i]}/>);
+          <th style={{boxSizing: 'border-box',
+              width: this.state.floatingColumnWidth}}
+            key={this.props.labels[index]}/>);
       } else {
         header.push(
           <th style={this.props.style.th}
               className={this.props.className}
               key={this.props.labels[index]}
-              ref={this.labelRefs[i]}
               onMouseDown={(event) => this.onLabelMouseDown(event, i)}>
             {this.props.labels[index]}
           </th>);
@@ -107,17 +98,10 @@ export class TableView extends React.Component<Properties, State> {
       const row = [];
       for(let j = 0; j < this.props.model.columnCount; ++j) {
         const index = this.state.headerOrder[j];
-        if(this.state.isMoving && this.state.movingColumnIndex === j &&
-            i === startRow) {
+        if(this.state.isMoving && this.state.floatingColumnIndex === j) {
           row.push(
             <td style={{boxSizing: 'border-box',
-                width: this.state.movingColumnWidth}}
-              ref={i === startRow && this.columnRefs[j]}
-              key={(i * this.props.model.columnCount) + j}/>);
-        } else if(this.state.isMoving && j == this.state.movingColumnIndex) {
-          row.push(
-            <td style={{boxSizing: 'border-box',
-              width: this.state.movingColumnWidth}}
+                width: this.state.floatingColumnWidth}}
               ref={i === startRow && this.columnRefs[j]}
               key={(i * this.props.model.columnCount) + j}/>);
         } else {
@@ -159,10 +143,10 @@ export class TableView extends React.Component<Properties, State> {
             overflow: 'auto', position: 'relative'}}
           ref={this.wrapperRef}>
         <FloatingColumn show={this.state.isMoving}
-          topPosition={this.state.colTop}
-          leftPosition={this.state.colLeft}
-          width={this.state.movingColumnWidth}
-          columnIndex={this.state.headerOrder[this.state.movingColumnIndex]}
+          topPosition={this.state.floatingColumnTop}
+          leftPosition={this.state.floatingColumnLeft}
+          width={this.state.floatingColumnWidth}
+          columnIndex={this.state.headerOrder[this.state.floatingColumnIndex]}
           style={this.props.style}
           labels={this.props.labels}
           rowsToShow={this.state.rowsToShow}
@@ -238,16 +222,16 @@ export class TableView extends React.Component<Properties, State> {
   private checkAndUpdateColumnWidths = () => {
     const widths = [];
     let hasChanged = false;
-    for(let i = 0; i < this.labelRefs.length; ++i) {
+    for(let i = 0; i < this.columnRefs.length; ++i) {
       const widthChanged = this.columnWidths[i] !==
-        this.labelRefs[i].current?.getBoundingClientRect().width;
-      if(widthChanged && this.labelRefs[i].current) {
+        this.columnRefs[i].current?.getBoundingClientRect().width;
+      if(widthChanged && this.columnRefs[i].current) {
         hasChanged = true;
       }
-      if(i === this.state.movingColumnIndex) {
+      if(i === this.state.floatingColumnIndex) {
         widths[i] = this.columnWidths[i];
       } else {
-        widths[i] = this.labelRefs[i].current.getBoundingClientRect().width;
+        widths[i] = this.columnRefs[i].current.getBoundingClientRect().width;
       }
     }
     console.log(widths)
@@ -269,13 +253,13 @@ export class TableView extends React.Component<Properties, State> {
       initialLeft += this.columnWidths[i];
     }
     this.originalColumn = index;
+    this.mouseXStart = event.clientX,
+    this.mouseYStart = event.clientY,
     this.setState({
       isMoving: true,
-      movingColumnIndex: index,
-      colLeft: initialLeft,
-      mouseXStart: event.clientX,
-      mouseYStart: event.clientY,
-      movingColumnWidth: this.columnWidths[index]
+      floatingColumnIndex: index,
+      floatingColumnLeft: initialLeft,
+      floatingColumnWidth: this.columnWidths[index]
     });
   }
 
@@ -287,19 +271,19 @@ export class TableView extends React.Component<Properties, State> {
     for(let i = 0; i < this.originalColumn; ++i) {
       originalLeft += this.columnWidths[i];
     }
-    const newLeft = originalLeft + event.clientX - this.state.mouseXStart;
+    const newLeft = originalLeft + event.clientX - this.mouseXStart;
     this.checkForThresholdCross(newLeft);
     const newTop = Math.min(
-      Math.max(0, event.clientY - this.state.mouseYStart),
+      Math.max(0, event.clientY - this.mouseYStart),
       this.state.rowHeight);
     this.setState({
-      colLeft: newLeft,
-      colTop: newTop
+      floatingColumnLeft: newLeft,
+      floatingColumnTop: newTop
     });
   }
 
   private checkForThresholdCross = (newLeft: number) => {
-    const oldLeft = this.state.colLeft;
+    const oldLeft = this.state.floatingColumnLeft;
     const delta = newLeft - oldLeft;
     let dest = -1;
     if(delta < 0) {
@@ -314,7 +298,7 @@ export class TableView extends React.Component<Properties, State> {
       }
     } else if(delta > 0) {
       const newRight = newLeft +
-        this.columnWidths[this.state.movingColumnIndex];
+        this.columnWidths[this.state.floatingColumnIndex];
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
         let threshold = lower + (this.columnWidths[i] / 2);
@@ -325,8 +309,8 @@ export class TableView extends React.Component<Properties, State> {
         lower = lower + (this.columnWidths[i]);
       }
     }
-    if(dest >= 0 && this.state.movingColumnIndex != dest) {
-      this.swapColumns(this.state.movingColumnIndex, dest)
+    if(dest >= 0 && this.state.floatingColumnIndex != dest) {
+      this.swapColumns(this.state.floatingColumnIndex, dest)
     }
   }
 
@@ -339,27 +323,28 @@ export class TableView extends React.Component<Properties, State> {
     this.state.headerOrder[source] = destValue;
     this.state.headerOrder[dest] = sourceValue;
     this.setState({headerOrder: this.state.headerOrder,
-      movingColumnIndex: dest});
+      floatingColumnIndex: dest});
     this.checkAndUpdateColumnWidths();
   }
 
   private onMouseUp = () => {
     if(this.state.isMoving) {
-      this.setState({isMoving: false, movingColumnIndex: -1});
+      this.setState({isMoving: false, floatingColumnIndex: -1});
     }
   }
 
   private updateMovingColumnWidth = (width: number) => {
-    if(this.columnWidths[this.state.movingColumnIndex] !== width) {
-      this.columnWidths[this.state.movingColumnIndex] = width;
-      this.setState({movingColumnWidth: width});
+    if(this.columnWidths[this.state.floatingColumnIndex] !== width) {
+      this.columnWidths[this.state.floatingColumnIndex] = width;
+      this.setState({floatingColumnWidth: width});
     }
   }
 
   private firstRowRef: React.RefObject<HTMLTableRowElement>;
   private wrapperRef: React.RefObject<HTMLDivElement>;
-  private labelRefs: React.RefObject<HTMLTableCellElement>[];
   private columnRefs: React.RefObject<HTMLTableCellElement>[];
   private columnWidths: number[];
+  private mouseXStart: number;
+  private mouseYStart: number;
   private originalColumn: number;
 }
