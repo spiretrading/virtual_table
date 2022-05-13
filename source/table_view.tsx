@@ -2,13 +2,14 @@ import * as React from 'react';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
+import {FloatingColumn} from './floating_column';
 
 interface Properties {
 
   /** The model to display. */
   model: TableModel;
 
-  /** The label for the columns of the table. */
+  /** The labels for the columns of the table. */
   labels?: string[];
 
   /** Specifies the CSS class. */
@@ -74,12 +75,12 @@ export class TableView extends React.Component<Properties, State> {
     for(let i = 0; i < this.props.labels.length; ++i) {
       const index = this.state.headerOrder[i];
       if(this.state.isMoving && this.state.movingColumnIndex === i) {
-        header.push(<th key='filler'
-              ref={this.labelRefs[i]}
-              style={{boxSizing: 'border-box',
-                width: this.state.movingColumnWidth
-                }}
-              className={this.props.className}/>);
+        header.push(
+          <th
+            style={{boxSizing: 'border-box',
+              width: this.state.movingColumnWidth}}
+            key={'moving-column'}
+            ref={this.labelRefs[i]}/>);
       } else {
         header.push(
           <th style={this.props.style.th}
@@ -106,11 +107,19 @@ export class TableView extends React.Component<Properties, State> {
       const row = [];
       for(let j = 0; j < this.props.model.columnCount; ++j) {
         const index = this.state.headerOrder[j];
-        if(this.state.isMoving && this.state.movingColumnIndex === j) {
+        if(this.state.isMoving && this.state.movingColumnIndex === j &&
+            i === startRow) {
           row.push(
-            <td
-                ref={i === startRow && this.columnRefs[j]}
-                key={(i * this.props.model.columnCount) + j}/>);
+            <td style={{boxSizing: 'border-box',
+                width: this.state.movingColumnWidth}}
+              ref={i === startRow && this.columnRefs[j]}
+              key={(i * this.props.model.columnCount) + j}/>);
+        } else if(this.state.isMoving && j == this.state.movingColumnIndex) {
+          row.push(
+            <td style={{boxSizing: 'border-box',
+              width: this.state.movingColumnWidth}}
+              ref={i === startRow && this.columnRefs[j]}
+              key={(i * this.props.model.columnCount) + j}/>);
         } else {
           row.push(
             <td style={{...this.props.style.td}}
@@ -149,14 +158,13 @@ export class TableView extends React.Component<Properties, State> {
       <div style={{height: `${this.props.height}px`,
             overflow: 'auto', position: 'relative'}}
           ref={this.wrapperRef}>
-        <MovingColumn show={this.state.isMoving}
+        <FloatingColumn show={this.state.isMoving}
           topPosition={this.state.colTop}
           leftPosition={this.state.colLeft}
-          height={this.props.height}
           width={this.state.movingColumnWidth}
           columnIndex={this.state.headerOrder[this.state.movingColumnIndex]}
           style={this.props.style}
-          label={this.props.labels}
+          labels={this.props.labels}
           rowsToShow={this.state.rowsToShow}
           tableModel={this.props.model}
           updateWidth={this.updateMovingColumnWidth}/>
@@ -249,9 +257,6 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private onScrollHandler = () => {
-    if(this.state.isMoving) {
-      throw new Error('No scroll allowed.');
-    }
     const percent =
       this.wrapperRef.current.scrollTop / this.wrapperRef.current.scrollHeight;
     this.setState({topRow: Math.floor(percent * this.props.model.rowCount)});
@@ -357,98 +362,4 @@ export class TableView extends React.Component<Properties, State> {
   private columnRefs: React.RefObject<HTMLTableCellElement>[];
   private columnWidths: number[];
   private originalColumn: number;
-}
-
-interface MovingColProperties {
-  leftPosition: number;
-  topPosition: number;
-  show: boolean;
-  height: number;
-  width: number;
-  columnIndex: number;
-  label: string[];
-  rowsToShow: number;
-  tableModel: TableModel;
-  className?: string;
-  style?: any;
-  updateWidth: (width: number) => void;
-}
-
-class MovingColumn extends React.Component<MovingColProperties> {
-  constructor(props: MovingColProperties) {
-    super(props);
-    this.props.tableModel.connect(this.tableUpdated.bind(this));
-    this.widthRef = React.createRef<HTMLTableCellElement>();
-  }
-
-  public render(): JSX.Element {
-    if(!this.props.show) {
-      return <div style={{display: 'none'}}/>
-    }
-    const cells = [];
-    for(let i = 0; i < this.props.rowsToShow; ++i) {
-      cells.push(
-        <tr style={this.props.style.tr} key={i}>
-          <td style={this.props.style.td}>
-            {this.props.tableModel.get(i, this.props.columnIndex)}
-          </td>
-        </tr>);
-    }
-    return (
-      <div style={{
-          boxSizing: 'border-box',
-          left: this.props.leftPosition,
-          top: this.props.topPosition,
-          position:'absolute',
-          height: this.props.height}}>
-        <table style={{
-            ...this.props.style.table,
-            ...{opacity: 0.8,
-              backgroundColor: 'white',
-              border: 'none'}}}>
-          <thead>
-            <tr style={this.props.style.tr}>
-              <th style={this.props.style.th} ref={this.widthRef}>
-                {this.props.label[this.props.columnIndex]}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {cells}
-          </tbody>
-        </table>
-      </div>);
-  }
-
-  private tableUpdated = (operation: Operation) => {
-    const start = 0;
-    const end = this.props.rowsToShow;
-    if(operation instanceof AddRowOperation ||
-        operation instanceof RemoveRowOperation) {
-      this.forceUpdate();
-      return;
-    } else if(operation instanceof UpdateOperation) {
-      if(start <= operation.row && operation.row <= end) {
-        this.forceUpdate();
-        return;
-      }
-    } else if(operation instanceof MoveRowOperation) {
-      if(!(operation.source < start && operation.destination < start) &&
-          !(end < operation.source && end < operation.destination)) {
-        this.forceUpdate();
-        return;
-      }
-    }
-  }
-
-  public componentDidUpdate(): void {
-    const isWidthTheSame = this.props.width !==
-      this.widthRef.current?.getBoundingClientRect().width;
-    if(this.props.show && isWidthTheSame) {
-      const newWidth = this.widthRef.current?.getBoundingClientRect().width;
-      this.props.updateWidth(newWidth);
-    }
-  }
-
-  private widthRef: React.RefObject<HTMLTableCellElement>
 }
