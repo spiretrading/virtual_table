@@ -149,7 +149,7 @@ export class TableView extends React.Component<Properties, State> {
           columnIndex={this.state.headerOrder[this.state.floatingColumnIndex]}
           style={this.props.style}
           labels={this.props.labels}
-          rowsToShow={this.state.rowsToShow}
+          rowsToShow={this.state.topRow + this.state.rowsToShow}
           tableModel={this.props.model}
           updateWidth={this.updateMovingColumnWidth}/>
         <table style={{...this.props.style.table}}
