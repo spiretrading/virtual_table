@@ -225,21 +225,16 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private checkAndUpdateColumnWidths = () => {
-    const widths = [];
+    const widths = this.columnWidths.slice();
     let hasChanged = false;
     for(let i = 0; i < this.columnRefs.length; ++i) {
-      const widthChanged = this.columnWidths[i] !==
+      const hasWidthChanged = this.columnWidths[i] !==
         this.columnRefs[i].current?.getBoundingClientRect().width;
-      if(widthChanged && this.columnRefs[i].current) {
+      if(hasWidthChanged) {
         hasChanged = true;
-      }
-      if(i === this.state.floatingColumnIndex) {
-        widths[i] = this.columnWidths[i];
-      } else {
         widths[i] = this.columnRefs[i].current.getBoundingClientRect().width;
       }
     }
-    console.log(widths)
     if(hasChanged) {
       this.columnWidths = widths;
     }
@@ -277,7 +272,7 @@ export class TableView extends React.Component<Properties, State> {
       originalLeft += this.columnWidths[i];
     }
     const newLeft = originalLeft + event.clientX - this.mouseXStart;
-    this.checkForThresholdCross(newLeft);
+    this.evaluateMove(newLeft);
     const newTop = Math.min(
       Math.max(0, event.clientY - this.mouseYStart),
       this.state.rowHeight);
@@ -287,7 +282,7 @@ export class TableView extends React.Component<Properties, State> {
     });
   }
 
-  private checkForThresholdCross = (newLeft: number) => {
+  private evaluateMove = (newLeft: number) => {
     const oldLeft = this.state.floatingColumnLeft;
     const delta = newLeft - oldLeft;
     let dest = -1;
@@ -315,11 +310,11 @@ export class TableView extends React.Component<Properties, State> {
       }
     }
     if(dest >= 0 && this.state.floatingColumnIndex != dest) {
-      this.swapColumns(this.state.floatingColumnIndex, dest)
+      this.moveColumn(this.state.floatingColumnIndex, dest)
     }
   }
 
-  private swapColumns = (source: number, dest: number) => {
+  private moveColumn = (source: number, dest: number) => {
     if(dest >= this.state.headerOrder.length || dest < 0) {
       return;
     }
