@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
+import { FloatingColumn } from './floating_column';
 import { TableModel } from './table_model';
-import {FloatingColumn} from './floating_column';
 
 interface Properties {
 
   /** The model to display. */
   model: TableModel;
 
-  /** The labels for the columns of the table. */
+  /** The label for the columns of the table. */
   labels?: string[];
 
   /** Specifies the CSS class. */
@@ -197,7 +197,8 @@ export class TableView extends React.Component<Properties, State> {
 
   public componentWillUnmount(): void {
     this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
-    window.addEventListener('mouseup', this.onMouseUp);
+    window.removeEventListener('mouseup', this.onMouseUp);
+    window.removeEventListener('mousemove', this.onMouseMove);
   }
 
   private tableUpdated = (operation: Operation) => {
