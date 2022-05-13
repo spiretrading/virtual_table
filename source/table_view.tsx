@@ -304,7 +304,7 @@ export class TableView extends React.Component<Properties, State> {
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
         let upper = lower + (this.columnWidths[i] / 2);
-        if(newLeft <= upper) {
+        if(newLeft < upper) {
           dest = i;
           break;
         }
@@ -315,8 +315,8 @@ export class TableView extends React.Component<Properties, State> {
         this.columnWidths[this.state.movingColumnIndex];
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
-        let bar = lower + (this.columnWidths[i] / 2);
-        if(bar <= newRight && newRight <= lower + this.columnWidths[i] ) {
+        let threshold = lower + (this.columnWidths[i] / 2);
+        if(threshold < newRight && newRight < lower + this.columnWidths[i] ) {
           dest = i;
           break;
         }
