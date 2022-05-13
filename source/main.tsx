@@ -23,22 +23,22 @@ const header = ['one', 'two', 'three', 'four'];
 
 const someStyle = {
   table: {
-    boxSizing: 'border-box',
+    //boxSizing: 'border-box',
     fontFamily: 'Arial, Helvetica, sans-serif',
     fontSize: '20px',
     borderCollapse: 'collapse',
     border: '5px solid #000000'
   } as React.CSSProperties,
   th: {
-    boxSizing: 'border-box',
+    //boxSizing: 'border-box',
     border: '2px solid #000000',
     color: '#4b23a0'
   } as React.CSSProperties,
   td: {
-    boxSizing: 'border-box',
+    //boxSizing: 'border-box',
     border: '2px solid #000000',
-    // paddingLeft: '30px',
-    // paddingRight: '30px',
+    paddingLeft: '30px',
+    paddingRight: '30px',
     color: '#4b23a0'
   } as React.CSSProperties
 };
