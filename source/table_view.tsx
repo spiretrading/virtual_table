@@ -319,11 +319,12 @@ export class TableView extends React.Component<Properties, State> {
       return;
     }
     const sourceValue = this.state.headerOrder[source];
-    const destValue = this.state.headerOrder[dest];
-    this.state.headerOrder[source] = destValue;
-    this.state.headerOrder[dest] = sourceValue;
-    this.setState({headerOrder: this.state.headerOrder,
-      floatingColumnIndex: dest});
+    this.state.headerOrder.splice(source, 1);
+    this.state.headerOrder.splice(dest, 0, sourceValue);
+    this.setState({
+      headerOrder: this.state.headerOrder,
+      floatingColumnIndex: dest
+    });
     this.checkAndUpdateColumnWidths();
   }
 
