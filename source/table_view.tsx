@@ -78,7 +78,9 @@ export class TableView extends React.Component<Properties, State> {
               ref={this.labelRefs[i]}
               style={{...this.props.style.th,
                 ...{opacity: 0, border: 'none',
-                  width: this.state.movingColumnWidth}}}
+                width: this.state.movingColumnWidth,
+                padding: 0
+                }}}
               className={this.props.className}/>);
       } else {
         header.push(
@@ -298,7 +300,7 @@ export class TableView extends React.Component<Properties, State> {
     const oldLeft = this.state.colLeft;
     const delta = newLeft - oldLeft;
     let dest = -1;
-    if(delta < 0) { //move left
+    if(delta < 0) {
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
         let upper = lower + (this.columnWidths[i] / 2);
@@ -309,7 +311,8 @@ export class TableView extends React.Component<Properties, State> {
         lower = lower + (this.columnWidths[i]);
       }
     } else if(delta > 0) {
-      const newRight = newLeft + this.columnWidths[this.state.movingColumnIndex];
+      const newRight = newLeft +
+        this.columnWidths[this.state.movingColumnIndex];
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
         let bar = lower + (this.columnWidths[i] / 2);
@@ -336,17 +339,17 @@ export class TableView extends React.Component<Properties, State> {
     this.setState({headerOrder: this.state.headerOrder,
       movingColumnIndex: dest});
     this.checkAndUpdateColumnWidths();
-    //this.startAnimation(dest, source);
+    this.startAnimation(dest, source);
   }
 
   private onMouseUp = () => {
     if(this.state.isMoving) {
-      this.setState({isMoving: false});
+      this.setState({isMoving: false, movingColumnIndex: -1});
     }
   }
 
   private startAnimation = (dest: number, source: number) => {
-    const width = this.columnWidths[this.state.movingColumnIndex];
+    const width = this.state.movingColumnWidth;
     const growFrames = this.getGrowKeyFrames(width);
     this.labelRefs[dest].current?.animate(growFrames, this.widthTiming);
     this.columnRefs[dest].current?.animate(growFrames, this.widthTiming);
@@ -356,14 +359,16 @@ export class TableView extends React.Component<Properties, State> {
     rowElement.rowSpan = 0;
     if(source < dest) {
       const shrinkKeyframes = this.getShrinkKeyFrames(width);
-      const currentHeader = this.labelRefs[source].current.insertAdjacentElement('beforebegin', headerElement);
+      const currentHeader =
+        this.labelRefs[source].current.insertAdjacentElement(
+          'beforebegin', headerElement);
       const shrinkAnimation1 = currentHeader.animate(shrinkKeyframes, this.widthTiming)
-      const current = this.columnRefs[source].current.insertAdjacentElement('beforebegin', rowElement);
+      const current =
+        this.columnRefs[source].current.insertAdjacentElement(
+          'beforebegin', rowElement);
       const shrinkAnimation2 = current.animate(shrinkKeyframes, this.widthTiming);
       shrinkAnimation1.onfinish = () => this.onAnimationFinish(headerElement);
       shrinkAnimation2.onfinish = () => this.onAnimationFinish(rowElement);
-    } else if(dest > source ) {
-    
     }
   }
 
@@ -373,8 +378,8 @@ export class TableView extends React.Component<Properties, State> {
 
   private getGrowKeyFrames = (width: number) => {
     return[
-      { width: '0px'},
-      { width: width + 'px'}
+      {maxWidth: '0px', overflow: 'hidden'},
+      {maxWidth: width + 'px', overflow: 'hidden'}
     ] as Keyframe[];
   }
 
@@ -393,8 +398,9 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private widthTiming = {
-    duration: 500,
+    duration: 300,
     iterations: 1,
+    ease: 'ease',
     fill: 'forwards'
   } as KeyframeAnimationOptions;
 
