@@ -77,7 +77,8 @@ export class TableView extends React.Component<Properties, State> {
         header.push(<th key='filler'
               ref={this.labelRefs[i]}
               style={{...this.props.style.th,
-                ...{opacity: 0, border: 'none', width: this.state.movingColumnWidth}}}
+                ...{opacity: 0, border: 'none',
+                  width: this.state.movingColumnWidth}}}
               className={this.props.className}/>);
       } else {
         header.push(
@@ -159,7 +160,8 @@ export class TableView extends React.Component<Properties, State> {
           style={this.props.style}
           label={this.props.labels}
           rowsToShow={this.state.rowsToShow}
-          tableModel={this.props.model}/>
+          tableModel={this.props.model}
+          updateWidth={this.updateMovingColumnWidth}/>
         <table style={{...this.props.style.table}}
             className={this.props.className}>
           <thead style={this.props.style.thead}
@@ -383,12 +385,12 @@ export class TableView extends React.Component<Properties, State> {
     ] as Keyframe[];
   }
 
-  // private updateMovingColumnWidth = (width: number) => {
-  //   if(this.columnWidths[this.state.movingColumnIndex] !== width) {
-  //     this.columnWidths[this.state.movingColumnIndex] = width;
-  //     this.setState({movingColumnIndex: width});
-  //   }
-  // }
+  private updateMovingColumnWidth = (width: number) => {
+    if(this.columnWidths[this.state.movingColumnIndex] !== width) {
+      this.columnWidths[this.state.movingColumnIndex] = width;
+      this.setState({movingColumnWidth: width});
+    }
+  }
 
   private widthTiming = {
     duration: 500,
@@ -416,12 +418,14 @@ interface MovingColProperties {
   tableModel: TableModel;
   className?: string;
   style?: any;
+  updateWidth: (width: number) => void;
 }
 
 class MovingColumn extends React.Component<MovingColProperties> {
   constructor(props: MovingColProperties) {
     super(props);
     this.props.tableModel.connect(this.tableUpdated.bind(this));
+    this.widthRef = React.createRef<HTMLTableCellElement>();
   }
 
   public render(): JSX.Element {
@@ -452,7 +456,7 @@ class MovingColumn extends React.Component<MovingColProperties> {
               border: 'none'}}}>
           <thead>
             <tr style={this.props.style.tr}>
-              <th style={this.props.style.th}>
+              <th style={this.props.style.th} ref={this.widthRef}>
                 {this.props.label[this.props.columnIndex]}
               </th>
             </tr>
@@ -484,4 +488,15 @@ class MovingColumn extends React.Component<MovingColProperties> {
       }
     }
   }
+
+  public componentDidUpdate(): void {
+    const isWidthTheSame = this.props.width !==
+      this.widthRef.current?.getBoundingClientRect().width;
+    if(this.props.show && isWidthTheSame) {
+      const newWidth = this.widthRef.current?.getBoundingClientRect().width;
+      this.props.updateWidth(newWidth);
+    }
+  }
+
+  private widthRef: React.RefObject<HTMLTableCellElement>
 }
