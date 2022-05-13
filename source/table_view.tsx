@@ -76,11 +76,9 @@ export class TableView extends React.Component<Properties, State> {
       if(this.state.isMoving && this.state.movingColumnIndex === i) {
         header.push(<th key='filler'
               ref={this.labelRefs[i]}
-              style={{...this.props.style.th,
-                ...{opacity: 0, border: 'none',
-                width: this.state.movingColumnWidth,
-                padding: 0
-                }}}
+              style={{boxSizing: 'border-box',
+                width: this.state.movingColumnWidth
+                }}
               className={this.props.className}/>);
       } else {
         header.push(
@@ -110,9 +108,7 @@ export class TableView extends React.Component<Properties, State> {
         const index = this.state.headerOrder[j];
         if(this.state.isMoving && this.state.movingColumnIndex === j) {
           row.push(
-            <td style={{...this.props.style.td,
-                  ...{opacity: 0, border: 'none'}}}
-                className={this.props.className}
+            <td
                 ref={i === startRow && this.columnRefs[j]}
                 key={(i * this.props.model.columnCount) + j}/>);
         } else {
@@ -246,6 +242,7 @@ export class TableView extends React.Component<Properties, State> {
         widths[i] = this.labelRefs[i].current.getBoundingClientRect().width;
       }
     }
+    console.log(widths)
     if(hasChanged) {
       this.columnWidths = widths;
     }
@@ -339,7 +336,6 @@ export class TableView extends React.Component<Properties, State> {
     this.setState({headerOrder: this.state.headerOrder,
       movingColumnIndex: dest});
     this.checkAndUpdateColumnWidths();
-    this.startAnimation(dest, source);
   }
 
   private onMouseUp = () => {
@@ -348,63 +344,12 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
-  private startAnimation = (dest: number, source: number) => {
-    const width = this.state.movingColumnWidth;
-    const growFrames = this.getGrowKeyFrames(width);
-    this.labelRefs[dest].current?.animate(growFrames, this.widthTiming);
-    this.columnRefs[dest].current?.animate(growFrames, this.widthTiming);
-    const headerElement = document.createElement('th');
-    headerElement.style
-    const rowElement = document.createElement('td');
-    rowElement.rowSpan = 0;
-    if(source < dest) {
-      const shrinkKeyframes = this.getShrinkKeyFrames(width);
-      const currentHeader =
-        this.labelRefs[source].current.insertAdjacentElement(
-          'beforebegin', headerElement);
-      const shrinkAnimation1 = currentHeader.animate(shrinkKeyframes,
-        this.widthTiming);
-      const current =
-        this.columnRefs[source].current.insertAdjacentElement(
-          'beforebegin', rowElement);
-      const shrinkAnimation2 = current.animate(shrinkKeyframes,
-        this.widthTiming);
-      shrinkAnimation1.onfinish = () => this.onAnimationFinish(headerElement);
-      shrinkAnimation2.onfinish = () => this.onAnimationFinish(rowElement);
-    }
-  }
-
-  onAnimationFinish(element: Element) {
-    element.parentNode.removeChild(element);
-  }
-
-  private getGrowKeyFrames = (width: number) => {
-    return[
-      {maxWidth: '0px', overflow: 'hidden'},
-      {maxWidth: width + 'px', overflow: 'hidden'}
-    ] as Keyframe[];
-  }
-
-  private getShrinkKeyFrames = (width: number) => {
-    return[
-      {width: width + 'px', padding: 0},
-      {width: '0px', padding: 0}
-    ] as Keyframe[];
-  }
-
   private updateMovingColumnWidth = (width: number) => {
     if(this.columnWidths[this.state.movingColumnIndex] !== width) {
       this.columnWidths[this.state.movingColumnIndex] = width;
       this.setState({movingColumnWidth: width});
     }
   }
-
-  private widthTiming = {
-    duration: 300,
-    iterations: 1,
-    ease: 'ease',
-    fill: 'forwards'
-  } as KeyframeAnimationOptions;
 
   private firstRowRef: React.RefObject<HTMLTableRowElement>;
   private wrapperRef: React.RefObject<HTMLDivElement>;
