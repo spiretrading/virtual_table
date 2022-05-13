@@ -362,11 +362,13 @@ export class TableView extends React.Component<Properties, State> {
       const currentHeader =
         this.labelRefs[source].current.insertAdjacentElement(
           'beforebegin', headerElement);
-      const shrinkAnimation1 = currentHeader.animate(shrinkKeyframes, this.widthTiming)
+      const shrinkAnimation1 = currentHeader.animate(shrinkKeyframes,
+        this.widthTiming);
       const current =
         this.columnRefs[source].current.insertAdjacentElement(
           'beforebegin', rowElement);
-      const shrinkAnimation2 = current.animate(shrinkKeyframes, this.widthTiming);
+      const shrinkAnimation2 = current.animate(shrinkKeyframes,
+        this.widthTiming);
       shrinkAnimation1.onfinish = () => this.onAnimationFinish(headerElement);
       shrinkAnimation2.onfinish = () => this.onAnimationFinish(rowElement);
     }
