@@ -447,7 +447,6 @@ class MovingColumn extends React.Component<MovingColProperties> {
           left: this.props.leftPosition,
           top: this.props.topPosition,
           position:'absolute',
-          border: '3px solid blue',
           height: this.props.height}}>
         <table style={{
             ...this.props.style.table,
