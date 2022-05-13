@@ -7,7 +7,7 @@ interface Properties {
   /** Specifies the horizontal position of the floating column. */
   leftPosition: number;
 
-  /** Specifies the horizontal position of the floating column. */
+  /** Specifies the vertical position of the floating column. */
   topPosition: number;
 
   /** Specifies if the column should be shown. */
@@ -34,7 +34,9 @@ interface Properties {
   /** The CSS style to apply. */
   style?: any;
 
-  /** Callback to tell the table to update the moving column's width. */
+  /** Callback to let the parent know the width of the column being
+   * moved changed. 
+   */
   updateWidth: (width: number) => void;
 }
 
