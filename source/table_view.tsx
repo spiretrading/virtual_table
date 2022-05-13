@@ -36,10 +36,14 @@ interface State {
 
 /** Renders a TableModel to HTML. */
 export class TableView extends React.Component<Properties, State> {
+  public static readonly defaultProps = {
+    labels: [] as string[]
+  };
+
   constructor(props: Properties) {
     super(props);
     const headerOrder = [];
-    for(let i = 0; i< this.props.labels.length; ++i) {
+    for(let i = 0; i< this.props.model.columnCount; ++i) {
       headerOrder.push(i);
     }
     this.state = {

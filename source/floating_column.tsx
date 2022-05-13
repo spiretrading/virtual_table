@@ -28,7 +28,6 @@ interface Properties {
   /** The label for the columns of the table. */
   labels?: string[];
 
-
   /** Specifies the CSS class. */
   className?: string;
 
@@ -39,7 +38,7 @@ interface Properties {
   updateWidth: (width: number) => void;
 }
 
-/** Renders a single column of a table. */
+/** Renders a single column of the table. */
 export class FloatingColumn extends React.Component<Properties> {
   constructor(props: Properties) {
     super(props);
@@ -71,13 +70,13 @@ export class FloatingColumn extends React.Component<Properties> {
             ...{opacity: 0.8,
               backgroundColor: 'white',
               border: 'none'}}}>
-          <thead>{
-            this.props.labels && 
-            <tr style={this.props.style.tr}>
-              <th style={this.props.style.th} ref={this.widthRef}>
-                {this.props.labels[this.props.columnIndex]}
-              </th>
-            </tr>}
+          <thead>
+            {this.props.labels && 
+              <tr style={this.props.style.tr}>
+                <th style={this.props.style.th} ref={this.widthRef}>
+                  {this.props.labels[this.props.columnIndex]}
+                </th>
+              </tr>}
           </thead>
           <tbody>
             {cells}
