@@ -149,9 +149,10 @@ export class TableView extends React.Component<Properties, State> {
           topPosition={this.state.floatingColumnTop}
           leftPosition={this.state.floatingColumnLeft}
           width={this.state.floatingColumnWidth}
-          columnIndex={this.state.headerOrder[this.state.floatingColumnIndex]}
+          index={this.state.headerOrder[this.state.floatingColumnIndex]}
           style={this.props.style}
-          label={this.props.labels[this.state.floatingColumnIndex]}
+          label={this.props.labels[
+            this.state.headerOrder[this.state.floatingColumnIndex]]}
           rowsToShow={this.state.rowsToShow}
           tableModel={this.props.model}
           updateWidth={this.updateMovingColumnWidth}/>}
@@ -175,7 +176,6 @@ export class TableView extends React.Component<Properties, State> {
   public componentDidMount(): void {
     this.wrapperRef.current.addEventListener('scroll', this.onScrollHandler);
     this.forceUpdate();
-    this.checkAndUpdateColumnWidths();
   }
 
   public componentDidUpdate(): void {
@@ -355,45 +355,45 @@ export class TableView extends React.Component<Properties, State> {
   private originalColumn: number;
 }
 
-interface FloatingProps {
+interface FloatingColumnProps {
+
+  /** The index of the column. */
+  index: number;
+
   /** Specifies the horizontal position of the floating column. */
   leftPosition: number;
-
-  /** Specifies the vertical position of the floating column. */
-  topPosition: number;
-
-  /** The current width of the column. */
-  width: number;
-
-  /** The index of the floating column. */
-  columnIndex: number;
 
   /** How many rows of the column should be shown. */
   rowsToShow: number;
 
+  /** Specifies the vertical position of the floating column. */
+  topPosition: number;
+
   /** The model to display. */
   tableModel: TableModel;
 
-  /** The label for the columns of the table. */
-  label?: string;
+  /** The current width of the column. */
+  width: number;
 
   /** Specifies the CSS class. */
   className?: string;
+
+  /** The label for the columns of the table. */
+  label?: string;
 
   /** The CSS style to apply. */
   style?: any;
 
   /** Callback to let the parent know the width of the column being
-   * moved changed. 
+   * moved changed.
    */
   updateWidth: (width: number) => void;
 }
 
 /** Renders a single column of the table. */
-class FloatingColumn extends React.Component<FloatingProps> {
-  constructor(props: FloatingProps) {
+class FloatingColumn extends React.Component<FloatingColumnProps> {
+  constructor(props: FloatingColumnProps) {
     super(props);
-    this.props.tableModel.connect(this.tableUpdated.bind(this));
     this.widthRef = React.createRef<HTMLTableCellElement>();
   }
 
@@ -402,8 +402,8 @@ class FloatingColumn extends React.Component<FloatingProps> {
     for(let i = 0; i <= this.props.rowsToShow; ++i) {
       cells.push(
         <tr style={this.props.style.tr} key={i}>
-          <td style={this.props.style.td}>
-            {this.props.tableModel.get(i, this.props.columnIndex)}
+          <td style={this.props.style.td} ref={i === 0 && this.widthRef}>
+            {this.props.tableModel.get(i, this.props.index)}
           </td>
         </tr>);
     }
@@ -421,7 +421,7 @@ class FloatingColumn extends React.Component<FloatingProps> {
           <thead>
             {this.props.label && 
               <tr style={this.props.style.tr}>
-                <th style={this.props.style.th} ref={this.widthRef}>
+                <th style={this.props.style.th}>
                   {this.props.label}
                 </th>
               </tr>}
@@ -442,25 +442,5 @@ class FloatingColumn extends React.Component<FloatingProps> {
     }
   }
 
-  private tableUpdated = (operation: Operation) => {
-    const start = 0;
-    const end = this.props.rowsToShow;
-    if(operation instanceof AddRowOperation ||
-        operation instanceof RemoveRowOperation) {
-      this.forceUpdate();
-      return;
-    } else if(operation instanceof UpdateOperation) {
-      if(start <= operation.row && operation.row <= end) {
-        this.forceUpdate();
-        return;
-      }
-    } else if(operation instanceof MoveRowOperation) {
-      if(!(operation.source < start && operation.destination < start) &&
-          !(end < operation.source && end < operation.destination)) {
-        this.forceUpdate();
-        return;
-      }
-    }
-  }
   private widthRef: React.RefObject<HTMLTableCellElement>
 }
