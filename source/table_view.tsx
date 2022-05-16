@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
-import { FloatingColumn } from './floating_column';
 import { TableModel } from './table_model';
 
 interface Properties {
@@ -146,16 +145,16 @@ export class TableView extends React.Component<Properties, State> {
       <div style={{height: `${this.props.height}px`,
             overflow: 'auto', position: 'relative'}}
           ref={this.wrapperRef}>
-        <FloatingColumn show={this.state.isMoving}
+        {this.state.isMoving && <FloatingColumn
           topPosition={this.state.floatingColumnTop}
           leftPosition={this.state.floatingColumnLeft}
           width={this.state.floatingColumnWidth}
           columnIndex={this.state.headerOrder[this.state.floatingColumnIndex]}
           style={this.props.style}
-          labels={this.props.labels}
-          rowsToShow={this.state.topRow + this.state.rowsToShow}
+          label={this.props.labels[this.state.floatingColumnIndex]}
+          rowsToShow={this.state.rowsToShow}
           tableModel={this.props.model}
-          updateWidth={this.updateMovingColumnWidth}/>
+          updateWidth={this.updateMovingColumnWidth}/>}
         <table style={{...this.props.style.table}}
             className={this.props.className}>
           <thead style={this.props.style.thead}
@@ -175,8 +174,6 @@ export class TableView extends React.Component<Properties, State> {
 
   public componentDidMount(): void {
     this.wrapperRef.current.addEventListener('scroll', this.onScrollHandler);
-    window.addEventListener('mouseup', this.onMouseUp);
-    window.addEventListener('mousemove', this.onMouseMove);
     this.forceUpdate();
     this.checkAndUpdateColumnWidths();
   }
@@ -197,8 +194,6 @@ export class TableView extends React.Component<Properties, State> {
 
   public componentWillUnmount(): void {
     this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
-    window.removeEventListener('mouseup', this.onMouseUp);
-    window.removeEventListener('mousemove', this.onMouseMove);
   }
 
   private tableUpdated = (operation: Operation) => {
@@ -242,10 +237,9 @@ export class TableView extends React.Component<Properties, State> {
 
   private onScrollHandler = (event: Event) => {
     if(this.state.isMoving) {
-      console.log('Do not scroll');
       const lastKnownX = this.wrapperRef.current.scrollLeft;
       const lastKnownY = window.scrollY;
-        this.wrapperRef.current.scrollTo(lastKnownX, lastKnownY);
+      this.wrapperRef.current.scrollTo(lastKnownX, lastKnownY);
       return;
     }
     const percent =
@@ -259,9 +253,11 @@ export class TableView extends React.Component<Properties, State> {
     for(let i = 0; i < index; ++i) {
       initialLeft += this.columnWidths[i];
     }
+    window.addEventListener('mouseup', this.onMouseUp);
+    window.addEventListener('mousemove', this.onMouseMove);
     this.originalColumn = index;
-    this.mouseXStart = event.clientX,
-    this.mouseYStart = event.clientY,
+    this.mouseXStart = event.clientX;
+    this.mouseYStart = event.clientY;
     this.setState({
       isMoving: true,
       floatingColumnIndex: index,
@@ -336,6 +332,8 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private onMouseUp = () => {
+    window.removeEventListener('mouseup', this.onMouseUp);
+    window.removeEventListener('mousemove', this.onMouseMove);
     if(this.state.isMoving) {
       this.setState({isMoving: false, floatingColumnIndex: -1});
     }
@@ -355,4 +353,114 @@ export class TableView extends React.Component<Properties, State> {
   private mouseXStart: number;
   private mouseYStart: number;
   private originalColumn: number;
+}
+
+interface FloatingProps {
+  /** Specifies the horizontal position of the floating column. */
+  leftPosition: number;
+
+  /** Specifies the vertical position of the floating column. */
+  topPosition: number;
+
+  /** The current width of the column. */
+  width: number;
+
+  /** The index of the floating column. */
+  columnIndex: number;
+
+  /** How many rows of the column should be shown. */
+  rowsToShow: number;
+
+  /** The model to display. */
+  tableModel: TableModel;
+
+  /** The label for the columns of the table. */
+  label?: string;
+
+  /** Specifies the CSS class. */
+  className?: string;
+
+  /** The CSS style to apply. */
+  style?: any;
+
+  /** Callback to let the parent know the width of the column being
+   * moved changed. 
+   */
+  updateWidth: (width: number) => void;
+}
+
+/** Renders a single column of the table. */
+class FloatingColumn extends React.Component<FloatingProps> {
+  constructor(props: FloatingProps) {
+    super(props);
+    this.props.tableModel.connect(this.tableUpdated.bind(this));
+    this.widthRef = React.createRef<HTMLTableCellElement>();
+  }
+
+  public render(): JSX.Element {
+    const cells = [];
+    for(let i = 0; i <= this.props.rowsToShow; ++i) {
+      cells.push(
+        <tr style={this.props.style.tr} key={i}>
+          <td style={this.props.style.td}>
+            {this.props.tableModel.get(i, this.props.columnIndex)}
+          </td>
+        </tr>);
+    }
+    return (
+      <div style={{
+          boxSizing: 'border-box',
+          left: this.props.leftPosition,
+          top: this.props.topPosition,
+          position:'absolute'}}>
+        <table style={{
+            ...this.props.style.table,
+            ...{opacity: 0.8,
+              backgroundColor: 'white',
+              border: 'none'}}}>
+          <thead>
+            {this.props.label && 
+              <tr style={this.props.style.tr}>
+                <th style={this.props.style.th} ref={this.widthRef}>
+                  {this.props.label}
+                </th>
+              </tr>}
+          </thead>
+          <tbody>
+            {cells}
+          </tbody>
+        </table>
+      </div>);
+  }
+
+  public componentDidUpdate(): void {
+    const shouldWidthUpdate = this.props.width !==
+      this.widthRef.current?.getBoundingClientRect().width;
+    if(shouldWidthUpdate) {
+      const newWidth = this.widthRef.current?.getBoundingClientRect().width;
+      this.props.updateWidth(newWidth);
+    }
+  }
+
+  private tableUpdated = (operation: Operation) => {
+    const start = 0;
+    const end = this.props.rowsToShow;
+    if(operation instanceof AddRowOperation ||
+        operation instanceof RemoveRowOperation) {
+      this.forceUpdate();
+      return;
+    } else if(operation instanceof UpdateOperation) {
+      if(start <= operation.row && operation.row <= end) {
+        this.forceUpdate();
+        return;
+      }
+    } else if(operation instanceof MoveRowOperation) {
+      if(!(operation.source < start && operation.destination < start) &&
+          !(end < operation.source && end < operation.destination)) {
+        this.forceUpdate();
+        return;
+      }
+    }
+  }
+  private widthRef: React.RefObject<HTMLTableCellElement>
 }
