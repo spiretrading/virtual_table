@@ -240,7 +240,14 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
-  private onScrollHandler = () => {
+  private onScrollHandler = (event: Event) => {
+    if(this.state.isMoving) {
+      console.log('Do not scroll');
+      const lastKnownX = this.wrapperRef.current.scrollLeft;
+      const lastKnownY = window.scrollY;
+        this.wrapperRef.current.scrollTo(lastKnownX, lastKnownY);
+      return;
+    }
     const percent =
       this.wrapperRef.current.scrollTop / this.wrapperRef.current.scrollHeight;
     this.setState({topRow: Math.floor(percent * this.props.model.rowCount)});
