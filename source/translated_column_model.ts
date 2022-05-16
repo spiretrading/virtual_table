@@ -44,7 +44,7 @@ export class TranslatedColumnModel extends TableModel {
    * @param dest - The new position of the column.
    * @throws RangeError - The indexes specified is not within range.
    */
-  public moveColumn = (source: number, dest: number) =>{
+  public moveColumn(source: number, dest: number): void {
     this.beginTransaction(); 
     if(source < 0 || dest < 0 || source >= this.columnCount ||
         dest >= this.columnCount) {
@@ -55,11 +55,6 @@ export class TranslatedColumnModel extends TableModel {
     this.columnOrder.splice(source, 1);
     this.columnOrder.splice(dest, 0, sourceValue);
     this.endTransaction();
-  }
-
-/** Returns the current order of columns. */
-  public getColumnOrder = () => {
-    return this.columnOrder.slice();
   }
 
   private handleSourceOperation = (operation: Operation) => {
