@@ -172,7 +172,7 @@ export class TranslatedColumnModelTester {
     const testTable = getWideTestTable();
     const translatedColumnTable = new TranslatedColumnModel(testTable);
     translatedColumnTable.moveColumn(1, 3);
-    translatedColumnTable.moveColumn(2, 4);
+    translatedColumnTable.moveColumn(1, 4);
     translatedColumnTable.moveColumn(3, 0);
     Expect(translatedColumnTable.columnCount).toEqual(5);
     Expect(translatedColumnTable.rowCount).toEqual(3);
