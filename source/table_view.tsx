@@ -389,7 +389,8 @@ interface FloatingColumnProps {
   style?: any;
 
   /** Callback to let the parent know the width of the column being
-   * moved changed.
+   * moved changed
+   * @width - The new width of the column.
    */
   updateWidth: (width: number) => void;
 }
