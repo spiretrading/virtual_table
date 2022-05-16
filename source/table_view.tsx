@@ -41,16 +41,16 @@ export class TableView extends React.Component<Properties, State> {
 
   constructor(props: Properties) {
     super(props);
-    const headerOrder = [];
-    for(let i = 0; i< this.props.model.columnCount; ++i) {
-      headerOrder.push(i);
+    const columnOrder = [];
+    for(let i = 0; i < this.props.model.columnCount; ++i) {
+      columnOrder.push(i);
     }
     this.state = {
       rowHeight: 1,
       rowsToShow: 1,
       topRow: 0,
       isMoving: false,
-      columnOrder: headerOrder,
+      columnOrder: columnOrder,
       floatingColumnIndex: -1,
       floatingColumnWidth: 0,
       floatingColumnLeft: 0,
@@ -61,7 +61,7 @@ export class TableView extends React.Component<Properties, State> {
     this.wrapperRef = React.createRef<HTMLDivElement>();
     this.columnRefs = [];
     this.columnWidths = [];
-    for(let i = 0; i< this.props.labels.length; ++i) {
+    for(let i = 0; i < this.props.labels.length; ++i) {
       this.columnRefs.push(React.createRef<HTMLTableCellElement>());
       this.columnWidths[i] = 0;
     }
@@ -70,19 +70,19 @@ export class TableView extends React.Component<Properties, State> {
   public render(): JSX.Element {
     const header = [];
     for(let i = 0; i < this.props.labels.length; ++i) {
-      const index = this.state.columnOrder[i];
+      const colIndex = this.state.columnOrder[i];
       if(this.state.isMoving && this.state.floatingColumnIndex === i) {
         header.push(
           <th style={{boxSizing: 'border-box',
               width: this.state.floatingColumnWidth}}
-            key={this.props.labels[index]}/>);
+            key={this.props.labels[colIndex]}/>);
       } else {
         header.push(
           <th style={this.props.style.th}
               className={this.props.className}
-              key={this.props.labels[index]}
-              onMouseDown={(event) => this.onLabelMouseDown(event, i)}>
-            {this.props.labels[index]}
+              key={this.props.labels[colIndex]}
+              onMouseDown={(event) => this.onMouseDownOverLabel(event, i)}>
+            {this.props.labels[colIndex]}
           </th>);
       }
     }
@@ -100,7 +100,7 @@ export class TableView extends React.Component<Properties, State> {
     for(let i = startRow; i <= endRow; ++i) {
       const row = [];
       for(let j = 0; j < this.props.model.columnCount; ++j) {
-        const index = this.state.columnOrder[j];
+        const colIndex = this.state.columnOrder[j];
         if(this.state.isMoving && this.state.floatingColumnIndex === j) {
           row.push(
             <td style={{boxSizing: 'border-box',
@@ -113,7 +113,7 @@ export class TableView extends React.Component<Properties, State> {
                 className={this.props.className}
                 ref={i === startRow && this.columnRefs[j]}
                 key={(i * this.props.model.columnCount) + j}>
-              {this.props.model.get(i, index)}
+              {this.props.model.get(i, colIndex)}
             </td>);
         }
       }
@@ -143,19 +143,21 @@ export class TableView extends React.Component<Properties, State> {
     }
     return(
       <div style={{height: `${this.props.height}px`,
-            overflow: 'auto', position: 'relative'}}
+            overflow: 'auto',
+            position: 'relative'}}
           ref={this.wrapperRef}>
-        {this.state.isMoving && <FloatingColumn
-          topPosition={this.state.floatingColumnTop}
-          leftPosition={this.state.floatingColumnLeft}
-          width={this.state.floatingColumnWidth}
-          index={this.state.columnOrder[this.state.floatingColumnIndex]}
-          style={this.props.style}
-          label={this.props.labels[
-            this.state.columnOrder[this.state.floatingColumnIndex]]}
-          rowsToShow={this.state.rowsToShow}
-          tableModel={this.props.model}
-          updateWidth={this.syncMovingColumnWidth}/>}
+        {this.state.isMoving &&
+          <FloatingColumn
+            topPosition={this.state.floatingColumnTop}
+            leftPosition={this.state.floatingColumnLeft}
+            width={this.state.floatingColumnWidth}
+            index={this.state.columnOrder[this.state.floatingColumnIndex]}
+            style={this.props.style}
+            label={this.props.labels[
+              this.state.columnOrder[this.state.floatingColumnIndex]]}
+            rowsToShow={this.state.rowsToShow}
+            tableModel={this.props.model}
+            updateWidth={this.syncMovingColumnWidth}/>}
         <table style={{...this.props.style.table}}
             className={this.props.className}>
           <thead style={this.props.style.thead}
@@ -175,8 +177,8 @@ export class TableView extends React.Component<Properties, State> {
 
   public componentDidMount(): void {
     this.wrapperRef.current.addEventListener('scroll', this.onScrollHandler);
-    this.checkAndUpdateColumnWidths();
     this.forceUpdate();
+    this.checkAndUpdateColumnWidths();
   }
 
   public componentDidUpdate(): void {
@@ -241,9 +243,9 @@ export class TableView extends React.Component<Properties, State> {
 
   private onScrollHandler = (event: Event) => {
     if(this.state.isMoving) {
-      const lastKnownX = this.wrapperRef.current.scrollLeft;
+      const currentX = this.wrapperRef.current.scrollLeft;
       const lastKnownY = window.scrollY;
-      this.wrapperRef.current.scrollTo(lastKnownX, lastKnownY);
+      this.wrapperRef.current.scrollTo(currentX, lastKnownY);
       return;
     }
     const percent =
@@ -251,16 +253,12 @@ export class TableView extends React.Component<Properties, State> {
     this.setState({topRow: Math.floor(percent * this.props.model.rowCount)});
   }
 
-  private onLabelMouseDown = (event: React.MouseEvent, index: number) => {
+  private onMouseDownOverLabel = (event: React.MouseEvent, index: number) => {
     let initialLeft = 0;
     for(let i = 0; i < index; ++i) {
       initialLeft += this.columnWidths[i];
     }
-    let originalLeft = 0;
-    for(let i = 0; i < index; ++i) {
-      originalLeft += this.columnWidths[i];
-    }
-    this.columnOffset = originalLeft;
+    this.columnOffset = initialLeft;
     this.mouseXStart = event.clientX;
     this.mouseYStart = event.clientY;
     window.addEventListener('mouseup', this.onMouseUp);
@@ -274,9 +272,6 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private onMouseMove = (event: MouseEvent) => {
-    if(!this.state.isMoving) {
-      return;
-    }
     const newLeft = this.columnOffset + event.clientX - this.mouseXStart;
     const newTop = Math.min(Math.max(0, event.clientY - this.mouseYStart),
       this.state.rowHeight);
