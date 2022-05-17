@@ -230,7 +230,7 @@ export class TableView extends React.Component<Properties, State> {
     let hasChanged = false;
     for(let i = 0; i < this.columnRefs.length; ++i) {
       const hasWidthChanged = this.columnWidths[i] !==
-        this.columnRefs[i].current?.getBoundingClientRect().width;
+        this.columnRefs[i].current.getBoundingClientRect().width;
       if(hasWidthChanged) {
         hasChanged = true;
         widths[i] = this.columnRefs[i].current.getBoundingClientRect().width;
@@ -267,6 +267,7 @@ export class TableView extends React.Component<Properties, State> {
       isMoving: true,
       floatingColumnIndex: index,
       floatingColumnLeft: initialLeft,
+      floatingColumnTop: 0,
       floatingColumnWidth: this.columnWidths[index]
     });
   }
@@ -284,7 +285,7 @@ export class TableView extends React.Component<Properties, State> {
     if(moveDelta < 0) {
       let lower = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
-        let threshold = lower + (this.columnWidths[i] / 2);
+        const threshold = lower + (this.columnWidths[i] / 2);
         if(newLeft < threshold && (lower < newLeft || i === 0)) {
           dest = i;
           break;
@@ -296,7 +297,7 @@ export class TableView extends React.Component<Properties, State> {
         this.columnWidths[this.state.floatingColumnIndex];
       let upper = 0;
       for(let i = 0; i < this.props.model.columnCount; ++i) {
-        let threshold = upper + (this.columnWidths[i] / 2);
+        const threshold = upper + (this.columnWidths[i] / 2);
         upper = upper + (this.columnWidths[i]);
         if(threshold < newRight && (newRight < upper ||
             i === this.props.model.columnCount - 1)) {
@@ -433,7 +434,7 @@ class FloatingColumn extends React.Component<FloatingColumnProps> {
 
   public componentDidUpdate(): void {
     const shouldWidthUpdate = this.props.width !==
-      this.widthRef.current?.getBoundingClientRect().width;
+      this.widthRef.current.getBoundingClientRect().width;
     if(shouldWidthUpdate) {
       const newWidth = this.widthRef.current?.getBoundingClientRect().width;
       this.props.updateWidth(newWidth);
