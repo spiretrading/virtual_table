@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {Sorting} from './sorting';
+import {Sorting} from '../sorting';
 
 interface Properties {
 
@@ -82,7 +82,9 @@ export class SortIconButton extends React.Component<Properties, State> {
     container: {
       boxSizing: 'border-box',
       display: 'flex',
-      alignItems: 'center', 
+      alignItems: 'center',
+      width: '16px',
+      height: '16px',
       paddingLeft: '4px',
       paddingRight: '4px'
     } as React.CSSProperties,

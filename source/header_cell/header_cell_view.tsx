@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {SortIconButton} from './sort_icon_button';
-import {Sorting} from './sorting';
+import {Sorting} from '../sorting';
 
 interface Properties {
 
