@@ -25,13 +25,13 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
     return (
       <div style={HeaderCellViewDemo.STYLE.container}>
           <button onClick={this.onSortableClick}>
-            SortableModel
+            Use SortableModel
           </button>
           <button onClick={this.onUnsortableClick}>
-            UnSortableModel
+            Use UnSortableModel
           </button>
           <button onClick={this.toggleFilterable}>
-            Toggle Filterable
+            Toggle isFilterable
           </button>
           <button onClick={this.toggleHasFilter}>
             Toggle hasFilter
