@@ -1,5 +1,4 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
 import { HeaderCellView } from '../header_cell/header_cell_view';
 import { Sorting } from '../sorting';
 
