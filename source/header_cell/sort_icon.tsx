@@ -58,7 +58,9 @@ export class SortIcon extends React.Component<Properties, State> {
       boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
-      width: '5px'
+      width: '5px',
+      flexGrow: 0,
+      flexShrink: 0
     } as React.CSSProperties
   }
 }

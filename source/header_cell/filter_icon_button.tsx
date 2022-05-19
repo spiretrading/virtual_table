@@ -79,6 +79,8 @@ export class FilterIconButton extends React.Component<Properties, State> {
       boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
+      flexGrow: 0,
+      flexShrink: 0
     } as React.CSSProperties,
     clickableArea: {
       boxSizing: 'border-box',

@@ -26,6 +26,7 @@ interface Properties {
 
 interface State {
   isHovered: boolean;
+  isCondensed: boolean;
 }
 
 /** Component that displays a HeaderCell. */
@@ -33,8 +34,11 @@ export class HeaderCellView extends React.Component<Properties, State> {
   constructor(props: Properties) {
     super(props);
     this.state = {
-      isHovered: false
-    }
+      isHovered: false,
+      isCondensed: false
+    };
+    this.widthRef = React.createRef<HTMLDivElement>();
+    this.lastWidth = 0;
   }
 
   render(): JSX.Element {
@@ -43,11 +47,14 @@ export class HeaderCellView extends React.Component<Properties, State> {
           onMouseEnter={this.onMouseEnter}
           onMouseLeave={this.onMouseLeave}
           onClick={this.onSortClick}>
-        <div style={HeaderCellView.STYLE.textSpace}>
-          <div 
+        <div style={HeaderCellView.STYLE.padding4}/>
+        <div style={this.state.isCondensed ?
+            HeaderCellView.STYLE.textSpaceMinimal:
+            HeaderCellView.STYLE.textSpace }>
+          <div  ref={this.widthRef}
             style={this.state.isHovered ? HeaderCellView.STYLE.textHovered :
               HeaderCellView.STYLE.text}>
-            {this.props.name}
+            {this.state.isCondensed ? this.props.shortName : this.props.name}
           </div>
           <div style={this.state.isHovered ?
             HeaderCellView.STYLE.hoveredTextFooter :
@@ -70,6 +77,19 @@ export class HeaderCellView extends React.Component<Properties, State> {
       </div>);
   }
 
+  componentDidUpdate(): void {
+    if(!this.state.isCondensed &&
+        this.widthRef.current.clientWidth < this.widthRef.current.scrollWidth) {
+      console.log('last width', this.lastWidth, 'client', this.widthRef.current.clientWidth, 'scroll', this.widthRef.current.scrollWidth );
+      this.lastWidth = this.widthRef.current.scrollWidth;
+      this.setState({isCondensed: true});
+    }
+    if(this.state.isCondensed &&
+        this.lastWidth === this.widthRef.current.clientWidth ) {
+      this.setState({isCondensed: false});
+    }
+  }
+
   private onMouseEnter = () => {
     this.setState({isHovered: true});
   }
@@ -89,7 +109,6 @@ export class HeaderCellView extends React.Component<Properties, State> {
 
   private static readonly STYLE = {
     container: {
-      boxSizing: 'border-box',
       fontFamily: 'Roboto, Arial, Helvetica, sans-serif',
       fontWeight: '500',
       height: '30px',
@@ -102,31 +121,46 @@ export class HeaderCellView extends React.Component<Properties, State> {
       flexShrink: 0,
       width: '4px'
     } as React.CSSProperties,
-    padding8: {
-      flexGrow: 0,
-      flexShrink: 0,
-      width: '8px'
-    } as React.CSSProperties,
     textSpace: {
       userSelect: 'none',
       paddingTop: '9px',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'auto',
+      flexGrow: 1,
+      flexShrink: 1
+    } as React.CSSProperties,
+    textSpaceMinimal: {
+      userSelect: 'none',
+      paddingTop: '9px',
+      display: 'flex',
+      flexDirection: 'column',
+      overflow: 'auto',
+      flexGrow: 1,
+      flexShrink: 0
     } as React.CSSProperties,
     text: {
       userSelect: 'none',
       fontSize: '12px',
       lineHeight: '14px',
-      color: '#808080'
+      color: '#808080',
+      flexGrow: 0,
+      flexShrink: 0,
+      overflow: 'hidden',
     } as React.CSSProperties,
     textHovered: {
       fontSize: '12px',
       lineHeight: '14px',
-      color: '#4B23A0'
+      color: '#4B23A0',
+      flexGrow: 0,
+      flexShrink: 0,
+      overflow: 'hidden'
     } as React.CSSProperties,
     resizeLine: {
       width: '4px',
       height: '14px',
+      flexGrow: 0,
+      flexShrink: 0,
       borderRight: '1px solid #C8C8C8'
     } as React.CSSProperties,
     textFooter: {
@@ -141,5 +175,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
     hoveredLine: {
       border: '1px solid #C8C8C8'
     }
-  }
+  };
+  lastWidth: number;
+  widthRef: React.RefObject<HTMLDivElement>;
 }
