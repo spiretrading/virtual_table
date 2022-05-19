@@ -1,33 +1,60 @@
 import {Sorting} from './sorting';
 
-/** Column header data. */
-export interface HeaderCell {
+export class HeaderCell {
+  constructor(name: string, shortName: string, isSortable: boolean = true,
+      sorting: Sorting = Sorting.NONE) {
+    this.#name = name;
+    this.#shortName = shortName;
+    if(isSortable) {
+      this.#sorting = new HeaderCell.Sortable(sorting);
+    } else {
+      this.#sorting = new HeaderCell.Unsortable();
+    }
+  }
 
-  /** The name to show in the header.*/
-  get name(): string;
+  get name(): string {
+    return this.#name;
+  }
 
-  /**  The condensed version of the name. */
-  get shortName(): string;
+  get shortName(): string {
+    return this.#shortName;
+  }
 
-  /** Ordering */
-  get order(): Order;
+  get sortable(): HeaderCell.Sortable | HeaderCell.Unsortable {
+    return this.#sorting;
+  }
+
+  #name: string;
+  #shortName: string;
+  #sorting: HeaderCell.Sortable | HeaderCell.Unsortable;
 }
 
-export type Order = Sortable | Unsortable;
+export namespace HeaderCell {
+  export class Sortable {
+    constructor(sorting: Sorting) {
+      this.#sorting = sorting;
+    }
 
-/** The interface for a sortable header */
-export interface Sortable {
+    get sortOrder(): Sorting {
+      return this.#sorting;
+    }
 
-  /** Returns the current sort order. */
-  get sortOrder(): Sorting;
+    updateSorting(sortOrder: Sorting): void {
+      this.#sorting = sortOrder;
+    }
 
-  /** Updates the sort order. */
-  updateSorting(sortOrder: Sorting): void;
-}
+    #sorting: Sorting;
+  }
 
-/** The interface for a header that cannot be sorted*/
-export interface Unsortable {
+  export class Unsortable {
+    constructor() {
+      this.#sorting = Sorting.NONE;
+    }
 
-  /** Returns the current sort order. */
-  get sortOrder(): Sorting;
+    get sortOrder(): Sorting {
+      return this.#sorting;
+    }
+
+    #sorting: Sorting;
+  }
 }

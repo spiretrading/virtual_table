@@ -3,7 +3,7 @@ import * as React from 'react';
 interface Properties {
 
   /** Determines if there is a filter applied. */
-  isFiltered: boolean;
+  hasFilter: boolean;
 }
 
 interface State {
@@ -21,7 +21,7 @@ export class FilterIconButton extends React.Component<Properties, State> {
 
   render(): JSX.Element {
     const icon = (() => {
-      if(this.props.isFiltered) {
+      if(this.props.hasFilter) {
         return (
           <svg id="Group_1542" data-name="Group 1542"
               xmlns="http://www.w3.org/2000/svg"

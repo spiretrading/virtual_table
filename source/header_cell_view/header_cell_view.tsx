@@ -17,8 +17,11 @@ interface Properties {
   /** Indicates if the sort button should be shown. */
   isSortable: boolean;
 
-  /** Indicates if the sort button should be shown. */
+  /** Indicates if the filter icon should be shown. */
   isFilterable: boolean;
+
+  /** Indicates if the column is filtered */
+  hasFilter: boolean;
 
   /** Callback to sort the column. */
   sort?: (order: Sorting) => void;
@@ -71,7 +74,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
         {this.props.isFilterable &&
           <> 
             <div style={HeaderCellView.STYLE.padding4}/>
-            <FilterIconButton isFiltered={this.props.isFilterable}/>
+            <FilterIconButton hasFilter={this.props.hasFilter}/>
           </>}
         <div style={HeaderCellView.STYLE.resizeLine}/>
       </div>);
@@ -80,7 +83,6 @@ export class HeaderCellView extends React.Component<Properties, State> {
   componentDidUpdate(): void {
     if(!this.state.isCondensed &&
         this.widthRef.current.clientWidth < this.widthRef.current.scrollWidth) {
-      console.log('last width', this.lastWidth, 'client', this.widthRef.current.clientWidth, 'scroll', this.widthRef.current.scrollWidth );
       this.lastWidth = this.widthRef.current.scrollWidth;
       this.setState({isCondensed: true});
     }
