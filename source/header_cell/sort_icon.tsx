@@ -5,12 +5,6 @@ interface Properties {
 
   /** The sort order of the column. */
   sortOrder: Sorting;
-
-  /** Indicate if the button is clickable. */
-  disabled?: boolean;
-
-  /** The callback to use for a click. */
-  onClick?: () => void;
 }
 
 interface State {
@@ -18,7 +12,7 @@ interface State {
 }
 
 /** Icon that displays sort information. */
-export class SortIconButton extends React.Component<Properties, State> {
+export class SortIcon extends React.Component<Properties, State> {
   constructor(props: Properties) {
     super(props);
     this.state = {
@@ -54,28 +48,9 @@ export class SortIconButton extends React.Component<Properties, State> {
       }
     })();
     return (
-      <div style={SortIconButton.STYLE.container}>
-        <div onMouseEnter={!this.props.disabled && this.onMouseEnter}
-            onMouseLeave={!this.props.disabled && this.onMouseLeave}
-            style={this.state.isHovered ?
-              SortIconButton.STYLE.clickableAreaHovered :
-              SortIconButton.STYLE.clickableArea}
-            onClick={!this.props.disabled && this.onClick}>
-          {icon}
-        </div>
+      <div style={SortIcon.STYLE.container}>
+        {icon}
       </div>);
-  }
-
-  private onMouseEnter = () => {
-    this.setState({isHovered: true});
-  }
-
-  private onMouseLeave = () => {
-    this.setState({isHovered: false});
-  }
-
-  private onClick = () => {
-    this.props.onClick();
   }
 
   private static readonly STYLE = {
@@ -83,23 +58,7 @@ export class SortIconButton extends React.Component<Properties, State> {
       boxSizing: 'border-box',
       display: 'flex',
       alignItems: 'center',
-      width: '16px',
-      height: '16px',
-      paddingLeft: '4px',
-      paddingRight: '4px'
-    } as React.CSSProperties,
-    clickableArea: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center', 
-      padding: '5px',
-    } as React.CSSProperties,
-    clickableAreaHovered: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center', 
-      padding: '5px',
-      backgroundColor: '#F2F2FF'
+      width: '5px'
     } as React.CSSProperties
   }
 }

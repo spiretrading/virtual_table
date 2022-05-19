@@ -1,6 +1,7 @@
 import * as React from 'react';
-import {SortIconButton} from './sort_icon_button';
 import {Sorting} from '../sorting';
+import {FilterIconButton} from './filter_icon_button';
+import {SortIcon} from './sort_icon';
 
 interface Properties {
 
@@ -15,6 +16,9 @@ interface Properties {
 
   /** Indicates if the sort button should be shown. */
   isSortable: boolean;
+
+  /** Indicates if the sort button should be shown. */
+  isFilterable: boolean;
 
   /** Callback to sort the column. */
   sort?: (order: Sorting) => void;
@@ -37,7 +41,8 @@ export class HeaderCellView extends React.Component<Properties, State> {
     return (
       <div style={HeaderCellView.STYLE.container}
           onMouseEnter={this.onMouseEnter}
-          onMouseLeave={this.onMouseLeave}>
+          onMouseLeave={this.onMouseLeave}
+          onClick={this.onSortClick}>
         <div style={HeaderCellView.STYLE.textSpace}>
           <div 
             style={this.state.isHovered ? HeaderCellView.STYLE.textHovered :
@@ -48,10 +53,19 @@ export class HeaderCellView extends React.Component<Properties, State> {
             HeaderCellView.STYLE.hoveredTextFooter :
             HeaderCellView.STYLE.textFooter}/>
         </div>
+        <div style={HeaderCellView.STYLE.padding4}/>
+        {!this.props.isSortable && !this.props.isFilterable &&
+          <div style={HeaderCellView.STYLE.padding4}/>}
         {this.props.isSortable && 
-          <SortIconButton sortOrder={this.props.sortOrder}
-            disabled={!this.props.isSortable}
-            onClick={this.onSortClick}/>}
+          <>
+            <div style={HeaderCellView.STYLE.padding4}/>
+            <SortIcon sortOrder={this.props.sortOrder}/>
+          </>}
+        {this.props.isFilterable &&
+          <> 
+            <div style={HeaderCellView.STYLE.padding4}/>
+            <FilterIconButton isFiltered={this.props.isFilterable}/>
+          </>}
         <div style={HeaderCellView.STYLE.resizeLine}/>
       </div>);
   }
@@ -64,7 +78,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
     this.setState({isHovered: false});
   }
 
-  private onSortClick = () => {
+  private onSortClick = (event: React.MouseEvent) => {
     if(this.props.sortOrder === Sorting.NONE ||
         this.props.sortOrder === Sorting.DESCENDING) {
       this.props.sort(Sorting.ASCENDING);
@@ -77,17 +91,30 @@ export class HeaderCellView extends React.Component<Properties, State> {
     container: {
       boxSizing: 'border-box',
       fontFamily: 'Roboto, Arial, Helvetica, sans-serif',
+      fontWeight: '500',
       height: '30px',
       display: 'flex',
       flexDirection: 'row',
       alignItems: 'center'
     } as React.CSSProperties,
+    padding4: {
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '4px'
+    } as React.CSSProperties,
+    padding8: {
+      flexGrow: 0,
+      flexShrink: 0,
+      width: '8px'
+    } as React.CSSProperties,
     textSpace: {
+      userSelect: 'none',
       paddingTop: '9px',
       display: 'flex',
       flexDirection: 'column'
     } as React.CSSProperties,
-    text: { 
+    text: {
+      userSelect: 'none',
       fontSize: '12px',
       lineHeight: '14px',
       color: '#808080'
