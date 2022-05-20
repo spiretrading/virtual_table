@@ -42,12 +42,10 @@ export class HeaderCell {
     return this.#sorting;
   }
 
-
   /** Get sortable object from the header. */
   get filter(): Filter {
     return this.#filterable.filter;
   }
-
 
   /** Get filterable object from the header. */
   get filterable(): HeaderCell.Unfilterable {
@@ -87,7 +85,7 @@ export namespace HeaderCell {
     #sorting: Sorting;
   }
 
-  /** A header that cannot be sorted. */
+  /** A header that can not be sorted. */
   export class Unsortable {
 
     /** Current sort order of the header. */
@@ -96,7 +94,7 @@ export namespace HeaderCell {
     }
   }
 
-  /** A header that cannot be filtered. */
+  /** A header that can not be filtered. */
   export class Unfilterable {
     
     /** Get the filter of the header. */
