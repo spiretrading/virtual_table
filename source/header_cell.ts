@@ -1,4 +1,5 @@
 import {Sorting} from './sorting';
+import {Filter} from './filter';
 
 export class HeaderCell {
   constructor(name: string, shortName: string, isSortable: boolean = true,
@@ -10,6 +11,7 @@ export class HeaderCell {
     } else {
       this.#sorting = new HeaderCell.Unsortable();
     }
+    this.#filterable = new HeaderCell.Unfilterable();
   }
 
   get name(): string {
@@ -24,12 +26,19 @@ export class HeaderCell {
     return this.#sorting;
   }
 
+  get filterable(): HeaderCell.Unfilterable {
+    return this.#filterable;
+  }
+
   #name: string;
   #shortName: string;
   #sorting: HeaderCell.Sortable | HeaderCell.Unsortable;
+  #filterable: HeaderCell.Unfilterable;
 }
 
 export namespace HeaderCell {
+
+  /** Sortable header. */
   export class Sortable {
     constructor(sorting: Sorting) {
       this.#sorting = sorting;
@@ -47,14 +56,14 @@ export namespace HeaderCell {
   }
 
   export class Unsortable {
-    constructor() {
-      this.#sorting = Sorting.NONE;
-    }
-
     get sortOrder(): Sorting {
-      return this.#sorting;
+      return Sorting.NONE
     }
+  }
 
-    #sorting: Sorting;
+  export class Unfilterable {
+    get filter(): Filter {
+      return Filter.NONE;
+    }
   }
 }
