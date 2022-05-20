@@ -15,7 +15,7 @@ class MainDemo extends React.Component<{}, State> {
     }
   }
 
-  render(): JSX.Element {
+  public render(): JSX.Element {
     const demo = (() => {
       if(this.state.currentDemo === 'TableViewDemo') {
         return <TableViewDemo/>;
@@ -40,7 +40,7 @@ class MainDemo extends React.Component<{}, State> {
     );
   }
 
-  onButtonClick(newDemo: string) {
+  private onButtonClick(newDemo: string) {
     this.setState({currentDemo: newDemo});
   }
 }

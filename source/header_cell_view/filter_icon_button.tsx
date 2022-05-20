@@ -2,7 +2,7 @@ import * as React from 'react';
 
 interface Properties {
 
-  /** Determines if there is a filter applied. */
+  /** Determines if there is a filter is active. */
   hasFilter: boolean;
 
   /** Callback for when the mouse enters the component area. */

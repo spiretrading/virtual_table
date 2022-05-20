@@ -27,7 +27,7 @@ export class HeaderCell {
     return this.#name;
   }
 
-  /** Get the condesned name of the header. */
+  /** Get the condensed name of the header. */
   get shortName(): string {
     return this.#shortName;
   }

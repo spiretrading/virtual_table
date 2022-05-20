@@ -2,18 +2,19 @@ import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
 import { TableView } from '../table_view';
 
+/** Demo that displays the TableView. */
 export class TableViewDemo extends React.Component<{}, {}> {
   constructor(props: {}) {
     super(props);
     this.model = new ArrayTableModel();
   }
 
-  render(): JSX.Element {
-    return  <TableView model={this.model} style={TableViewDemo.someStyle}
+  public render(): JSX.Element {
+    return <TableView model={this.model} style={TableViewDemo.someStyle}
       labels={TableViewDemo.header} height={700}/>;
   }
 
-  componentDidMount(): void {
+  public componentDidMount(): void {
     for(let row = 0; row < 10000; ++row) {
       const r = [];
       for(let column = 0; column < 4; ++column) {
@@ -26,10 +27,11 @@ export class TableViewDemo extends React.Component<{}, {}> {
         }
       }
       this.model.push(r);
-      }
+    }
+    setInterval(this.changeValues, 2000);
   }
 
-  changeValues = () => {
+  private changeValues = () => {
     const diceRoll = Math.floor(Math.random() * 4);
     const testRow = Math.floor(Math.random() * this.model.rowCount);
     if(this.model.rowCount > 500 && diceRoll === 0) {
@@ -63,6 +65,5 @@ export class TableViewDemo extends React.Component<{}, {}> {
       color: '#4b23a0'
     }
   };
-
   private model: ArrayTableModel;
 }

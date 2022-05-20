@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { HeaderCell } from '../header_cell';
-import { HeaderCellView } from '../header_cell_view/header_cell_view';
+import { HeaderCellView } from '../header_cell_view';
 import { Sorting } from '../sorting';
 
 interface State {
@@ -10,6 +10,7 @@ interface State {
   hasFilter: boolean;
 }
 
+/** Demo that displays the HeaderCellView. */
 export class HeaderCellViewDemo extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
@@ -21,24 +22,24 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
     };
   }
 
-  render(): JSX.Element {
+  public render(): JSX.Element {
     return (
       <div style={HeaderCellViewDemo.STYLE.container}>
-          <button onClick={this.onSortableClick}>
-            Use SortableModel
-          </button>
-          <button onClick={this.onUnsortableClick}>
-            Use UnSortableModel
-          </button>
-          <button onClick={this.toggleFilterable}>
-            Toggle isFilterable
-          </button>
-          <button onClick={this.toggleHasFilter}>
-            Toggle hasFilter
-          </button>
-          <span>Available Width</span>
-          <input type='number' onChange={this.updateWidth}
-            value={this.state.width}/>
+        <button onClick={this.onSortableClick}>
+          Use SortableModel
+        </button>
+        <button onClick={this.onUnsortableClick}>
+          Use UnSortableModel
+        </button>
+        <button onClick={this.toggleFilterable}>
+          Toggle isFilterable
+        </button>
+        <button onClick={this.toggleHasFilter}>
+          Toggle hasFilter
+        </button>
+        <span>Available Width</span>
+        <input type='number' onChange={this.updateWidth}
+          value={this.state.width}/>
         <div style={{maxWidth: `${this.state.width}px`,
             minWidth: `${this.state.width}px`, minHeight: '40px'}}>
           <HeaderCellView
@@ -112,8 +113,8 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
       alignItems: 'flex-start',
       border: '10px solid white'
     } as React.CSSProperties,
-  }
-  private static unsortableModel = new HeaderCell('Volume', 'Vol.', false);
+  };
   private static sortableModel = new HeaderCell('Distance', 'Dist.', true,
     Sorting.NONE);
+  private static unsortableModel = new HeaderCell('Volume', 'Vol.', false);
 }
