@@ -50,7 +50,7 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
               HeaderCell.Sortable}
             isFilterable={this.state.isFilterable}
             hasFilter={this.state.hasFilter}
-            sort={this.updateSort}/>
+            onSort={this.updateSort}/>
         </div>
       </div>);
   }

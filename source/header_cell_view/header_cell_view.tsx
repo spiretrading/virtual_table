@@ -24,7 +24,7 @@ interface Properties {
   hasFilter: boolean;
 
   /** Callback to sort the column. */
-  sort?: (order: Sorting) => void;
+  onSort?: (order: Sorting) => void;
 }
 
 interface State {
@@ -122,9 +122,9 @@ export class HeaderCellView extends React.Component<Properties, State> {
   private onSortClick = () => {
     if(this.props.sortOrder === Sorting.NONE ||
         this.props.sortOrder === Sorting.DESCENDING) {
-      this.props.sort(Sorting.ASCENDING);
+      this.props.onSort(Sorting.ASCENDING);
     } else {
-      this.props.sort(Sorting.DESCENDING);
+      this.props.onSort(Sorting.DESCENDING);
     }
   }
 
