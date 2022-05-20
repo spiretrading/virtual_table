@@ -1,3 +1,4 @@
+import { StyleSheet, css } from 'aphrodite';
 import * as React from 'react';
 
 interface Properties {
@@ -57,25 +58,14 @@ export class FilterIconButton extends React.Component<Properties, State> {
     })();
     return (
       <div style={FilterIconButton.STYLE.container}>
-        <div onMouseEnter={this.onMouseEnter}
-            onMouseLeave={this.onMouseLeave}
+        <div onMouseEnter={this.props.onMouseEnter}
+            onMouseLeave={this.props.onMouseLeave}
             onClick={this.onClick}
-            style={this.state.isHovered ?
-              FilterIconButton.STYLE.clickableAreaHovered :
-              FilterIconButton.STYLE.clickableArea}>
+            style={FilterIconButton.STYLE.clickableArea}
+            className={css(FilterIconButton.DYNAMIC_STYLE.mouseEffects)}>
           {icon}
         </div>
       </div>);
-  }
-
-  private onMouseEnter = () => {
-    this.props.onMouseEnter();
-    this.setState({isHovered: true});
-  }
-
-  private onMouseLeave = () => {
-    this.props.onMouseLeave();
-    this.setState({isHovered: false});
   }
 
   private onClick = (event: React.MouseEvent) => {
@@ -97,6 +87,10 @@ export class FilterIconButton extends React.Component<Properties, State> {
       width: '16px',
       height: '16px',
       padding: '5px',
+      color: 'blue',
+      ':hover': {
+        backgroundColor: 'red'
+      }
     } as React.CSSProperties,
     clickableAreaHovered: {
       boxSizing: 'border-box',
@@ -107,5 +101,12 @@ export class FilterIconButton extends React.Component<Properties, State> {
       padding: '5px',
       backgroundColor: '#F2F2FF'
     } as React.CSSProperties
-  }
+  };
+  private static readonly DYNAMIC_STYLE = StyleSheet.create({
+    mouseEffects: {
+      ':hover': {
+        backgroundColor: '#F2F2FF'
+      }
+    }
+  });
 }
