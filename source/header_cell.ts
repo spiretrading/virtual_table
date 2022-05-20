@@ -33,9 +33,21 @@ export class HeaderCell {
   }
 
   /** Get sortable object from the header. */
+  get sortOrder(): Sorting {
+    return this.#sorting.sortOrder;
+  }
+
+  /** Get sortable object from the header. */
   get sortable(): HeaderCell.Sortable | HeaderCell.Unsortable {
     return this.#sorting;
   }
+
+
+  /** Get sortable object from the header. */
+  get filter(): Filter {
+    return this.#filterable.filter;
+  }
+
 
   /** Get filterable object from the header. */
   get filterable(): HeaderCell.Unfilterable {

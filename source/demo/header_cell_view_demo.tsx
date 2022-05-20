@@ -44,7 +44,7 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
           <HeaderCellView
             name={this.state.model.name}
             shortName={this.state.model.shortName}
-            sortOrder={this.state.model.sortable.sortOrder}
+            sortOrder={this.state.model.sortOrder}
             isSortable={this.state.model.sortable instanceof
               HeaderCell.Sortable}
             isFilterable={this.state.isFilterable}
