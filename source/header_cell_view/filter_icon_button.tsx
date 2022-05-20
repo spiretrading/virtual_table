@@ -4,13 +4,19 @@ interface Properties {
 
   /** Determines if there is a filter applied. */
   hasFilter: boolean;
+
+  /** Callback for when the mouse enters the component area. */
+  onMouseEnter: () => void;
+
+  /** Callback for when the mouse leaves the component area. */
+  onMouseLeave: () => void;
 }
 
 interface State {
   isHovered: boolean;
 }
 
-/** Icon that displays filter information. */
+/** A icon that displays filter information. */
 export class FilterIconButton extends React.Component<Properties, State> {
   constructor(props: Properties) {
     super(props);
@@ -63,10 +69,12 @@ export class FilterIconButton extends React.Component<Properties, State> {
   }
 
   private onMouseEnter = () => {
+    this.props.onMouseEnter();
     this.setState({isHovered: true});
   }
 
   private onMouseLeave = () => {
+    this.props.onMouseLeave();
     this.setState({isHovered: false});
   }
 

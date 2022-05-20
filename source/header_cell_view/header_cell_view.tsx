@@ -74,7 +74,10 @@ export class HeaderCellView extends React.Component<Properties, State> {
         {this.props.isFilterable &&
           <> 
             <div style={HeaderCellView.STYLE.padding4}/>
-            <FilterIconButton hasFilter={this.props.hasFilter}/>
+            <FilterIconButton
+              hasFilter={this.props.hasFilter}
+              onMouseEnter={this.onFilterMouseEnter}
+              onMouseLeave={this.onFilterMouseLeave}/>
           </>}
         <div style={HeaderCellView.STYLE.resizeLine}/>
       </div>);
@@ -100,6 +103,18 @@ export class HeaderCellView extends React.Component<Properties, State> {
 
   private onMouseLeave = () => {
     if(this.props.isSortable) {
+      this.setState({isHovered: false});
+    }
+  }
+
+  private onFilterMouseEnter = () => {
+    if(!this.props.isSortable) {
+      this.setState({isHovered: true});
+    }
+  }
+
+  private onFilterMouseLeave = () => {
+    if(!this.props.isSortable) {
       this.setState({isHovered: false});
     }
   }
