@@ -15,7 +15,7 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
     super(props);
     this.state = {
       width: 200,
-      model: HeaderCellViewDemo.sortableModel,
+      model: HeaderCellViewDemo.unsortableModel,
       isFilterable: false,
       hasFilter: true
     };

@@ -93,14 +93,18 @@ export class HeaderCellView extends React.Component<Properties, State> {
   }
 
   private onMouseEnter = () => {
-    this.setState({isHovered: true});
+    if(this.props.isSortable) {
+      this.setState({isHovered: true});
+    }
   }
 
   private onMouseLeave = () => {
-    this.setState({isHovered: false});
+    if(this.props.isSortable) {
+      this.setState({isHovered: false});
+    }
   }
 
-  private onSortClick = (event: React.MouseEvent) => {
+  private onSortClick = () => {
     if(this.props.sortOrder === Sorting.NONE ||
         this.props.sortOrder === Sorting.DESCENDING) {
       this.props.sort(Sorting.ASCENDING);
