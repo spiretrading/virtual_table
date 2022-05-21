@@ -1,10 +1,10 @@
 import * as React from 'react';
-import {Sorting} from '../sorting';
+import { SortOrder } from '../sort_order';
 
 interface Properties {
 
   /** The sort order of the column. */
-  sortOrder: Sorting;
+  sortOrder: SortOrder;
 }
 
 interface State {
@@ -22,7 +22,7 @@ export class SortIcon extends React.Component<Properties, State> {
 
   render(): JSX.Element {
     const icon = (() => {
-      if(this.props.sortOrder === Sorting.ASCENDING) {
+      if(this.props.sortOrder === SortOrder.ASCENDING) {
         return (
           <svg xmlns="http://www.w3.org/2000/svg"
               width="5"
@@ -33,7 +33,7 @@ export class SortIcon extends React.Component<Properties, State> {
               d="M2.5,0,5,6H0Z"
               fill="#4b23a0"/>
           </svg>);
-      } else if(this.props.sortOrder === Sorting.DESCENDING) {
+      } else if(this.props.sortOrder === SortOrder.DESCENDING) {
         return (
           <svg xmlns="http://www.w3.org/2000/svg"
               width="5"

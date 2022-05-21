@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {Sorting} from '../sorting';
-import {FilterIconButton} from './filter_icon_button';
-import {SortIcon} from './sort_icon';
+import { SortOrder } from '../sort_order';
+import { FilterIconButton } from './filter_icon_button';
+import { SortIcon } from './sort_icon';
 
 interface Properties {
 
@@ -12,7 +12,7 @@ interface Properties {
   shortName: string;
 
   /** The sort order of the column. */
-  sortOrder: Sorting;
+  sortOrder: SortOrder;
 
   /** Indicates if the sort button should be shown. */
   isSortable: boolean;
@@ -24,7 +24,7 @@ interface Properties {
   hasFilter: boolean;
 
   /** Callback to sort the column. */
-  onSort?: (order: Sorting) => void;
+  onSort?: () => void;
 }
 
 interface State {
@@ -54,7 +54,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
         <div style={this.state.isCondensed ?
             HeaderCellView.STYLE.textSpaceMinimal:
             HeaderCellView.STYLE.textSpace }>
-          <div  ref={this.widthRef}
+          <div ref={this.widthRef}
             style={this.state.isHovered ? HeaderCellView.STYLE.textHovered :
               HeaderCellView.STYLE.text}>
             {this.state.isCondensed ? this.props.shortName : this.props.name}
@@ -120,12 +120,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
   }
 
   private onSortClick = () => {
-    if(this.props.sortOrder === Sorting.NONE ||
-        this.props.sortOrder === Sorting.DESCENDING) {
-      this.props.onSort(Sorting.ASCENDING);
-    } else {
-      this.props.onSort(Sorting.DESCENDING);
-    }
+    this.props.onSort();
   }
 
   private static readonly STYLE = {

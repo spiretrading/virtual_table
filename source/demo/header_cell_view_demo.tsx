@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { HeaderCell } from '../header_cell';
 import { HeaderCellView } from '../header_cell_view';
-import { Sorting } from '../sorting';
+import { SortOrder } from '../sort_order';
 
 interface State {
   width: number;
@@ -16,7 +16,8 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
     super(props);
     this.state = {
       width: 200,
-      model: HeaderCellViewDemo.unsortableModel,
+      model: new HeaderCell('Distance', 'Dist.', SortOrder.NONE,
+        this.simulateSort),
       isFilterable: true,
       hasFilter: false
     };
@@ -46,8 +47,7 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
             name={this.state.model.name}
             shortName={this.state.model.shortName}
             sortOrder={this.state.model.sortOrder}
-            isSortable={this.state.model.sortable instanceof
-              HeaderCell.Sortable}
+            isSortable={this.state.model.sortOrder !== SortOrder.UNSORTABLE}
             isFilterable={this.state.isFilterable}
             hasFilter={this.state.hasFilter}
             onSort={this.updateSort}/>
@@ -56,19 +56,25 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
   }
 
   private onSortableClick = () => {
-    this.setState({model: HeaderCellViewDemo.sortableModel});
+    const model = new HeaderCell('Distance', 'Dist.', SortOrder.NONE,
+      this.simulateSort);
+    this.setState({model: model});
   }
 
   private onUnsortableClick = () => {
-    this.setState({model: HeaderCellViewDemo.unsortableModel});
+    const model = new HeaderCell('Distance', 'Dist.', SortOrder.UNSORTABLE,
+      this.simulateSort);
+    this.setState({model: model});
   }
 
-  private updateSort = (value: Sorting) => {
-    const sortable = this.state.model.sortable;
-    if(sortable instanceof HeaderCell.Sortable) {
-      sortable.updateSorting(value);
-    }
+  private updateSort = () => {
+    this.state.model.sort();
     this.setState({model: this.state.model});
+    return true;
+  }
+
+  private simulateSort = () => {
+    return true;
   }
 
   private toggleFilterable = () => {
@@ -87,7 +93,7 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
     }
   }
 
-  private updateWidth = (event: React.ChangeEvent<HTMLInputElement>)  => {
+  private updateWidth = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = (() => {
       if(event.target.value.length === 0) {
         return 0;
@@ -114,7 +120,4 @@ export class HeaderCellViewDemo extends React.Component<{}, State> {
       border: '10px solid white'
     } as React.CSSProperties,
   };
-  private static sortableModel = new HeaderCell('Distance', 'Dist.', true,
-    Sorting.NONE);
-  private static unsortableModel = new HeaderCell('Volume', 'Vol.', false);
 }

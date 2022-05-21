@@ -1,5 +1,5 @@
 /** Specifies the sort order. */
-export enum Sorting {
+export enum SortOrder {
 
   /** No sorting. */
   NONE,
@@ -8,5 +8,8 @@ export enum Sorting {
   ASCENDING,
 
   /** Sorted high to low. */
-  DESCENDING
+  DESCENDING,
+
+  /** No sorting. */
+  UNSORTABLE
 }
