@@ -76,15 +76,18 @@ export class HeaderCellView extends React.Component<Properties, State> {
   }
 
   componentDidUpdate(): void {
-    if(!this.state.isCondensed &&
-        this.widthRef.current.clientWidth < this.widthRef.current.scrollWidth) {
-      this.lastWidth = this.widthRef.current.scrollWidth;
-      this.setState({isCondensed: true});
-    }
-    if(this.state.isCondensed &&
-        this.lastWidth === this.widthRef.current.clientWidth) {
-      this.setState({isCondensed: false});
-    }
+    this.setState((state) => {
+      if(!state.isCondensed && this.widthRef.current.clientWidth <
+          this.widthRef.current.scrollWidth) {
+        this.lastWidth = this.widthRef.current.scrollWidth;
+        return {isCondensed: true};
+      } else if(state.isCondensed &&
+          this.lastWidth === this.widthRef.current.clientWidth) {
+        return {isCondensed: false};
+      } else {
+        return null;
+      }
+    });
   }
 
   private onMouseEnter = () => {
