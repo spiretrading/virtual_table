@@ -17,7 +17,7 @@ export class SortIcon extends React.Component<Properties, State> {
     super(props);
     this.state = {
       isHovered: false
-    }
+    };
   }
 
   render(): JSX.Element {
@@ -62,5 +62,5 @@ export class SortIcon extends React.Component<Properties, State> {
       flexGrow: 0,
       flexShrink: 0
     } as React.CSSProperties
-  }
+  };
 }
