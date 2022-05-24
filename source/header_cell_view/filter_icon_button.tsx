@@ -1,10 +1,10 @@
-import { StyleSheet, css } from 'aphrodite';
+import { css, StyleSheet} from 'aphrodite';
 import * as React from 'react';
 
 interface Properties {
 
   /** Determines if there is a filter is active. */
-  hasFilter: boolean;
+  isFiltered: boolean;
 
   /** Callback for when the mouse enters the component area. */
   onMouseEnter: () => void;
@@ -23,12 +23,12 @@ export class FilterIconButton extends React.Component<Properties, State> {
     super(props);
     this.state = {
       isHovered: false
-    }
+    };
   }
 
   render(): JSX.Element {
     const icon = (() => {
-      if(this.props.hasFilter) {
+      if(this.props.isFiltered) {
         return (
           <svg id="Group_1542" data-name="Group 1542"
               xmlns="http://www.w3.org/2000/svg"
@@ -61,8 +61,7 @@ export class FilterIconButton extends React.Component<Properties, State> {
         <div onMouseEnter={this.props.onMouseEnter}
             onMouseLeave={this.props.onMouseLeave}
             onClick={this.onClick}
-            style={FilterIconButton.STYLE.clickableArea}
-            className={css(FilterIconButton.DYNAMIC_STYLE.mouseEffects)}>
+            className={css(FilterIconButton.DYNAMIC_STYLE.clickableArea)}>
           {icon}
         </div>
       </div>);
@@ -79,7 +78,9 @@ export class FilterIconButton extends React.Component<Properties, State> {
       alignItems: 'center',
       flexGrow: 0,
       flexShrink: 0
-    } as React.CSSProperties,
+    } as React.CSSProperties
+  };
+  private static readonly DYNAMIC_STYLE = StyleSheet.create({
     clickableArea: {
       boxSizing: 'border-box',
       display: 'flex',
@@ -87,23 +88,6 @@ export class FilterIconButton extends React.Component<Properties, State> {
       width: '16px',
       height: '16px',
       padding: '5px',
-      color: 'blue',
-      ':hover': {
-        backgroundColor: 'red'
-      }
-    } as React.CSSProperties,
-    clickableAreaHovered: {
-      boxSizing: 'border-box',
-      display: 'flex',
-      alignItems: 'center',
-      width: '16px',
-      height: '16px', 
-      padding: '5px',
-      backgroundColor: '#F2F2FF'
-    } as React.CSSProperties
-  };
-  private static readonly DYNAMIC_STYLE = StyleSheet.create({
-    mouseEffects: {
       ':hover': {
         backgroundColor: '#F2F2FF'
       }
