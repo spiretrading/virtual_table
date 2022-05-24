@@ -7,11 +7,10 @@ export class HeaderCell {
     * @param name - The name to display if there is enough available space.
     * @param shortName - The name to display if there is not enough space.
     * @param sortOrder - The current sorting of the column.
-    * @param onSort - Callback to sort the column. Returns true if the sort was
-    *               successful. Returns false otherwise.
+    * @param onSort - Callback to sort the column.
     */
   constructor(name: string, shortName: string, sortOrder: SortOrder,
-      onSort: (newOrder: SortOrder) => boolean) {
+      onSort: (newOrder: SortOrder) => void) {
     this.#name = name;
     this.#shortName = shortName;
     this.#sortOrder = sortOrder;
@@ -48,13 +47,12 @@ export class HeaderCell {
           return SortOrder.ASCENDING;
       }
     })();
-    if(this.#onSort(nextOrder)) {
-      this.#sortOrder = nextOrder;
-    }
+    this.#sortOrder = nextOrder;
+    this.#onSort(nextOrder);
   }
 
   #name: string;
   #shortName: string;
   #sortOrder: SortOrder;
-  #onSort: (newOrder: SortOrder) => boolean;
+  #onSort: (newOrder: SortOrder) => void;
 }
