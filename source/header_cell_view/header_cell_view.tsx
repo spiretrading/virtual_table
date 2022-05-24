@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Filter } from '../filter';
 import { SortOrder } from '../sort_order';
 import { FilterIconButton } from './filter_icon_button';
 import { SortIcon } from './sort_icon';
@@ -11,20 +12,14 @@ interface Properties {
   /** The shortened name of the header cell. */
   shortName: string;
 
-  /** The sort order of the column. */
+  /** Indicates which sort order icon should be shown. */
   sortOrder: SortOrder;
 
-  /** Indicates if the sort button should be shown. */
-  isSortable: boolean;
-
-  /** Indicates if the filter icon should be shown. */
-  isFilterable: boolean;
-
-  /** Indicates if the column is filtered */
-  hasFilter: boolean;
+  /** Indicates which filter should be shown. */
+  filter: Filter;
 
   /** Callback to sort the column. */
-  onSort?: () => void;
+  onSort: () => void;
 }
 
 interface State {
@@ -63,19 +58,16 @@ export class HeaderCellView extends React.Component<Properties, State> {
             HeaderCellView.STYLE.hoveredTextFooter :
             HeaderCellView.STYLE.textFooter}/>
         </div>
-        <div style={HeaderCellView.STYLE.padding4}/>
-        {!this.props.isSortable && !this.props.isFilterable &&
-          <div style={HeaderCellView.STYLE.padding4}/>}
-        {this.props.isSortable &&
+        {this.props.sortOrder !== SortOrder.UNSORTABLE &&
           <>
             <div style={HeaderCellView.STYLE.padding4}/>
             <SortIcon sortOrder={this.props.sortOrder}/>
           </>}
-        {this.props.isFilterable &&
+        {this.props.filter !== Filter.UNFILTERABLE &&
           <>
             <div style={HeaderCellView.STYLE.padding4}/>
             <FilterIconButton
-              isFiltered={this.props.hasFilter}
+              filter={this.props.filter}
               onMouseEnter={this.onFilterMouseEnter}
               onMouseLeave={this.onFilterMouseLeave}/>
           </>}
@@ -90,31 +82,31 @@ export class HeaderCellView extends React.Component<Properties, State> {
       this.setState({isCondensed: true});
     }
     if(this.state.isCondensed &&
-        this.lastWidth === this.widthRef.current.clientWidth ) {
+        this.lastWidth === this.widthRef.current.clientWidth) {
       this.setState({isCondensed: false});
     }
   }
 
   private onMouseEnter = () => {
-    if(this.props.isSortable) {
+    if(this.props.sortOrder !== SortOrder.UNSORTABLE) {
       this.setState({isHovered: true});
     }
   }
 
   private onMouseLeave = () => {
-    if(this.props.isSortable) {
+    if(this.props.sortOrder !== SortOrder.UNSORTABLE) {
       this.setState({isHovered: false});
     }
   }
 
   private onFilterMouseEnter = () => {
-    if(!this.props.isSortable) {
+    if(this.props.sortOrder === SortOrder.UNSORTABLE) {
       this.setState({isHovered: true});
     }
   }
 
   private onFilterMouseLeave = () => {
-    if(!this.props.isSortable) {
+    if(this.props.sortOrder === SortOrder.UNSORTABLE) {
       this.setState({isHovered: false});
     }
   }
@@ -162,7 +154,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
       color: '#808080',
       flexGrow: 0,
       flexShrink: 0,
-      overflow: 'hidden',
+      overflow: 'hidden'
     } as React.CSSProperties,
     textHovered: {
       fontSize: '12px',
@@ -173,7 +165,8 @@ export class HeaderCellView extends React.Component<Properties, State> {
       overflow: 'hidden'
     } as React.CSSProperties,
     resizeLine: {
-      width: '4px',
+      boxSizing: 'border-box',
+      width: '5px',
       height: '14px',
       flexGrow: 0,
       flexShrink: 0,
@@ -181,7 +174,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
     } as React.CSSProperties,
     textFooter: {
       height: '8px',
-      width: '18px',
+      width: '18px'
     } as React.CSSProperties,
     hoveredTextFooter: {
       height: '6px',

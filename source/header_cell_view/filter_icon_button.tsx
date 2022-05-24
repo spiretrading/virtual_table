@@ -1,10 +1,11 @@
 import { css, StyleSheet} from 'aphrodite';
 import * as React from 'react';
+import { Filter } from '../filter';
 
 interface Properties {
 
-  /** Determines if there is a filter is active. */
-  isFiltered: boolean;
+  /** Determines if there is a active filter. */
+  filter: Filter;
 
   /** Callback for when the mouse enters the component area. */
   onMouseEnter: () => void;
@@ -28,7 +29,7 @@ export class FilterIconButton extends React.Component<Properties, State> {
 
   render(): JSX.Element {
     const icon = (() => {
-      if(this.props.isFiltered) {
+      if(this.props.filter === Filter.ANY) {
         return (
           <svg id="Group_1542" data-name="Group 1542"
               xmlns="http://www.w3.org/2000/svg"
