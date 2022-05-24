@@ -1,4 +1,6 @@
 export * from './array_table_model';
+export * from './header_cell';
+export * from './header_cell_view';
 export * from './operations';
 export * from './sorted_table_model';
 export * from './table_model';
