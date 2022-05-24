@@ -5,10 +5,10 @@ import { SortIcon } from './sort_icon';
 
 interface Properties {
 
-  /** The full name of the header cell */
+  /** The full name of the header cell. */
   name: string;
 
-  /** The condensed name to used. */
+  /** The shortened name of the header cell. */
   shortName: string;
 
   /** The sort order of the column. */
@@ -66,16 +66,16 @@ export class HeaderCellView extends React.Component<Properties, State> {
         <div style={HeaderCellView.STYLE.padding4}/>
         {!this.props.isSortable && !this.props.isFilterable &&
           <div style={HeaderCellView.STYLE.padding4}/>}
-        {this.props.isSortable && 
+        {this.props.isSortable &&
           <>
             <div style={HeaderCellView.STYLE.padding4}/>
             <SortIcon sortOrder={this.props.sortOrder}/>
           </>}
         {this.props.isFilterable &&
-          <> 
+          <>
             <div style={HeaderCellView.STYLE.padding4}/>
             <FilterIconButton
-              hasFilter={this.props.hasFilter}
+              isFiltered={this.props.hasFilter}
               onMouseEnter={this.onFilterMouseEnter}
               onMouseLeave={this.onFilterMouseLeave}/>
           </>}
