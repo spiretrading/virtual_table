@@ -14,10 +14,10 @@ function getTestTable() {
 
 function getWideTestTable() {
   const matrix = new ArrayTableModel();
-  matrix.push(['w', 2, 0, 0]);
-  matrix.push(['b', 2, 0, 0]);
-  matrix.push(['h', 2, 0, 0]);
-  matrix.push(['a', 2, 0, 0]);
+  matrix.push(['w', 2, 3, 23]);
+  matrix.push(['b', 2, 4, 45]);
+  matrix.push(['h', 2, 1, 0]);
+  matrix.push(['a', 2, 1, -57]);
   return matrix;
 }
 
@@ -43,7 +43,7 @@ export class SortedTableModelTester {
   /** Tests sorting by Ascending order. */
   @Test()
   public testAscendingSort(): void {
-    const sourceTable = getTestTable()
+    const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
     sortedModel.sortAscending(0);
     Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(1, 0));
@@ -56,7 +56,7 @@ export class SortedTableModelTester {
   /** Tests sorting by Descending order. */
   @Test()
   public testDescendingSort(): void {
-    const sourceTable = getTestTable()
+    const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
     sortedModel.sortDescending(0);
     Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
@@ -65,4 +65,56 @@ export class SortedTableModelTester {
     Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
     Expect(sortedModel.lastSortedColumnIndex).toEqual(0);
   }
+
+  /** Tests link to add operations from source. */
+  @Test()
+  public testSourceAdd(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.sortAscending(0);
+    Expect(() => sourceTable.insert([9, 8], 0)).not.toThrow();
+    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(2, 0));
+    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
+    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(4, 0));
+    Expect(sortedModel.get(4, 0)).toEqual(sourceTable.get(1, 0));
+  }
+
+  /** Tests link to remove operations from source. */
+  @Test()
+  public testSourceRemove(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.sortAscending(0);
+    Expect(() => sourceTable.remove(1)).not.toThrow();
+    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(1, 0));
+    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
+    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(0, 0));
+  }
+
+  /** Tests link to update operations from source. */
+  @Test()
+  public testSourceUpdate(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.sortAscending(0);
+    Expect(() => sourceTable.set(3, 0, 2)).not.toThrow();
+    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(3, 0));
+    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(1, 0));
+    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
+    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(0, 0));
+  }
+
+  /** Tests link to remove operations from source. */
+  @Test()
+  public testSourceMove(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.sortAscending(0);
+    Expect(() => sourceTable.move(0, 1)).not.toThrow();
+    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
+    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
+    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
+  } 
 }
