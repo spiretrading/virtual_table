@@ -8,7 +8,16 @@ function getTestTable() {
   matrix.push([100, 2]);
   matrix.push([3, 4]);
   matrix.push([55, 7]);
-  matrix.push([56, 6]);
+  matrix.push([55, 6]);
+  return matrix;
+}
+
+function getWideTestTable() {
+  const matrix = new ArrayTableModel();
+  matrix.push(['w', 2, 0, 0]);
+  matrix.push(['b', 2, 0, 0]);
+  matrix.push(['h', 2, 0, 0]);
+  matrix.push(['a', 2, 0, 0]);
   return matrix;
 }
 
@@ -49,7 +58,7 @@ export class SortedTableModelTester {
   public testDescendingSort(): void {
     const sourceTable = getTestTable()
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
+    sortedModel.sortDescending(0);
     Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
     Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(3, 0));
     Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
