@@ -1,6 +1,6 @@
 import {Expect, Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, SortedTableModel, Transaction,
+  RemoveRowOperation, SortedTableModel, SortOrder, Transaction,
   UpdateOperation} from '../source';
 
 function getTestTable() {
@@ -45,12 +45,11 @@ export class SortedTableModelTester {
   public testAscendingSort(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
     Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(1, 0));
     Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
     Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
     Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(0, 0));
-    Expect(sortedModel.lastSortedColumnIndex).toEqual(0);
   }
 
   /** Tests sorting by Descending order. */
@@ -58,63 +57,65 @@ export class SortedTableModelTester {
   public testDescendingSort(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortDescending(0);
+    sortedModel.updateSort(0, SortOrder.DESCENDING);
     Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
     Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(3, 0));
     Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
     Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
-    Expect(sortedModel.lastSortedColumnIndex).toEqual(0);
   }
 
-  /** Tests link to add operations from source. */
+  /** Tests that table stays sorted when source adds a new row. */
   @Test()
   public testSourceAdd(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
     Expect(() => sourceTable.insert([9, 8], 0)).not.toThrow();
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(0, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
-    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(4, 0));
-    Expect(sortedModel.get(4, 0)).toEqual(sourceTable.get(1, 0));
+    Expect(sortedModel.get(0, 0)).toEqual(3);
+    Expect(sortedModel.get(1, 0)).toEqual(9);
+    Expect(sortedModel.get(2, 0)).toEqual(55);
+    Expect(sortedModel.get(3, 0)).toEqual(55);
+    Expect(sortedModel.get(4, 0)).toEqual(100);
+    Expect(sortedModel.rowCount).toEqual(5);
   }
 
-  /** Tests link to remove operations from source. */
+  /** Tests that table stays sorted when a source removes row. */
   @Test()
   public testSourceRemove(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
     Expect(() => sourceTable.remove(1)).not.toThrow();
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(1, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(0, 0)).toEqual(55);
+    Expect(sortedModel.get(1, 0)).toEqual(55);
+    Expect(sortedModel.get(2, 0)).toEqual(100);
+    Expect(sortedModel.rowCount).toEqual(3);
   }
 
-  /** Tests link to update operations from source. */
+  /** Tests that table stays sorted when source updates a row. */
   @Test()
   public testSourceUpdate(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
     Expect(() => sourceTable.set(3, 0, 2)).not.toThrow();
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(3, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(1, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(0, 0)).toEqual(2);
+    Expect(sortedModel.get(1, 0)).toEqual(3);
+    Expect(sortedModel.get(2, 0)).toEqual(55);
+    Expect(sortedModel.get(3, 0)).toEqual(100);
+    Expect(sortedModel.rowCount).toEqual(4);
   }
 
-  /** Tests link to remove operations from source. */
+ /** Tests that table stays sorted when source moves a row. */
   @Test()
   public testSourceMove(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.sortAscending(0);
-    Expect(() => sourceTable.move(0, 1)).not.toThrow();
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
-    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
-  } 
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sourceTable.move(0, 3);
+    Expect(sortedModel.get(0, 0)).toEqual(3);
+    Expect(sortedModel.get(1, 0)).toEqual(55);
+    Expect(sortedModel.get(2, 0)).toEqual(55);
+    Expect(sortedModel.get(3, 0)).toEqual(100);
+  }
 }
