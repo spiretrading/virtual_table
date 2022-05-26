@@ -4,16 +4,24 @@ import { HeaderCell } from '../header_cell';
 import { SortOrder } from '../sort_order';
 import { TableView } from '../table_view';
 
+interface State {
+  headerCells: HeaderCell[];
+}
+
 /** Demo that displays the TableView. */
-export class TableViewDemo extends React.Component<{}, {}> {
+export class TableViewDemo extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
+    this.state = {
+      headerCells: this.generateHeaderCells()
+    }
     this.model = new ArrayTableModel();
+    
   }
 
   public render(): JSX.Element {
     return <TableView model={this.model} style={TableViewDemo.someStyle}
-      headerCells={this.headerCells} height={700}/>;
+      headerCells={this.state.headerCells} height={700}/>;
   }
 
   public componentDidMount(): void {
@@ -48,16 +56,24 @@ export class TableViewDemo extends React.Component<{}, {}> {
     }
   }
 
-  private headerCells = [
-    new HeaderCell('Distance', 'Dist.', SortOrder.NONE,
-      () => {}),
-    new HeaderCell('Unsortable', 'No Sort.', SortOrder.UNSORTABLE,
-      () => {}),
-    new HeaderCell('Volume', 'Vol.', SortOrder.NONE,
-      () => {}),
-    new HeaderCell('Length', 'Len.', SortOrder.NONE,
-      () => {})
-  ];
+  private onSort = (column: number, sortOrder: SortOrder) => {
+    console.log('sort click', column, sortOrder);
+    this.setState({headerCells: this.state.headerCells});
+  }
+
+  private generateHeaderCells = () => {
+    return [
+      new HeaderCell('Distance', 'Dist.', SortOrder.NONE,
+        (sortOrder: SortOrder) => {this.onSort(0, sortOrder)}),
+      new HeaderCell('Unsortable', 'No Sort.', SortOrder.UNSORTABLE,
+        (sortOrder: SortOrder) => {this.onSort(1, sortOrder)}),
+      new HeaderCell('Volume', 'Vol.', SortOrder.NONE,
+        (sortOrder: SortOrder) => {this.onSort(2, sortOrder)}),
+      new HeaderCell('Length', 'Len.', SortOrder.NONE,
+        (sortOrder: SortOrder) => {this.onSort(3, sortOrder)})
+    ];
+  }
+
   private static someStyle = {
     table: {
       fontFamily: 'Arial, Helvetica, sans-serif',

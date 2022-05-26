@@ -6,7 +6,6 @@ import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
 
-
 interface Properties {
 
   /** The model to display. */
@@ -46,16 +45,16 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   public render(): JSX.Element {
-    const header = [];
-    for(const headerCell of this.props.headerCells) {
+    const header = [];this.props.headerCells
+    for(let i = 0; i < this.props.headerCells.length; ++i) {
       header.push(
-        <th>
+        <th key={'header' + i}>
           <HeaderCellView
-            name={headerCell.name}
-            shortName={headerCell.shortName}
-            sortOrder={headerCell.sortOrder}
+            name={this.props.headerCells[i].name}
+            shortName={this.props.headerCells[i].shortName}
+            sortOrder={this.props.headerCells[i].sortOrder}
             filter={Filter.UNFILTERABLE}
-            onSort={() => {}}/>
+            onSort={() => this.props.headerCells[i].sort()}/>
         </th>);
     }
     const startRow = Math.max(0, this.state.topRow - 1);
