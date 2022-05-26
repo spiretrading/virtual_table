@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
+import { HeaderCell } from '../header_cell';
+import { SortOrder } from '../sort_order';
 import { TableView } from '../table_view';
 
 /** Demo that displays the TableView. */
@@ -11,7 +13,7 @@ export class TableViewDemo extends React.Component<{}, {}> {
 
   public render(): JSX.Element {
     return <TableView model={this.model} style={TableViewDemo.someStyle}
-      labels={TableViewDemo.header} height={700}/>;
+      headerCells={this.headerCells} height={700}/>;
   }
 
   public componentDidMount(): void {
@@ -46,17 +48,22 @@ export class TableViewDemo extends React.Component<{}, {}> {
     }
   }
 
-  private static header = ['one', 'two', 'three', 'four'];
+  private headerCells = [
+    new HeaderCell('Distance', 'Dist.', SortOrder.NONE,
+      () => {}),
+    new HeaderCell('Unsortable', 'No Sort.', SortOrder.UNSORTABLE,
+      () => {}),
+    new HeaderCell('Volume', 'Vol.', SortOrder.NONE,
+      () => {}),
+    new HeaderCell('Length', 'Len.', SortOrder.NONE,
+      () => {})
+  ];
   private static someStyle = {
     table: {
       fontFamily: 'Arial, Helvetica, sans-serif',
       fontSize: '20px',
       borderCollapse: 'collapse',
       border: '5px solid #000000'
-    },
-    th: {
-      border: '2px solid #000000',
-      color: '#4b23a0'
     },
     td: {
       border: '2px solid #000000',

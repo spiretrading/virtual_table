@@ -1,15 +1,19 @@
 import * as React from 'react';
+import { HeaderCell } from './header_cell';
+import { HeaderCellView } from './header_cell_view';
+import { Filter } from './filter';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
+
 
 interface Properties {
 
   /** The model to display. */
   model: TableModel;
 
-  /** The label for the columns of the table. */
-  labels?: string[];
+  /** The headers for each column. */
+  headerCells: HeaderCell[];
 
   /** Specifies the CSS class. */
   className?: string;
@@ -43,12 +47,15 @@ export class TableView extends React.Component<Properties, State> {
 
   public render(): JSX.Element {
     const header = [];
-    for(let i = 0; i < this.props.labels.length; ++i) {
+    for(const headerCell of this.props.headerCells) {
       header.push(
-        <th style={this.props.style.th}
-            className={this.props.className}
-            key={this.props.labels[i]}>
-          {this.props.labels[i]}
+        <th>
+          <HeaderCellView
+            name={headerCell.name}
+            shortName={headerCell.shortName}
+            sortOrder={headerCell.sortOrder}
+            filter={Filter.UNFILTERABLE}
+            onSort={() => {}}/>
         </th>);
     }
     const startRow = Math.max(0, this.state.topRow - 1);
