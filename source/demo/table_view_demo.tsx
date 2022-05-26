@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
 import { HeaderCell } from '../header_cell';
+import { SortedTableModel } from '../sorted_table_model';
 import { SortOrder } from '../sort_order';
 import { TableView } from '../table_view';
 
@@ -15,12 +16,12 @@ export class TableViewDemo extends React.Component<{}, State> {
     this.state = {
       headerCells: this.generateHeaderCells()
     }
-    this.model = new ArrayTableModel();
-    
+    this.sourceModel = new ArrayTableModel();
+    this.sortedModel = new SortedTableModel(this.sourceModel);
   }
 
   public render(): JSX.Element {
-    return <TableView model={this.model} style={TableViewDemo.someStyle}
+    return <TableView model={this.sortedModel} style={TableViewDemo.someStyle}
       headerCells={this.state.headerCells} height={700}/>;
   }
 
@@ -36,28 +37,28 @@ export class TableViewDemo extends React.Component<{}, State> {
           r.push(Math.floor(Math.random() * 50));
         }
       }
-      this.model.push(r);
+      this.sourceModel.push(r);
     }
     setInterval(this.changeValues, 2000);
   }
 
   private changeValues = () => {
     const diceRoll = Math.floor(Math.random() * 4);
-    const testRow = Math.floor(Math.random() * this.model.rowCount);
-    if(this.model.rowCount > 500 && diceRoll === 0) {
-      this.model.remove(testRow);
+    const testRow = Math.floor(Math.random() * this.sourceModel.rowCount);
+    if(this.sourceModel.rowCount > 500 && diceRoll === 0) {
+      this.sourceModel.remove(testRow);
     } else if(diceRoll === 1) {
       const num = Math.floor(Math.random() * 90) + 100;
-      this.model.insert([this.model.rowCount, num, num, num], 0);
+      this.sourceModel.insert([this.sourceModel.rowCount, num, num, num], 0);
     } else {
-      const testValue = Math.floor(Math.random() * this.model.rowCount) + 0.5;
+      const testValue = Math.floor(Math.random() * this.sourceModel.rowCount) + 0.5;
       const testColumn = Math.floor(Math.random() * 4);
-      this.model.set(testRow, testColumn, testValue);
+      this.sourceModel.set(testRow, testColumn, testValue);
     }
   }
 
   private onSort = (column: number, sortOrder: SortOrder) => {
-    console.log('sort click', column, sortOrder);
+    this.sortedModel.updateSort(column, sortOrder);
     this.setState({headerCells: this.state.headerCells});
   }
 
@@ -88,5 +89,6 @@ export class TableViewDemo extends React.Component<{}, State> {
       color: '#4b23a0'
     }
   };
-  private model: ArrayTableModel;
+  private sourceModel: ArrayTableModel;
+  private sortedModel: SortedTableModel;
 }
