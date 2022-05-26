@@ -64,6 +64,18 @@ export class SortedTableModelTester {
     Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
   }
 
+  /** Tests sorting by Descending order. */
+  @Test()
+  public testPrioritySort(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(0, SortOrder.DESCENDING);
+    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(3, 0));
+    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
+    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
+  }
+
   /** Tests that table stays sorted when source adds a new row. */
   @Test()
   public testSourceAdd(): void {
@@ -131,15 +143,9 @@ export class SortedTableModelTester {
     });
     Expect(() => sourceTable.insert([9, 8], 0)).not.toThrow();
     Expect(operations.length).toEqual(1);
-    const transaction = operations.pop() as Transaction;
-    Expect(transaction).not.toBeNull();
-    const firstOperation = transaction.operations[0] as AddRowOperation;
-    Expect(firstOperation).not.toBeNull();
-    Expect(firstOperation.index).toEqual(4);
-    const secondOperation= transaction.operations[1] as MoveRowOperation;
-    Expect(secondOperation).not.toBeNull();
-    Expect(secondOperation.source).toEqual(4);
-    Expect(secondOperation.destination).toEqual(1);
+    const addOperation = operations.pop() as AddRowOperation;
+    Expect(addOperation).not.toBeNull();
+    Expect(addOperation.index).toEqual(1);
     listener.unlisten();
   }
 
@@ -174,13 +180,14 @@ export class SortedTableModelTester {
     Expect(() => sourceTable.set(0, 0, 0)).not.toThrow();
     const transaction = operations.pop() as Transaction;
     Expect(transaction).not.toBeNull();
-    const firstOperation = transaction.operations[0] as UpdateOperation;
-    Expect(firstOperation).not.toBeNull();
-    Expect(firstOperation.row).toEqual(3);
-    const secondOperation= transaction.operations[1] as MoveRowOperation;
+    Expect(transaction.operations.length).toEqual(2);
+    const secondOperation = transaction.operations[0] as MoveRowOperation;
     Expect(secondOperation).not.toBeNull();
     Expect(secondOperation.source).toEqual(3);
     Expect(secondOperation.destination).toEqual(0);
+    const firstOperation = transaction.operations[1] as UpdateOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.row).toEqual(0);
     listener.unlisten();
   }
 }

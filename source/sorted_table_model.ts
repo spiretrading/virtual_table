@@ -33,6 +33,7 @@ export class SortedTableModel extends TableModel {
     this.transactionLog = new TransactionLog();
     this.translatedTable = new TranslatedTableModel(model);
     this.translatedTable.connect(this.handleSourceOperation);
+    this.movesToIgnore = 0;
   }
 
   /**
@@ -140,24 +141,26 @@ export class SortedTableModel extends TableModel {
   }
 
   private sourceAdd(operation: AddRowOperation) {
-    this.beginTransaction();
-    this.transactionLog.push(operation);
     const sortedIndex = this.findSortedIndex(operation.index);
+    ++this.movesToIgnore;
     this.translatedTable.moveRow(operation.index, sortedIndex);
-    this.endTransaction();
+    this.transactionLog.push(new AddRowOperation(sortedIndex));
   }
 
   private sourceMove(operation: MoveRowOperation) {
-    if(operation.source !== operation.destination) {
+    if(this.movesToIgnore > 0) {
+      --this.movesToIgnore;
+    } else if(operation.source !== operation.destination) {
       this.transactionLog.push(operation);
     }
   }
 
   private sourceUpdate(operation: UpdateOperation) {
     this.beginTransaction();
-    this.transactionLog.push(operation);
     const sortedIndex = this.findSortedIndex(operation.row);
     this.translatedTable.moveRow(operation.row, sortedIndex);
+    this.transactionLog.push(new UpdateOperation(
+      sortedIndex, operation.column));
     this.endTransaction();
   }
 
@@ -203,4 +206,5 @@ export class SortedTableModel extends TableModel {
   private sortOrder: SortOrder[];
   private sortPriority: number[];
   private transactionLog: TransactionLog;
+  private movesToIgnore: number;
 }
