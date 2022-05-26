@@ -141,8 +141,8 @@ export class SortedTableModel extends TableModel {
 
   private sourceAdd(operation: AddRowOperation) {
     this.beginTransaction();
+    this.transactionLog.push(operation);
     const sortedIndex = this.findSortedIndex(operation.index);
-    this.transactionLog.push(new AddRowOperation(sortedIndex));
     this.translatedTable.moveRow(operation.index, sortedIndex);
     this.endTransaction();
   }
@@ -155,8 +155,8 @@ export class SortedTableModel extends TableModel {
 
   private sourceUpdate(operation: UpdateOperation) {
     this.beginTransaction();
-    const sortedIndex = this.findSortedIndex(operation.row);
     this.transactionLog.push(operation);
+    const sortedIndex = this.findSortedIndex(operation.row);
     this.translatedTable.moveRow(operation.row, sortedIndex);
     this.endTransaction();
   }
