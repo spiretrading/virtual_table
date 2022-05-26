@@ -106,7 +106,7 @@ export class SortedTableModelTester {
     Expect(sortedModel.rowCount).toEqual(4);
   }
 
- /** Tests that table stays sorted when source moves a row. */
+  /** Tests that table stays sorted when source moves a row. */
   @Test()
   public testSourceMove(): void {
     const sourceTable = getTestTable();
@@ -117,5 +117,70 @@ export class SortedTableModelTester {
     Expect(sortedModel.get(1, 0)).toEqual(55);
     Expect(sortedModel.get(2, 0)).toEqual(55);
     Expect(sortedModel.get(3, 0)).toEqual(100);
+  }
+
+  /** Tests the signal SortedTable sends on a source add. */
+  @Test()
+  public testSourceAddSignal(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    const operations: Operation[] = [];
+    const listener = sortedModel.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => sourceTable.insert([9, 8], 0)).not.toThrow();
+    Expect(operations.length).toEqual(1);
+    const transaction = operations.pop() as Transaction;
+    Expect(transaction).not.toBeNull();
+    const firstOperation = transaction.operations[0] as AddRowOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.index).toEqual(4);
+    const secondOperation= transaction.operations[1] as MoveRowOperation;
+    Expect(secondOperation).not.toBeNull();
+    Expect(secondOperation.source).toEqual(4);
+    Expect(secondOperation.destination).toEqual(1);
+    listener.unlisten();
+  }
+
+  /** Tests the signal SortedTable sends on a source remove. */
+  @Test()
+  public testSourceRemoveSignal(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    const operations: Operation[] = [];
+    const listener = sortedModel.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => sourceTable.remove(1)).not.toThrow();
+    Expect(operations.length).toEqual(1);
+    const operation = operations.pop() as RemoveRowOperation;
+    Expect(operation).not.toBeNull();
+    Expect(operation.index).toEqual(0);
+    listener.unlisten();
+  }
+
+  /** Tests the signal SortedTable sends on a source update. */
+  @Test()
+  public testSourceUpdateSignal(): void {
+    const sourceTable = getTestTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    const operations: Operation[] = [];
+    const listener = sortedModel.connect((operation: Operation) => {
+      operations.push(operation);
+    });
+    Expect(() => sourceTable.set(0, 0, 0)).not.toThrow();
+    const transaction = operations.pop() as Transaction;
+    Expect(transaction).not.toBeNull();
+    const firstOperation = transaction.operations[0] as UpdateOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.row).toEqual(3);
+    const secondOperation= transaction.operations[1] as MoveRowOperation;
+    Expect(secondOperation).not.toBeNull();
+    Expect(secondOperation.source).toEqual(3);
+    Expect(secondOperation.destination).toEqual(0);
+    listener.unlisten();
   }
 }
