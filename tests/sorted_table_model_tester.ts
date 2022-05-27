@@ -72,7 +72,7 @@ export class SortedTableModelTester {
     Expect(sortedModel.get(3, 3)).toEqual(-57);
   }
 
-  /** Tests sorting by Descending order. */
+  /** Tests sorting with priority. */
   @Test()
   public testPrioritySort(): void {
     const sortedModel = new SortedTableModel(getWideTestTable());
@@ -82,6 +82,26 @@ export class SortedTableModelTester {
     Expect(sortedModel.get(2, 3)).toEqual(0);
     Expect(sortedModel.get(3, 3)).toEqual(-57);
     sortedModel.updateSort(1, SortOrder.ASCENDING);
+    Expect(sortedModel.get(0, 1)).toEqual(1);
+    Expect(sortedModel.get(1, 1)).toEqual(1);
+    Expect(sortedModel.get(2, 1)).toEqual(2);
+    Expect(sortedModel.get(3, 1)).toEqual(2);
+    Expect(sortedModel.get(0, 3)).toEqual(0);
+    Expect(sortedModel.get(1, 3)).toEqual(-57);
+    Expect(sortedModel.get(2, 3)).toEqual(45);
+    Expect(sortedModel.get(3, 3)).toEqual(22);
+  }
+
+  /** Tests sorting with priority using sortColumns. */
+  @Test()
+  public testSortColumns(): void {
+    const sortedModel = new SortedTableModel(getWideTestTable());
+    const sortOrder = [
+      SortOrder.NONE,
+      SortOrder.ASCENDING,
+      SortOrder.UNSORTABLE,
+      SortOrder.DESCENDING];
+    sortedModel.sortColumns(sortOrder, [1, 3])
     Expect(sortedModel.get(0, 1)).toEqual(1);
     Expect(sortedModel.get(1, 1)).toEqual(1);
     Expect(sortedModel.get(2, 1)).toEqual(2);
