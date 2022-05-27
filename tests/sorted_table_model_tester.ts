@@ -14,10 +14,10 @@ function getTestTable() {
 
 function getWideTestTable() {
   const matrix = new ArrayTableModel();
-  matrix.push(['w', 2, 3, 23]);
+  matrix.push(['w', 2, 3, 22]);
   matrix.push(['b', 2, 4, 45]);
-  matrix.push(['h', 2, 1, 0]);
-  matrix.push(['a', 2, 1, -57]);
+  matrix.push(['a', 1, 4, -57]);
+  matrix.push(['b', 1, 4, 0]);
   return matrix;
 }
 
@@ -43,25 +43,53 @@ export class SortedTableModelTester {
   /** Tests sorting by Ascending order. */
   @Test()
   public testAscendingSort(): void {
-    const sourceTable = getTestTable();
-    const sortedModel = new SortedTableModel(sourceTable);
+    const sortedModel = new SortedTableModel(getTestTable());
     sortedModel.updateSort(0, SortOrder.ASCENDING);
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(1, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(3, 0));
-    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(0, 0));
+    Expect(sortedModel.get(0, 0)).toEqual(3);
+    Expect(sortedModel.get(1, 0)).toEqual(55);
+    Expect(sortedModel.get(2, 0)).toEqual(55);
+    Expect(sortedModel.get(3, 0)).toEqual(100);
   }
 
   /** Tests sorting by Descending order. */
   @Test()
   public testDescendingSort(): void {
-    const sourceTable = getTestTable();
-    const sortedModel = new SortedTableModel(sourceTable);
+    const sortedModel = new SortedTableModel(getTestTable());
     sortedModel.updateSort(0, SortOrder.DESCENDING);
-    Expect(sortedModel.get(0, 0)).toEqual(sourceTable.get(0, 0));
-    Expect(sortedModel.get(1, 0)).toEqual(sourceTable.get(3, 0));
-    Expect(sortedModel.get(2, 0)).toEqual(sourceTable.get(2, 0));
-    Expect(sortedModel.get(3, 0)).toEqual(sourceTable.get(1, 0));
+    Expect(sortedModel.get(0, 0)).toEqual(100);
+    Expect(sortedModel.get(1, 0)).toEqual(55);
+    Expect(sortedModel.get(2, 0)).toEqual(55);
+    Expect(sortedModel.get(3, 0)).toEqual(3);
+  }
+
+  @Test()
+  public testSortOnDifferentColumn(): void {
+    const sortedModel = new SortedTableModel(getWideTestTable());
+    sortedModel.updateSort(3, SortOrder.DESCENDING);
+    Expect(sortedModel.get(0, 3)).toEqual(45);
+    Expect(sortedModel.get(1, 3)).toEqual(22);
+    Expect(sortedModel.get(2, 3)).toEqual(0);
+    Expect(sortedModel.get(3, 3)).toEqual(-57);
+  }
+
+  /** Tests sorting by Descending order. */
+  @Test()
+  public testPrioritySort(): void {
+    const sortedModel = new SortedTableModel(getWideTestTable());
+    sortedModel.updateSort(3, SortOrder.DESCENDING);
+    Expect(sortedModel.get(0, 3)).toEqual(45);
+    Expect(sortedModel.get(1, 3)).toEqual(22);
+    Expect(sortedModel.get(2, 3)).toEqual(0);
+    Expect(sortedModel.get(3, 3)).toEqual(-57);
+    sortedModel.updateSort(1, SortOrder.ASCENDING);
+    Expect(sortedModel.get(0, 1)).toEqual(1);
+    Expect(sortedModel.get(1, 1)).toEqual(1);
+    Expect(sortedModel.get(2, 1)).toEqual(2);
+    Expect(sortedModel.get(3, 1)).toEqual(2);
+    Expect(sortedModel.get(0, 3)).toEqual(0);
+    Expect(sortedModel.get(1, 3)).toEqual(-57);
+    Expect(sortedModel.get(2, 3)).toEqual(45);
+    Expect(sortedModel.get(3, 3)).toEqual(22);
   }
 
   /** Tests that table stays sorted when source adds a new row. */
@@ -131,15 +159,9 @@ export class SortedTableModelTester {
     });
     Expect(() => sourceTable.insert([9, 8], 0)).not.toThrow();
     Expect(operations.length).toEqual(1);
-    const transaction = operations.pop() as Transaction;
-    Expect(transaction).not.toBeNull();
-    const firstOperation = transaction.operations[0] as AddRowOperation;
-    Expect(firstOperation).not.toBeNull();
-    Expect(firstOperation.index).toEqual(4);
-    const secondOperation= transaction.operations[1] as MoveRowOperation;
-    Expect(secondOperation).not.toBeNull();
-    Expect(secondOperation.source).toEqual(4);
-    Expect(secondOperation.destination).toEqual(1);
+    const addOperation = operations.pop() as AddRowOperation;
+    Expect(addOperation).not.toBeNull();
+    Expect(addOperation.index).toEqual(1);
     listener.unlisten();
   }
 
@@ -174,13 +196,14 @@ export class SortedTableModelTester {
     Expect(() => sourceTable.set(0, 0, 0)).not.toThrow();
     const transaction = operations.pop() as Transaction;
     Expect(transaction).not.toBeNull();
-    const firstOperation = transaction.operations[0] as UpdateOperation;
-    Expect(firstOperation).not.toBeNull();
-    Expect(firstOperation.row).toEqual(3);
-    const secondOperation= transaction.operations[1] as MoveRowOperation;
+    Expect(transaction.operations.length).toEqual(2);
+    const secondOperation = transaction.operations[0] as MoveRowOperation;
     Expect(secondOperation).not.toBeNull();
     Expect(secondOperation.source).toEqual(3);
     Expect(secondOperation.destination).toEqual(0);
+    const firstOperation = transaction.operations[1] as UpdateOperation;
+    Expect(firstOperation).not.toBeNull();
+    Expect(firstOperation.row).toEqual(0);
     listener.unlisten();
   }
 }

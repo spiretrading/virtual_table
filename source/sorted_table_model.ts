@@ -7,32 +7,25 @@ import {TableModel} from './table_model';
 import {TransactionLog} from './transaction_log';
 import {TranslatedTableModel} from './translated_table_model';
 
+/** A table that sorts columns. */
 export class SortedTableModel extends TableModel {
 
   /**
    * Constructs a model adapting an existing TableModel.
    * @param model The TableModel to adapt.
    */
-  constructor(model: TableModel, sortOrders?: SortOrder[],
-      comparator?: Comparator) {
+  constructor(model: TableModel) {
     super();
-    if(comparator) {
-      this.comparator = comparator;
-    } else {
-      this.comparator = new Comparator();
-    }
-    if(sortOrders === undefined) {
-      this.sortOrder = [];
-      for(let i = 0; i < model.columnCount; ++i) {
-        this.sortOrder.push(SortOrder.NONE);
-      }
-    } else {
-      this.sortOrder = sortOrders;
+    this.comparator = new Comparator();
+    this.sortOrder = [];
+    for(let i = 0; i < model.columnCount; ++i) {
+      this.sortOrder.push(SortOrder.NONE);
     }
     this.sortPriority = [];
     this.transactionLog = new TransactionLog();
     this.translatedTable = new TranslatedTableModel(model);
     this.translatedTable.connect(this.handleSourceOperation);
+    this.movesToIgnore = 0;
   }
 
   /**
@@ -70,6 +63,9 @@ export class SortedTableModel extends TableModel {
    * @param sortOrder - The sort order of column.
    */
   public updateSort(column: number, sortOrder: SortOrder) {
+    if(sortOrder === SortOrder.NONE || sortOrder === SortOrder.UNSORTABLE) {
+      return;
+    }
     this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
       this.sortPriority.splice(this.sortPriority.indexOf(column), 1).unshift(
@@ -77,6 +73,7 @@ export class SortedTableModel extends TableModel {
     } else {
       this.sortPriority.unshift(column);
     }
+    this.sortPriority = [column];
     this.sort();
   }
 
@@ -97,6 +94,7 @@ export class SortedTableModel extends TableModel {
       rowOrdering.push(i);
     }
     rowOrdering.sort((a, b) => this.compareRows(a, b));
+    console.log(rowOrdering);
     for(let i = 0; i < rowOrdering.length; ++i) {
       this.translatedTable.moveRow(rowOrdering[i], i);
       for(let j = i + 1; j < rowOrdering.length; ++j) {
@@ -105,17 +103,18 @@ export class SortedTableModel extends TableModel {
         }
       }
     }
+    console.log('Done sort?');
   }
 
-  private compareRows(row1: number, row2: number) {
+  private compareRows(a: number, b: number) {
     for(let i = 0; i < this.sortPriority.length; ++i) {
       const value = this.comparator.compareValues(
-        this.translatedTable.get(row1, this.sortPriority[i]),
-        this.translatedTable.get(row2, this.sortPriority[i]));
+        this.translatedTable.get(a, this.sortPriority[i]),
+        this.translatedTable.get(b, this.sortPriority[i]));
       if(value !== 0) {
-        if(this.sortOrder[i] === SortOrder.ASCENDING) {
+        if(this.sortOrder[this.sortPriority[i]] === SortOrder.ASCENDING) {
           return value;
-        } else if(this.sortOrder[i] === SortOrder.DESCENDING) {
+        } else {
           return -value;
         }
       }
@@ -140,24 +139,26 @@ export class SortedTableModel extends TableModel {
   }
 
   private sourceAdd(operation: AddRowOperation) {
-    this.beginTransaction();
-    this.transactionLog.push(operation);
     const sortedIndex = this.findSortedIndex(operation.index);
+    ++this.movesToIgnore;
     this.translatedTable.moveRow(operation.index, sortedIndex);
-    this.endTransaction();
+    this.transactionLog.push(new AddRowOperation(sortedIndex));
   }
 
   private sourceMove(operation: MoveRowOperation) {
-    if(operation.source !== operation.destination) {
+    if(this.movesToIgnore > 0) {
+      --this.movesToIgnore;
+    } else if(operation.source !== operation.destination) {
       this.transactionLog.push(operation);
     }
   }
 
   private sourceUpdate(operation: UpdateOperation) {
     this.beginTransaction();
-    this.transactionLog.push(operation);
     const sortedIndex = this.findSortedIndex(operation.row);
     this.translatedTable.moveRow(operation.row, sortedIndex);
+    this.transactionLog.push(new UpdateOperation(
+      sortedIndex, operation.column));
     this.endTransaction();
   }
 
@@ -203,4 +204,5 @@ export class SortedTableModel extends TableModel {
   private sortOrder: SortOrder[];
   private sortPriority: number[];
   private transactionLog: TransactionLog;
+  private movesToIgnore: number;
 }
