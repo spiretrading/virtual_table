@@ -5,6 +5,7 @@ import { Filter } from './filter';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
+import { SortOrder } from './sort_order';
 
 interface Properties {
 
@@ -13,6 +14,9 @@ interface Properties {
 
   /** The headers for each column. */
   headerCells: HeaderCell[];
+
+  /** The index of the header with the highest sort priority. */
+  highestPriorityHeader: number;
 
   /** Specifies the CSS class. */
   className?: string;
@@ -52,7 +56,9 @@ export class TableView extends React.Component<Properties, State> {
           <HeaderCellView
             name={this.props.headerCells[i].name}
             shortName={this.props.headerCells[i].shortName}
-            sortOrder={this.props.headerCells[i].sortOrder}
+            sortOrder={this.props.highestPriorityHeader === i ?
+              this.props.headerCells[i].sortOrder :
+              SortOrder.NONE}
             filter={Filter.UNFILTERABLE}
             onSort={() => this.props.headerCells[i].sort()}/>
         </th>);

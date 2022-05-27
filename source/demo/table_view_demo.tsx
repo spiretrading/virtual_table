@@ -7,6 +7,7 @@ import { TableView } from '../table_view';
 
 interface State {
   headerCells: HeaderCell[];
+  highestPriorityHeader: number;
 }
 
 /** Demo that displays the TableView. */
@@ -14,15 +15,18 @@ export class TableViewDemo extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      headerCells: this.generateHeaderCells()
+      headerCells: this.generateHeaderCells(),
+      highestPriorityHeader: -1
     }
     this.sourceModel = new ArrayTableModel();
     this.sortedModel = new SortedTableModel(this.sourceModel);
   }
-
   public render(): JSX.Element {
-    return <TableView model={this.sortedModel} style={TableViewDemo.someStyle}
-      headerCells={this.state.headerCells} height={700}/>;
+    return <TableView model={this.sortedModel}
+      style={TableViewDemo.someStyle}
+      headerCells={this.state.headerCells} 
+      highestPriorityHeader={this.state.highestPriorityHeader}
+      height={700}/>;
   }
 
   public componentDidMount(): void {
@@ -59,7 +63,10 @@ export class TableViewDemo extends React.Component<{}, State> {
 
   private onSort = (column: number, sortOrder: SortOrder) => {
     this.sortedModel.updateSort(column, sortOrder);
-    this.setState({headerCells: this.state.headerCells});
+    this.setState({
+      headerCells: this.state.headerCells,
+      highestPriorityHeader: column
+    });
   }
 
   private generateHeaderCells = () => {
