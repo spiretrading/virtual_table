@@ -94,7 +94,6 @@ export class SortedTableModel extends TableModel {
       rowOrdering.push(i);
     }
     rowOrdering.sort((a, b) => this.compareRows(a, b));
-    console.log(rowOrdering);
     for(let i = 0; i < rowOrdering.length; ++i) {
       this.translatedTable.moveRow(rowOrdering[i], i);
       for(let j = i + 1; j < rowOrdering.length; ++j) {
@@ -103,7 +102,6 @@ export class SortedTableModel extends TableModel {
         }
       }
     }
-    console.log('Done sort?');
   }
 
   private compareRows(a: number, b: number) {
