@@ -56,9 +56,7 @@ export class TableView extends React.Component<Properties, State> {
           <HeaderCellView
             name={this.props.headerCells[i].name}
             shortName={this.props.headerCells[i].shortName}
-            sortOrder={this.props.highestPriorityHeader === i ?
-              this.props.headerCells[i].sortOrder :
-              SortOrder.NONE}
+            sortOrder={this.sortOrder(i)}
             filter={Filter.UNFILTERABLE}
             onSort={() => this.props.headerCells[i].sort()}/>
         </th>);
@@ -149,6 +147,17 @@ export class TableView extends React.Component<Properties, State> {
 
   public componentWillUnmount(): void {
     this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
+  }
+
+  private sortOrder = (index: number) => {
+    if(this.props.highestPriorityHeader === index) {
+      return this.props.headerCells[index].sortOrder;
+    } else if(this.props.headerCells[index].sortOrder ===
+        SortOrder.UNSORTABLE) {
+      return SortOrder.UNSORTABLE;
+    } else {
+      return SortOrder.NONE;
+    }
   }
 
   private tableUpdated = (operation: Operation) => {
