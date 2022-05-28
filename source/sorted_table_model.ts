@@ -54,17 +54,23 @@ export class SortedTableModel extends TableModel {
     return this.translatedTable.get(row, column);
   }
 
-  public connect(slot: (operation: Operation) => void): Kola.Listener<Operation> {
+  public connect(slot: (operation: Operation) => void):
+      Kola.Listener<Operation> {
     return this.transactionLog.connect(slot);
   }
 
-  /** Sorts the table using column as the column with the highest sort priority.
+  /** 
+   * Sorts the table using @param column as the column with the highest sort
+   * priority. All previous sort priorities are pushed down a rank.
    * @param column - The column that will now have the highest priority
    * @param sortOrder - The sort order of column.
    */
   public updateSort(column: number, sortOrder: SortOrder) {
-    if(sortOrder === SortOrder.NONE || sortOrder === SortOrder.UNSORTABLE) {
-      return;
+    if(sortOrder === SortOrder.UNSORTABLE) {
+      throw new Error('The column is unsortable.');
+    }
+    if(sortOrder === SortOrder.NONE) {
+      throw new Error('The column is neither ascending or descending.');
     }
     this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
@@ -80,7 +86,7 @@ export class SortedTableModel extends TableModel {
   /** Sorts the table using the given parameters.
    * @param sortOrder - The sortOrder of every column.
    * @param sortPriority - The priority of every column being sorted from
-   *  highest to lowest. 
+   *  highest to lowest.
    */
   public sortColumns(sortOrder: SortOrder[], sortPriority: number[]) {
     this.sortOrder = sortOrder;
@@ -145,8 +151,8 @@ export class SortedTableModel extends TableModel {
 
   private sourceMove(operation: MoveRowOperation) {
     if(this.movesToIgnore > 0) {
-      --this.movesToIgnore;
-    } else if(operation.source !== operation.destination) {
+      --this.movesToIgnore
+    } else if(operation.source !== operation.destination){
       this.transactionLog.push(operation);
     }
   }
