@@ -1,4 +1,3 @@
-import { Timeout } from 'alsatian';
 import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
 import { HeaderCell } from '../header_cell';
@@ -51,16 +50,12 @@ export class TableViewDemo extends React.Component<{}, State> {
     const diceRoll = Math.floor(Math.random() * 4);
     const testRow = Math.floor(Math.random() * (this.sourceModel.rowCount - 5));
     if(this.sourceModel.rowCount > 500 && diceRoll === 0) {
-      console.log('remove', testRow);
-      this.sourceModel.remove(testRow);
     } else if(diceRoll === 1) {
       const num = Math.floor(Math.random() * 90) + 100.5;
-      console.log('insert', [this.sourceModel.rowCount + 0.5, num, num, num], 0);
       this.sourceModel.insert([this.sourceModel.rowCount + 0.5, num, num, num], 0);
     } else {
       const testValue = Math.floor(Math.random() * this.sourceModel.rowCount) + 0.5;
       const testColumn = Math.floor(Math.random() * 4);
-      console.log('set', testRow, testColumn, testValue);
       this.sourceModel.set(testRow, testColumn, testValue);
     }
   }
