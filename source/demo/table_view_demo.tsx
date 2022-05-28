@@ -1,3 +1,4 @@
+import { Timeout } from 'alsatian';
 import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
 import { HeaderCell } from '../header_cell';
@@ -19,6 +20,7 @@ export class TableViewDemo extends React.Component<{}, State> {
       highestPriorityHeader: -1
     }
     this.sourceModel = new ArrayTableModel();
+    this.sourceModel.insert([0, 0, 0, 0], 0);
     this.sortedModel = new SortedTableModel(this.sourceModel);
   }
   public render(): JSX.Element {
@@ -30,7 +32,7 @@ export class TableViewDemo extends React.Component<{}, State> {
   }
 
   public componentDidMount(): void {
-    for(let row = 0; row < 10000; ++row) {
+    for(let row = 0; row < 1000; ++row) {
       const r = [];
       for(let column = 0; column < 4; ++column) {
         if(column === 0) {
@@ -43,20 +45,22 @@ export class TableViewDemo extends React.Component<{}, State> {
       }
       this.sourceModel.push(r);
     }
-    setInterval(this.changeValues, 2000);
   }
 
   private changeValues = () => {
     const diceRoll = Math.floor(Math.random() * 4);
-    const testRow = Math.floor(Math.random() * this.sourceModel.rowCount);
+    const testRow = Math.floor(Math.random() * (this.sourceModel.rowCount - 5));
     if(this.sourceModel.rowCount > 500 && diceRoll === 0) {
+      console.log('remove', testRow);
       this.sourceModel.remove(testRow);
     } else if(diceRoll === 1) {
-      const num = Math.floor(Math.random() * 90) + 100;
-      this.sourceModel.insert([this.sourceModel.rowCount, num, num, num], 0);
+      const num = Math.floor(Math.random() * 90) + 100.5;
+      console.log('insert', [this.sourceModel.rowCount + 0.5, num, num, num], 0);
+      this.sourceModel.insert([this.sourceModel.rowCount + 0.5, num, num, num], 0);
     } else {
       const testValue = Math.floor(Math.random() * this.sourceModel.rowCount) + 0.5;
       const testColumn = Math.floor(Math.random() * 4);
+      console.log('set', testRow, testColumn, testValue);
       this.sourceModel.set(testRow, testColumn, testValue);
     }
   }
@@ -67,6 +71,8 @@ export class TableViewDemo extends React.Component<{}, State> {
       headerCells: this.state.headerCells,
       highestPriorityHeader: column
     });
+    this.sourceModel.remove(326);
+    this.sourceModel.insert([999.5, 125.5, 125.5, 125.5], 0);
   }
 
   private generateHeaderCells = () => {
@@ -85,17 +91,21 @@ export class TableViewDemo extends React.Component<{}, State> {
   private static someStyle = {
     table: {
       fontFamily: 'Arial, Helvetica, sans-serif',
-      fontSize: '20px',
+      fontSize: '12px',
       borderCollapse: 'collapse',
       border: '5px solid #000000'
     },
     td: {
       border: '2px solid #000000',
-      paddingLeft: '30px',
+      paddingLeft: '10px',
       paddingRight: '30px',
+      textAlign: 'left',
+      boxSizing: 'border-box',
+      width: '150px',
       color: '#4b23a0'
     }
   };
   private sourceModel: ArrayTableModel;
   private sortedModel: SortedTableModel;
+  private interval: NodeJS.Timer;
 }
