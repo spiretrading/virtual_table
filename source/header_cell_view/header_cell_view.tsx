@@ -151,6 +151,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
       flexShrink: 0
     } as React.CSSProperties,
     text: {
+      display: 'flex',
       userSelect: 'none',
       fontSize: '12px',
       lineHeight: '14px',
@@ -160,6 +161,7 @@ export class HeaderCellView extends React.Component<Properties, State> {
       overflow: 'hidden'
     } as React.CSSProperties,
     textHovered: {
+      display: 'flex',
       fontSize: '12px',
       lineHeight: '14px',
       color: '#4B23A0',
