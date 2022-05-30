@@ -112,7 +112,6 @@ export class TranslatedTableModelTester {
     const operations: (Operation | Transaction)[] = [];
     const listener = translatedTable.connect((
       operation: Operation | Transaction) => {operations.push(operation);});
-    
     Expect(() => translatedTable.beginTransaction()).not.toThrow();
     Expect(() => translatedTable.moveRow(0, 1)).not.toThrow();
     Expect(() => translatedTable.moveRow(0, 2)).not.toThrow();
@@ -408,14 +407,12 @@ export class TranslatedTableModelTester {
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
-  /** 
-   * Tests that the table looks correct after being shuffled and rows being 
-   * removed from source.
-   */
+  /** Tests that removing rows is handled correctly after multiple moves. */
   @Test()
   public testRemoveOnShuffled(): void {
     const source = getTestLargerTable();
     const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
     let expectedTable = [
       [7],
       [5],
@@ -425,7 +422,6 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    shuffleRows(translatedTable);
     source.remove(2);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
     expectedTable = [
@@ -436,8 +432,141 @@ export class TranslatedTableModelTester {
       [0],
       [6]
     ];
-    shuffleRows(translatedTable);
     source.remove(4);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that updating cells is handled correctly after multiple moves. */
+  @Test()
+  public testUpdateOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
+    let expectedTable = [
+      [72],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6]
+    ];
+    source.set(7, 0, 72);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    expectedTable = [
+      [72],
+      [5],
+      [3],
+      [1],
+      [0],
+      [-27],
+      [4],
+      [6]
+    ];
+    source.set(2, 0, -27);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that adding rows is handled correctly after multiple moves. */
+  @Test()
+  public testAddToEndOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
+    let expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6],
+      [8]
+    ];
+    source.push([8]);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that inserts are handled correctly after multiple moves. */
+  @Test()
+  public testInsertOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
+    let expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6],
+      [8]
+    ];
+    source.insert([8], 1);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6],
+      [8],
+      [9]
+    ];
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that updates are performed correctly after rows are added. */
+  @Test()
+  public testInsertThenUpdateOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
+    let expectedTable = [
+      [7],
+      [50],
+      [3],
+      [1],
+      [100],
+      [2],
+      [4],
+      [6],
+      [80],
+      [9]
+    ];
+    source.insert([8], 1);;
+    source.push([9]);
+    source.set(1, 0, 80);
+    source.set(6, 0, 50);
+    source.set(0, 0, 100);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that remove is performed correctly after a row is inserted. */
+  @Test()
+  public testInsertThenRemoveOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
+    let expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [4],
+      [6],
+      [8]
+    ];
+    source.insert([8], 1);;
+    source.remove(3);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 }
