@@ -432,7 +432,7 @@ export class TranslatedTableModelTester {
       [0],
       [6]
     ];
-    source.remove(4);
+    source.remove(3);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
