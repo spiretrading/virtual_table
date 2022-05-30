@@ -1,7 +1,7 @@
 import {Expect, Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, TableModel, Transaction, TranslatedTableModel, UpdateOperation} from
-  '../source';
+  RemoveRowOperation, TableModel, Transaction, TranslatedTableModel,
+   UpdateOperation} from '../source';
 
 function getTestTable() {
   const matrix = new ArrayTableModel();
@@ -320,7 +320,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests how TranslatedTable handles a */
+  /** Tests how TranslatedTable handles a Transaction. */
   @Test()
   public testSourceTableTransactions(): void {
     const testTable = getTestTable();
