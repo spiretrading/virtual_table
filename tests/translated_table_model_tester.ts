@@ -11,7 +11,7 @@ function getTestTable() {
   return matrix;
 }
 
-function getTestLargerTable() {
+function getLongTestTable() {
   const matrix = new ArrayTableModel();
   matrix.push([0]);
   matrix.push([1]);
@@ -132,7 +132,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests link to add operations from source. */
+  /** Tests handling AddRowOperations. */
   @Test()
   public testSourceAdd(): void {
     const source = new ArrayTableModel();
@@ -159,7 +159,7 @@ export class TranslatedTableModelTester {
     Expect(() => source.insert([40], 10)).toThrow();
   }
 
-  /** Tests link to move operations from source. */
+  /** Tests handling MoveRowOperations. */
   @Test()
   public testSourceMove(): void {
     const source = new ArrayTableModel();
@@ -181,6 +181,7 @@ export class TranslatedTableModelTester {
     Expect(() => source.move(4, 2)).not.toThrow();
     Expect(source.get(2, 0)).toEqual(10);
     Expect(translation.get(2, 0)).toEqual(10);
+    Expect(operations.length).toEqual(0);
     Expect(() => translation.moveRow(2, 0)).not.toThrow();
     Expect(translation.get(0, 0)).toEqual(10);
     Expect(() => source.move(2, 0)).not.toThrow();
@@ -189,10 +190,11 @@ export class TranslatedTableModelTester {
     Expect(() => source.move(0, 3)).not.toThrow();
     Expect(source.get(3, 0)).toEqual(10);
     Expect(translation.get(3, 0)).toEqual(3);
+    Expect(operations.length).toEqual(1);
     listener.unlisten();
   }
 
-  /** Tests link to remove operations from source. */
+  /** Tests handling RemoveRowOperations. */
   @Test()
   public testSourceRemove(): void {
     const source = new ArrayTableModel();
@@ -222,7 +224,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests link to update operations from source. */
+  /** Tests handling UpdateOperation. */
   @Test()
   public testSourceUpdate(): void {
     const source = new ArrayTableModel();
@@ -251,7 +253,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests link to combinations of source operations. */
+  /** Tests handling a variety of operations. */
   @Test()
   public testSourceTableUpdates(): void {
     const testTable = getTestTable();
@@ -318,7 +320,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests link to source transaction. */
+  /** Tests how TranslatedTable handles a */
   @Test()
   public testSourceTableTransactions(): void {
     const testTable = getTestTable();
@@ -367,7 +369,7 @@ export class TranslatedTableModelTester {
   /** Tests that shuffleRows produces the expected table. */
   @Test()
   public testShuffle(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     const expectedTable = [
       [7],
@@ -383,10 +385,10 @@ export class TranslatedTableModelTester {
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
-  /** Tests that the table matches the expected table after 6 moves. */
+  /** Tests a series of moves. */
   @Test()
   public testsAlternateDirectionShuffle(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     const expectedTable = [
       [7],
@@ -410,7 +412,7 @@ export class TranslatedTableModelTester {
   /** Tests that removing rows is handled correctly after multiple moves. */
   @Test()
   public testRemoveOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
     let expectedTable = [
@@ -439,7 +441,7 @@ export class TranslatedTableModelTester {
   /** Tests that updating cells is handled correctly after multiple moves. */
   @Test()
   public testUpdateOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
     let expectedTable = [
@@ -471,7 +473,7 @@ export class TranslatedTableModelTester {
   /** Tests that adding rows is handled correctly after multiple moves. */
   @Test()
   public testAddToEndOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
     let expectedTable = [
@@ -492,9 +494,10 @@ export class TranslatedTableModelTester {
   /** Tests that inserts are handled correctly after multiple moves. */
   @Test()
   public testInsertOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
+    source.insert([8], 1);
     let expectedTable = [
       [7],
       [5],
@@ -506,8 +509,8 @@ export class TranslatedTableModelTester {
       [6],
       [8]
     ];
-    source.insert([8], 1);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    source.insert([9], 5);
     expectedTable = [
       [7],
       [5],
@@ -526,9 +529,14 @@ export class TranslatedTableModelTester {
   /** Tests that updates are performed correctly after rows are added. */
   @Test()
   public testInsertThenUpdateOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
+    source.insert([8], 1);;
+    source.push([9]);
+    source.set(1, 0, 80);
+    source.set(6, 0, 50);
+    source.set(0, 0, 100);
     let expectedTable = [
       [7],
       [50],
@@ -541,20 +549,17 @@ export class TranslatedTableModelTester {
       [80],
       [9]
     ];
-    source.insert([8], 1);;
-    source.push([9]);
-    source.set(1, 0, 80);
-    source.set(6, 0, 50);
-    source.set(0, 0, 100);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
   /** Tests that remove is performed correctly after a row is inserted. */
   @Test()
   public testInsertThenRemoveOnShuffled(): void {
-    const source = getTestLargerTable();
+    const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
+    source.insert([8], 1);;
+    source.remove(3);
     let expectedTable = [
       [7],
       [5],
@@ -565,8 +570,6 @@ export class TranslatedTableModelTester {
       [6],
       [8]
     ];
-    source.insert([8], 1);;
-    source.remove(3);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 }
