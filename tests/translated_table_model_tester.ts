@@ -371,6 +371,7 @@ export class TranslatedTableModelTester {
   public testShuffle(): void {
     const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
+    shuffleRows(translatedTable);
     const expectedTable = [
       [7],
       [5],
@@ -381,7 +382,6 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    shuffleRows(translatedTable);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
@@ -390,6 +390,12 @@ export class TranslatedTableModelTester {
   public testsAlternateDirectionShuffle(): void {
     const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
+    translatedTable.moveRow(7, 0);
+    translatedTable.moveRow(7, 1);
+    translatedTable.moveRow(7, 2);
+    translatedTable.moveRow(1, 7);
+    translatedTable.moveRow(5, 2);
+    translatedTable.moveRow(3, 4);
     const expectedTable = [
       [7],
       [5],
@@ -400,12 +406,6 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    translatedTable.moveRow(7, 0);
-    translatedTable.moveRow(7, 1);
-    translatedTable.moveRow(7, 2);
-    translatedTable.moveRow(1, 7);
-    translatedTable.moveRow(5, 2);
-    translatedTable.moveRow(3, 4);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
@@ -415,26 +415,16 @@ export class TranslatedTableModelTester {
     const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
-    let expectedTable = [
-      [7],
-      [5],
-      [3],
-      [1],
-      [0],
-      [4],
-      [6]
-    ];
     source.remove(2);
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
-    expectedTable = [
+    source.remove(3);
+    source.remove(0);
+    const expectedTable = [
       [7],
       [5],
       [3],
       [1],
-      [0],
       [6]
     ];
-    source.remove(3);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
@@ -444,29 +434,19 @@ export class TranslatedTableModelTester {
     const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
-    let expectedTable = [
-      [72],
-      [5],
-      [3],
-      [1],
-      [0],
-      [2],
-      [4],
-      [6]
-    ];
     source.set(7, 0, 72);
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
-    expectedTable = [
+    source.set(2, 0, -27);
+    source.set(0, 0, 100);
+    const expectedTable = [
       [72],
       [5],
       [3],
       [1],
-      [0],
+      [100],
       [-27],
       [4],
       [6]
     ];
-    source.set(2, 0, -27);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
@@ -476,7 +456,10 @@ export class TranslatedTableModelTester {
     const source = getLongTestTable();
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
-    let expectedTable = [
+    source.push([8]);
+    source.push([9]);
+    source.push([10]);
+    const expectedTable = [
       [7],
       [5],
       [3],
@@ -485,9 +468,10 @@ export class TranslatedTableModelTester {
       [2],
       [4],
       [6],
-      [8]
+      [8],
+      [9],
+      [10]
     ];
-    source.push([8]);
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 
@@ -498,20 +482,9 @@ export class TranslatedTableModelTester {
     const translatedTable = new TranslatedTableModel(source);
     shuffleRows(translatedTable);
     source.insert([8], 1);
-    let expectedTable = [
-      [7],
-      [5],
-      [3],
-      [1],
-      [0],
-      [2],
-      [4],
-      [6],
-      [8]
-    ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
     source.insert([9], 5);
-    expectedTable = [
+    source.insert([10], 5);
+    const expectedTable = [
       [7],
       [5],
       [3],
@@ -521,7 +494,8 @@ export class TranslatedTableModelTester {
       [4],
       [6],
       [8],
-      [9]
+      [9],
+      [10]
     ];
     Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
