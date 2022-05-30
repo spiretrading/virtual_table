@@ -52,12 +52,12 @@ export class TableViewDemo extends React.Component<{}, State> {
     const testRow = Math.floor(Math.random() * (this.sourceModel.rowCount - 5));
     if(this.sourceModel.rowCount > 500 && diceRoll === 0) {
     } else if(diceRoll === 1) {
-      const num = Math.floor(Math.random() * 90) + 100.5;
-      this.sourceModel.insert([this.sourceModel.rowCount + 0.5, num, num, num], 0);
+      const num = Math.floor(Math.random() * 50);
+      this.sourceModel.insert([this.sourceModel.rowCount, 0, num, num % 25], 0);
     } else {
-      const testValue = Math.floor(Math.random() * this.sourceModel.rowCount) + 0.5;
+      const testValue = Math.floor(Math.random() * this.sourceModel.rowCount);
       const testColumn = Math.floor(Math.random() * 4);
-      this.sourceModel.set(testRow, testColumn, testValue);
+      this.sourceModel.set(testRow, testColumn, testValue + 0.5);
     }
   }
 
@@ -68,7 +68,7 @@ export class TableViewDemo extends React.Component<{}, State> {
       highestPriorityHeader: column
     });
     this.sourceModel.remove(326);
-    this.sourceModel.insert([999.5, 125.5, 125.5, 125.5], 0);
+    this.sourceModel.insert([999.75, 125.75, 125.75, 125.75], 0);
   }
 
   private generateHeaderCells = () => {
