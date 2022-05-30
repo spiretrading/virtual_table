@@ -224,7 +224,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests handling UpdateOperation. */
+  /** Tests handling UpdateOperations. */
   @Test()
   public testSourceUpdate(): void {
     const source = new ArrayTableModel();
