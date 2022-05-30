@@ -144,6 +144,7 @@ export class TranslatedTableModel extends TableModel {
     this.shift(-1, sourceIndex, reverseIndex);
     this.translatedToSourceIndices.splice(reverseIndex, 1);
     this.sourceToTranslatedIndices.splice(sourceIndex, 1);
+    this.transactionLog.push(new RemoveRowOperation(reverseIndex));
   }
 
   private shift(amount: number, rowIndex: number, reverseIndex: number) {
@@ -155,7 +156,6 @@ export class TranslatedTableModel extends TableModel {
         this.sourceToTranslatedIndices[i] += amount;
       }
     }
-
   }
 
   private sourceUpdate(operation: UpdateOperation) {
