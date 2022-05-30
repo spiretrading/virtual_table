@@ -1,6 +1,6 @@
 import {Expect, Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, Transaction, TranslatedTableModel, UpdateOperation} from
+  RemoveRowOperation, TableModel, Transaction, TranslatedTableModel, UpdateOperation} from
   '../source';
 
 function getTestTable() {
@@ -9,6 +9,39 @@ function getTestTable() {
   matrix.push([3, 4]);
   matrix.push([5, 6]);
   return matrix;
+}
+
+function getTestLargerTable() {
+  const matrix = new ArrayTableModel();
+  matrix.push([0]);
+  matrix.push([1]);
+  matrix.push([2]);
+  matrix.push([3]);
+  matrix.push([4]);
+  matrix.push([5]);
+  matrix.push([6]);
+  matrix.push([7]);
+  return matrix;
+}
+
+function shuffleRows(table: TranslatedTableModel) {
+  table.moveRow(7, 0);
+  table.moveRow(6, 1);
+  table.moveRow(5, 2);
+  table.moveRow(3, 4);
+}
+
+function areTableCellsEqual(table: TableModel, expectedTable: any[][]) {
+  for(let i = 0; i < table.rowCount; ++i) {
+    for(let j = 0; j < table.columnCount; ++j) {
+      if(table.get(i, j) !== expectedTable[i][j]) {
+        throw new Error(`Checking row: ${i} column: ${j}.\n
+          The expected value ${expectedTable[i][j]}.\n
+          Actual value ${table.get(i, j)}.`);
+      }
+    }
+  }
+  return true;
 }
 
 /** Tests the TranslatedTableModel. */
@@ -312,5 +345,99 @@ export class TranslatedTableModelTester {
     Expect(secondOperation).not.toBeNull();
     Expect(secondOperation.operations.length).toEqual(0);
     listener.unlisten();
+  }
+
+  /** Tests areTableCellsEqual which is used by future tests. */
+  @Test()
+  public testCompareTables(): void {
+    const source = getTestTable();
+    const expectedTable = [
+      [1, 2],
+      [3, 4],
+      [5, 6]
+    ];
+    Expect(areTableCellsEqual(source, expectedTable)).toEqual(true);
+    const errorTable = [
+      [1, 2],
+      [1, -4],
+      [0, -6]
+    ];
+    Expect(() => areTableCellsEqual(source, errorTable)).toThrow();
+  }
+
+  /** Tests that shuffleRows produces the expected table. */
+  @Test()
+  public testShuffle(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    const expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6]
+    ];
+    shuffleRows(translatedTable);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** Tests that the table matches the expected table after 6 moves. */
+  @Test()
+  public testsAlternateDirectionShuffle(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    const expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [2],
+      [4],
+      [6]
+    ];
+    translatedTable.moveRow(7, 0);
+    translatedTable.moveRow(7, 1);
+    translatedTable.moveRow(7, 2);
+    translatedTable.moveRow(1, 7);
+    translatedTable.moveRow(5, 2);
+    translatedTable.moveRow(3, 4);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+  }
+
+  /** 
+   * Tests that the table looks correct after being shuffled and rows being 
+   * removed from source.
+   */
+  @Test()
+  public testRemoveOnShuffled(): void {
+    const source = getTestLargerTable();
+    const translatedTable = new TranslatedTableModel(source);
+    let expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [4],
+      [6]
+    ];
+    shuffleRows(translatedTable);
+    source.remove(2);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    expectedTable = [
+      [7],
+      [5],
+      [3],
+      [1],
+      [0],
+      [6]
+    ];
+    shuffleRows(translatedTable);
+    source.remove(4);
+    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
   }
 }
