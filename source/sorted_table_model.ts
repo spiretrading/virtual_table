@@ -83,17 +83,6 @@ export class SortedTableModel extends TableModel {
     this.sort();
   }
 
-  /** Sorts the table using the given parameters.
-   * @param sortOrder - The sortOrder of every column.
-   * @param sortPriority - The priority of every column being sorted from
-   *  highest to lowest.
-   */
-  public sortColumns(sortOrder: SortOrder[], sortPriority: number[]) {
-    this.sortOrder = sortOrder;
-    this.sortPriority = sortPriority;
-    this.sort();
-  }
-
   private sort() {
     const rowOrdering = [];
     for(let i = 0; i < this.translatedTable.rowCount; ++i) {
@@ -143,9 +132,11 @@ export class SortedTableModel extends TableModel {
   }
 
   private sourceAdd(operation: AddRowOperation) {
+    console.log('add', operation.index);
     const sortedIndex = this.findSortedIndex(operation.index);
     ++this.movesToIgnore;
     this.translatedTable.moveRow(operation.index, sortedIndex);
+    console.log('move', operation.index, sortedIndex);
     this.transactionLog.push(new AddRowOperation(sortedIndex));
   }
 
