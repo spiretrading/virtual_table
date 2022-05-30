@@ -44,6 +44,7 @@ export class TableViewDemo extends React.Component<{}, State> {
       }
       this.sourceModel.push(r);
     }
+    setInterval(() => this.changeValues(), 2000);
   }
 
   private changeValues = () => {
