@@ -74,8 +74,8 @@ export class SortedTableModel extends TableModel {
     }
     this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
-      this.sortPriority.splice(this.sortPriority.indexOf(column), 1).unshift(
-        column);
+      this.sortPriority.splice(this.sortPriority.indexOf(column), 1);
+      this.sortPriority.unshift(column);
     } else {
       this.sortPriority.unshift(column);
     }
@@ -148,7 +148,6 @@ export class SortedTableModel extends TableModel {
   private sourceUpdate(operation: UpdateOperation) {
     this.beginTransaction();
     const sortedIndex = this.findSortedIndex(operation.row);
-    console.log(operation.row, sortedIndex);
     this.translatedTable.moveRow(operation.row, sortedIndex);
     this.transactionLog.push(new UpdateOperation(
       sortedIndex, operation.column));
@@ -183,10 +182,10 @@ export class SortedTableModel extends TableModel {
   private findInTail(start: number, end: number, indexOfValue: number) {
     while(start < end) {
       const middle = Math.ceil((start + end) / 2);
-      if(this.compareRows(indexOfValue, middle) < 0) {
-        end = middle - 1;
-      } else {
+      if(this.compareRows(indexOfValue, middle) > 0) {
         start = middle;
+      } else {
+        end = middle - 1;
       }
     }
     return start;
