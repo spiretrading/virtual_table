@@ -32,7 +32,7 @@ function shuffleRows(table: TranslatedTableModel) {
 }
 
 class TableMatcher extends Matcher<TableModel | (() => any)> {
-  toEqualCells(expected: any[][]) {
+  public toEqualCells(expected: any[][]): void {
     if(!(this.actualValue instanceof TableModel)) {
       throw new MatchError('actualValue needs to be a TableModel');
     }
@@ -63,7 +63,7 @@ class TableMatcher extends Matcher<TableModel | (() => any)> {
         if(this.actualValue.get(i, j) !== expected[i][j]) {
           if(this.shouldMatch) {
             throw new MatchError(
-              `expected row ${i} column ${i} values to match`,
+              `expected row ${i} column ${j} values to match`,
               `${expected[i][j]}`,
               `${this.actualValue.get(i, j)}`
             );
@@ -81,7 +81,7 @@ class TableMatcher extends Matcher<TableModel | (() => any)> {
     }
   }
 
-  toThrow() {
+  public toThrow(): void {
     const expect = CoreExpect(this.actualValue as () => any);
     if(!this.shouldMatch) {
       expect.not;
