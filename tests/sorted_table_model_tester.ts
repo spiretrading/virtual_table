@@ -204,24 +204,23 @@ export class SortedTableModelTester {
   /** Tests that table stays sorted when source adds many new rows. */
   @Test()
   public testSourceManyAdd(): void {
-    const sourceTable = getTestTable();
+    const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
     sortedModel.updateSort(1, SortOrder.DESCENDING);
     sortedModel.updateSort(0, SortOrder.ASCENDING);
     sourceTable.insert([0, 7], 0);
-    sourceTable.insert([2, 7], 4);
-    sourceTable.insert([1, 4], 2);
+    sourceTable.insert([2, 2], 4);
+    sourceTable.insert([1, 4], 4);
     const expectedTable = [
       [0, 7],
       [1, 4],
       [1, 2],
-      [2, 7],
+      [2, 2],
       [3, 4],
       [5, 7],
       [5, 6]
     ];
     Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
-    Expect(sortedModel.rowCount).toEqual(7);
   }
 
   /** Tests that table stays sorted when the source table removes a row. */
