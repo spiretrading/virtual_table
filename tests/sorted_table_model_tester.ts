@@ -110,11 +110,13 @@ export class SortedTableModelTester {
     Expect(sortedModel).toEqualCells(expectedTable);;
   }
 
-  /** Tests sorting with priority. */
+  /** Tests sorting remains correct after multiple priority changes. */
   @Test()
   public testPrioritySortAgain(): void {
     const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(1, SortOrder.DESCENDING);
+    sortedModel.updateSort(0, SortOrder.DESCENDING);
     sortedModel.updateSort(1, SortOrder.DESCENDING);
     sortedModel.updateSort(0, SortOrder.ASCENDING);
     const expectedTable = [
