@@ -157,6 +157,22 @@ export class SortedTableModelTester {
     Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
   }
 
+  /** Tests sorting with priority. */
+  @Test()
+  public testPrioritySortAgain(): void {
+    const sourceTable = getSingleDigitTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(1, SortOrder.DESCENDING);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    const expectedTable = [
+      [1, 2],
+      [3, 4],
+      [5, 7],
+      [5, 6]
+    ];
+    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+  }
+
   /** Tests sorting on a empty table. */
   @Test()
   public testEmptySort(): void {
@@ -169,6 +185,25 @@ export class SortedTableModelTester {
   /** Tests that table stays sorted when source adds a new row. */
   @Test()
   public testSourceAdd(): void {
+    const sourceTable = getSingleDigitTable();
+    const sortedModel = new SortedTableModel(sourceTable);
+    sortedModel.updateSort(1, SortOrder.DESCENDING);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sourceTable.insert([0, 7], 4);
+    const expectedTable = [
+      [0, 7],
+      [1, 2],
+      [3, 4],
+      [5, 7],
+      [5, 6]
+    ];
+    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel.rowCount).toEqual(5);
+  }
+
+  /** Tests that table stays sorted when source adds many new rows. */
+  @Test()
+  public testSourceManyAdd(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
     sortedModel.updateSort(1, SortOrder.DESCENDING);
