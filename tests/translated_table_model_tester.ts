@@ -1,4 +1,4 @@
-import {Expect, Matcher, MatchError, Test} from 'alsatian';
+import {Expect as CoreExpect, Matcher, MatchError, Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
   RemoveRowOperation, TableModel, Transaction, TranslatedTableModel,
   UpdateOperation} from '../source';
@@ -31,40 +31,66 @@ function shuffleRows(table: TranslatedTableModel) {
   table.moveRow(3, 4);
 }
 
-function areTableCellsEqual(table: TableModel, expectedTable: any[][]) {
-  for(let i = 0; i < table.rowCount; ++i) {
-    for(let j = 0; j < table.columnCount; ++j) {
-      if(table.get(i, j) !== expectedTable[i][j]) {
-        throw new Error();
+class TableMatcher extends Matcher<TableModel | (() => any)> {
+  toEqualCells(expected: any[][]) {
+    if(!(this.actualValue instanceof TableModel)) {
+      throw new MatchError('actualValue needs to be a TableModel');
+    }
+    if(this.actualValue.rowCount !== expected.length) {
+      if(this.shouldMatch) {
+        throw new MatchError(
+          `expected number of rows to be the same`,
+          `${expected.length}`,
+          `${this.actualValue.rowCount}`
+        );
+      } else {
+        return;
       }
     }
-  }
-}
-
-function toEqualCells(expected: any[][]) {
-  if(!(this.actualValue instanceof TableModel)) {
-    throw new Error('actualValue needs to be a TableModel');
-  }
-  for(let i = 0; i < this.actualValue.rowCount; ++i) {
-    for(let j = 0; j < this.actualValue.columnCount; ++j) {
-      if(this.actualValue.get(i, j) !== expected[i][j]) {
+    for(let i = 0; i < this.actualValue.rowCount; ++i) {
+      if(this.actualValue.columnCount !== expected[i].length) {
         if(this.shouldMatch) {
           throw new MatchError(
-            `expected row ${i} column ${i} values to match`,
-            `${expected[i][j]}`,
-            `${this.actualValue.get(i, j)}`
+            `expected number of columns to be the same`,
+            `${expected[i].length}`,
+            `${this.actualValue.columnCount}`
           );
+        } else {
+          return;
+        }
+      }
+      for(let j = 0; j < this.actualValue.columnCount; ++j) {
+        if(this.actualValue.get(i, j) !== expected[i][j]) {
+          if(this.shouldMatch) {
+            throw new MatchError(
+              `expected row ${i} column ${i} values to match`,
+              `${expected[i][j]}`,
+              `${this.actualValue.get(i, j)}`
+            );
+          } else {
+            return;
+          }
         }
       }
     }
-  if(!this.shouldMatch) {
-    throw new MatchError(
-      `expected at least one cell to not match`,
-      `${expected}`,
-      `${expected}`
-    );
+    if(!this.shouldMatch) {
+      throw new MatchError(
+        `expected at least one cell to not match`,
+        `${expected}`,
+        `${expected}`);
+    }
+  }
+
+  toThrow() {
+    const expect = CoreExpect(this.actualValue as () => any);
+    if(!this.shouldMatch) {
+      expect.not;
+    }
+    expect.toThrow();
   }
 }
+
+const Expect = (value: any) => new TableMatcher(value);
 
 /** Tests the TranslatedTableModel. */
 export class TranslatedTableModelTester {
@@ -370,7 +396,7 @@ export class TranslatedTableModelTester {
     listener.unlisten();
   }
 
-  /** Tests areTableCellsEqual which is used by future tests. */
+  /** Tests TableExpect which is used by future tests. */
   @Test()
   public testCompareTables(): void {
     const source = getTestTable();
@@ -379,13 +405,23 @@ export class TranslatedTableModelTester {
       [3, 4],
       [5, 6]
     ];
-    Expect(() => areTableCellsEqual(source, expectedTable)).not.toThrow();
-    const errorTable = [
+    Expect(source).toEqualCells(expectedTable);
+    const differentTable = [
       [1, 2],
       [1, -4],
       [0, -6]
     ];
-    Expect(() => areTableCellsEqual(source, errorTable)).toThrow();
+    Expect(source).not.toEqualCells(differentTable);
+    const tooShortTable = [
+      [1, 2]
+    ];
+    Expect(source).not.toEqualCells(tooShortTable);
+    const tooNarrowTable = [
+      [1],
+      [3],
+      [5]
+    ];
+    Expect(source).not.toEqualCells(tooNarrowTable);
   }
 
   /** Tests that shuffleRows produces the expected table. */
@@ -404,7 +440,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests a series of moves. */
@@ -428,7 +464,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that removing rows is handled correctly after multiple moves. */
@@ -447,7 +483,7 @@ export class TranslatedTableModelTester {
       [1],
       [6]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that updating cells is handled correctly after multiple moves. */
@@ -469,7 +505,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that adding rows is handled correctly after multiple moves. */
@@ -494,7 +530,7 @@ export class TranslatedTableModelTester {
       [9],
       [10]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that inserts are handled correctly after multiple moves. */
@@ -519,7 +555,7 @@ export class TranslatedTableModelTester {
       [9],
       [10]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that updates are performed correctly after rows are added. */
@@ -545,7 +581,7 @@ export class TranslatedTableModelTester {
       [80],
       [9]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 
   /** Tests that remove is performed correctly after a row is inserted. */
@@ -566,6 +602,6 @@ export class TranslatedTableModelTester {
       [6],
       [8]
     ];
-    Expect(areTableCellsEqual(translatedTable, expectedTable)).toEqual(true);
+    Expect(translatedTable).toEqualCells(expectedTable);
   }
 }
