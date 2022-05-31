@@ -72,13 +72,14 @@ export class SortedTableModel extends TableModel {
     if(sortOrder === SortOrder.NONE) {
       throw new Error('The column is neither ascending or descending.');
     }
+    if(column < 0 || this.columnCount <= column) {
+      throw new Error('The column is outside of range.');
+    }
     this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
       this.sortPriority.splice(this.sortPriority.indexOf(column), 1);
-      this.sortPriority.unshift(column);
-    } else {
-      this.sortPriority.unshift(column);
     }
+    this.sortPriority.unshift(column);
     this.sort();
   }
 
@@ -168,12 +169,12 @@ export class SortedTableModel extends TableModel {
   }
 
   private findInHead(start: number, end: number, indexOfValue: number) {
-    while(start < end) {
+    while(start <  end) {
       const middle = Math.floor((start + end) / 2);
     if(this.compareRows(middle, indexOfValue) > 0) {
         end = middle;
       } else {
-        start = middle + 1; 
+        start = middle + 1;
       }
     }
     return end;
