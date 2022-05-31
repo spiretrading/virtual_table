@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { ArrayTableModel } from '../array_table_model';
 import { HeaderCell } from '../header_cell';
-import { SortedTableModel } from '../sorted_table_model';
 import { SortOrder } from '../sort_order';
+import { SortedTableModel } from '../sorted_table_model';
 import { TableView } from '../table_view';
 
 interface State {
@@ -19,13 +19,13 @@ export class TableViewDemo extends React.Component<{}, State> {
       highestPriorityHeader: -1
     }
     this.sourceModel = new ArrayTableModel();
-    this.sourceModel.insert([0, 0, 0, 0], 0);
-    this.sortedModel = new SortedTableModel(this.sourceModel);
+    this.sortedModel = new SortedTableModel(this.sourceModel );
   }
   public render(): JSX.Element {
-    return <TableView model={this.sortedModel}
+    return <TableView
+      model={this.sortedModel}
       style={TableViewDemo.someStyle}
-      headerCells={this.state.headerCells} 
+      headerCells={this.state.headerCells}
       highestPriorityHeader={this.state.highestPriorityHeader}
       height={700}/>;
   }
@@ -51,6 +51,8 @@ export class TableViewDemo extends React.Component<{}, State> {
     const diceRoll = Math.floor(Math.random() * 4);
     const testRow = Math.floor(Math.random() * (this.sourceModel.rowCount - 5));
     if(this.sourceModel.rowCount > 500 && diceRoll === 0) {
+      const testRow = Math.floor(Math.random() * 50);
+      this.sourceModel.remove(testRow);
     } else if(diceRoll === 1) {
       const num = Math.floor(Math.random() * 50);
       this.sourceModel.insert([this.sourceModel.rowCount, 0, num, num % 25], 0);
@@ -103,5 +105,4 @@ export class TableViewDemo extends React.Component<{}, State> {
   };
   private sourceModel: ArrayTableModel;
   private sortedModel: SortedTableModel;
-  private interval: NodeJS.Timer;
 }
