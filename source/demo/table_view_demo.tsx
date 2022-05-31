@@ -57,7 +57,7 @@ export class TableViewDemo extends React.Component<{}, State> {
     } else {
       const testValue = Math.floor(Math.random() * this.sourceModel.rowCount);
       const testColumn = Math.floor(Math.random() * 4);
-      this.sourceModel.set(testRow, testColumn, testValue + 0.5);
+      this.sourceModel.set(testRow, testColumn, testValue);
     }
   }
 
@@ -68,7 +68,7 @@ export class TableViewDemo extends React.Component<{}, State> {
       highestPriorityHeader: column
     });
     this.sourceModel.remove(326);
-    this.sourceModel.insert([999.75, 125.75, 125.75, 125.75], 0);
+    this.sourceModel.insert([999, 125, 125, 125], 0);
   }
 
   private generateHeaderCells = () => {
