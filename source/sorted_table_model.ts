@@ -79,7 +79,6 @@ export class SortedTableModel extends TableModel {
     } else {
       this.sortPriority.unshift(column);
     }
-    this.sortPriority = [column];
     this.sort();
   }
 
@@ -99,11 +98,11 @@ export class SortedTableModel extends TableModel {
     }
   }
 
-  private compareRows(a: number, b: number) {
+  private compareRows(left: number, right: number) {
     for(let i = 0; i < this.sortPriority.length; ++i) {
       const value = this.comparator.compareValues(
-        this.translatedTable.get(a, this.sortPriority[i]),
-        this.translatedTable.get(b, this.sortPriority[i]));
+        this.translatedTable.get(left, this.sortPriority[i]),
+        this.translatedTable.get(right, this.sortPriority[i]));
       if(value !== 0) {
         if(this.sortOrder[this.sortPriority[i]] === SortOrder.ASCENDING) {
           return value;
@@ -132,11 +131,9 @@ export class SortedTableModel extends TableModel {
   }
 
   private sourceAdd(operation: AddRowOperation) {
-    console.log('add', operation.index);
     const sortedIndex = this.findSortedIndex(operation.index);
     ++this.movesToIgnore;
     this.translatedTable.moveRow(operation.index, sortedIndex);
-    console.log('move', operation.index, sortedIndex);
     this.transactionLog.push(new AddRowOperation(sortedIndex));
   }
 
@@ -151,6 +148,7 @@ export class SortedTableModel extends TableModel {
   private sourceUpdate(operation: UpdateOperation) {
     this.beginTransaction();
     const sortedIndex = this.findSortedIndex(operation.row);
+    console.log(operation.row, sortedIndex);
     this.translatedTable.moveRow(operation.row, sortedIndex);
     this.transactionLog.push(new UpdateOperation(
       sortedIndex, operation.column));
@@ -159,7 +157,7 @@ export class SortedTableModel extends TableModel {
 
   private findSortedIndex(source: number): number {
     if(source !== 0 &&
-        this.compareRows(source, source - 1) < 0) {
+        this.compareRows(source - 1, source) > 0) {
       return this.findInHead(0, source - 1, source);
     } else if(source !== this.rowCount - 1 &&
         this.compareRows(source, source + 1) > 0) {
@@ -173,10 +171,10 @@ export class SortedTableModel extends TableModel {
   private findInHead(start: number, end: number, indexOfValue: number) {
     while(start < end) {
       const middle = Math.floor((start + end) / 2);
-      if(this.compareRows(indexOfValue, middle) < 0) {
+    if(this.compareRows(middle, indexOfValue) > 0) {
         end = middle;
       } else {
-        start = middle + 1;
+        start = middle + 1; 
       }
     }
     return end;
@@ -185,10 +183,10 @@ export class SortedTableModel extends TableModel {
   private findInTail(start: number, end: number, indexOfValue: number) {
     while(start < end) {
       const middle = Math.ceil((start + end) / 2);
-      if(this.compareRows(middle, indexOfValue) < 0) {
-        start = middle;
-      } else {
+      if(this.compareRows(indexOfValue, middle) < 0) {
         end = middle - 1;
+      } else {
+        start = middle;
       }
     }
     return start;
