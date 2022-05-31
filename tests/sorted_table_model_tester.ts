@@ -200,10 +200,10 @@ export class SortedTableModelTester {
     sourceTable.insert([1, 4], 4);
     sourceTable.insert([3, 5], 4);
     sourceTable.insert([7, 7], 4);
-    sourceTable.insert([0, 0], 4);
+    sourceTable.insert([0, 0], 1);
     const expectedTable = [
-      [0, 0],
       [0, 7],
+      [0, 0],
       [1, 4],
       [1, 2],
       [2, 2],
