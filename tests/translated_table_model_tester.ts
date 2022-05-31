@@ -1,7 +1,7 @@
-import {Expect, Test} from 'alsatian';
+import {Expect, Matcher, MatchError, Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
   RemoveRowOperation, TableModel, Transaction, TranslatedTableModel,
-   UpdateOperation} from '../source';
+  UpdateOperation} from '../source';
 
 function getTestTable() {
   const matrix = new ArrayTableModel();
@@ -35,13 +35,35 @@ function areTableCellsEqual(table: TableModel, expectedTable: any[][]) {
   for(let i = 0; i < table.rowCount; ++i) {
     for(let j = 0; j < table.columnCount; ++j) {
       if(table.get(i, j) !== expectedTable[i][j]) {
-        throw new Error(`Checking row: ${i} column: ${j}.\n
-          The expected value ${expectedTable[i][j]}.\n
-          Actual value ${table.get(i, j)}.`);
+        throw new Error();
       }
     }
   }
-  return true;
+}
+
+function toEqualCells(expected: any[][]) {
+  if(!(this.actualValue instanceof TableModel)) {
+    throw new Error('actualValue needs to be a TableModel');
+  }
+  for(let i = 0; i < this.actualValue.rowCount; ++i) {
+    for(let j = 0; j < this.actualValue.columnCount; ++j) {
+      if(this.actualValue.get(i, j) !== expected[i][j]) {
+        if(this.shouldMatch) {
+          throw new MatchError(
+            `expected row ${i} column ${i} values to match`,
+            `${expected[i][j]}`,
+            `${this.actualValue.get(i, j)}`
+          );
+        }
+      }
+    }
+  if(!this.shouldMatch) {
+    throw new MatchError(
+      `expected at least one cell to not match`,
+      `${expected}`,
+      `${expected}`
+    );
+  }
 }
 
 /** Tests the TranslatedTableModel. */
@@ -357,7 +379,7 @@ export class TranslatedTableModelTester {
       [3, 4],
       [5, 6]
     ];
-    Expect(areTableCellsEqual(source, expectedTable)).toEqual(true);
+    Expect(() => areTableCellsEqual(source, expectedTable)).not.toThrow();
     const errorTable = [
       [1, 2],
       [1, -4],
