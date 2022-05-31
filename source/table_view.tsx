@@ -3,7 +3,7 @@ import { HeaderCell } from './header_cell';
 import { HeaderCellView } from './header_cell_view';
 import { Filter } from './filter';
 import { AddRowOperation, MoveRowOperation, Operation,
-  RemoveRowOperation, UpdateOperation } from './operations';
+  RemoveRowOperation, Transaction, UpdateOperation } from './operations';
 import { TableModel } from './table_model';
 import { SortOrder } from './sort_order';
 
@@ -161,6 +161,14 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private tableUpdated = (operation: Operation) => {
+    if(operation instanceof Transaction) {
+      operation.operations.forEach(this.checkSignal);
+    } else {
+      this.checkSignal(operation);
+    }
+  }
+
+  private checkSignal = (operation: Operation) => {
     const start = Math.max(0, this.state.topRow - 1);
     const end = Math.min(this.props.model.rowCount,
       Math.abs(this.props.model.rowCount - 1),
