@@ -139,24 +139,23 @@ export class TranslatedTableModel extends TableModel {
   }
 
   private sourceRemove(operation: RemoveRowOperation) {
-    const translatedIndex = this.sourceToTranslatedIndices[operation.index];
-    const rowCount = this.translatedToSourceIndices.length;
-    for(let index = 0; index < rowCount - 1; ++index) {
-      if(index >= translatedIndex) {
-        this.translatedToSourceIndices[index] =
-          this.translatedToSourceIndices[index + 1];
-        this.sourceToTranslatedIndices[this.translatedToSourceIndices[index]] =
-          index;
+    const sourceIndex = operation.index;
+    const reverseIndex = this.sourceToTranslatedIndices[sourceIndex];
+    this.shift(-1, sourceIndex, reverseIndex);
+    this.translatedToSourceIndices.splice(reverseIndex, 1);
+    this.sourceToTranslatedIndices.splice(sourceIndex, 1);
+    this.transactionLog.push(new RemoveRowOperation(reverseIndex));
+  }
+
+  private shift(amount: number, rowIndex: number, reverseIndex: number) {
+    for(let i = 0; i < this.translatedToSourceIndices.length; ++i) {
+      if(this.translatedToSourceIndices[i] >= rowIndex) {
+        this.translatedToSourceIndices[i] += amount;
       }
-      const indexValue = this.translatedToSourceIndices[index];
-      if(indexValue >= operation.index) {
-        this.translatedToSourceIndices[index] = indexValue - 1;
-        this.sourceToTranslatedIndices[indexValue - 1] = index;
+      if(this.sourceToTranslatedIndices[i] >= reverseIndex) {
+        this.sourceToTranslatedIndices[i] += amount;
       }
     }
-    this.translatedToSourceIndices.pop();
-    this.sourceToTranslatedIndices.pop();
-    this.transactionLog.push(new RemoveRowOperation(translatedIndex));
   }
 
   private sourceUpdate(operation: UpdateOperation) {
