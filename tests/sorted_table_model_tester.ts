@@ -1,7 +1,8 @@
-import {Expect, Test} from 'alsatian';
+import {Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
   RemoveRowOperation, SortedTableModel, SortOrder, TableModel, Transaction,
   UpdateOperation} from '../source';
+import {Expect} from '../test_helpers/table_matcher';
 
 function getTestTable() {
   const matrix = new ArrayTableModel();
@@ -23,24 +24,14 @@ function getSingleDigitTable() {
 
 function getWideTestTable() {
   const matrix = new ArrayTableModel();
+  matrix.push(['b', 3, 4, 0]);
   matrix.push(['w', 2, 3, 22]);
   matrix.push(['b', 2, 4, 45]);
   matrix.push(['a', 1, 4, -57]);
   matrix.push(['b', 1, 4, 0]);
+  matrix.push(['b', 2, 4, 0]);
+  matrix.push(['w', 3, 10, -1]);
   return matrix;
-}
-
-function areCellsEqual(table: TableModel, expectedTable: any[][]) {
-  for(let i = 0; i < table.rowCount; ++i) {
-    for(let j = 0; j < table.columnCount; ++j) {
-      if(table.get(i, j) !== expectedTable[i][j]) {
-        throw new Error(`Checking row: ${i} column: ${j}.\n
-          The expected value ${expectedTable[i][j]}.\n
-          Actual value ${table.get(i, j)}.`);
-      }
-    }
-  }
-  return true;
 }
 
 /** Tests the SortedTableModel. */
@@ -54,20 +45,6 @@ export class SortedTableModelTester {
     Expect(sortedModel.columnCount).toEqual(0);
   }
 
-  /** Tests areCellsEqual which is used by other tests. */
-  @Test()
-  public areCellsEqual(): void {
-    const table = getTestTable();
-    const expectedTable = [
-      [100, 2],
-      [3, 4],
-      [55, 7],
-      [55, 6]
-    ];
-    Expect(areCellsEqual(table, expectedTable)).toEqual(true);
-    Expect(() => areCellsEqual(getSingleDigitTable(), expectedTable)).toThrow();
-  }
-
   /** Tests creating a SortedTableModel. */
   @Test()
   public testTable(): void {
@@ -78,7 +55,7 @@ export class SortedTableModelTester {
       [55, 7],
       [55, 6]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(4);
     Expect(sortedModel.columnCount).toEqual(2);
   }
@@ -94,7 +71,7 @@ export class SortedTableModelTester {
       [55, 6],
       [100, 2]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(4);
     Expect(sortedModel.columnCount).toEqual(2);
   }
@@ -110,23 +87,9 @@ export class SortedTableModelTester {
       [55, 6],
       [3, 4],
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(4);
     Expect(sortedModel.columnCount).toEqual(2);
-  }
-
-  /** Tests sorting by Descending on a different table. */
-  @Test()
-  public testSortOnDifferentColumn(): void {
-    const sortedModel = new SortedTableModel(getWideTestTable());
-    sortedModel.updateSort(3, SortOrder.DESCENDING);
-    const expectedTable = [
-      ['b', 2, 4, 45],
-      ['w', 2, 3, 22],
-      ['b', 1, 4, 0],
-      ['a', 1, 4, -57],
-    ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
   }
 
   /** Tests sorting with priority. */
@@ -139,9 +102,12 @@ export class SortedTableModelTester {
       ['b', 1, 4, 0],
       ['a', 1, 4, -57],
       ['b', 2, 4, 45],
-      ['w', 2, 3, 22]
+      ['w', 2, 3, 22],
+      ['b', 2, 4, 0],
+      ['b', 3, 4, 0],
+      ['w', 3, 10, -1]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);;
   }
 
   /** Tests sorting with priority. */
@@ -157,7 +123,7 @@ export class SortedTableModelTester {
       [5, 7],
       [5, 6]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
   }
 
   /** Tests sorting on a empty table. */
@@ -166,7 +132,7 @@ export class SortedTableModelTester {
     const sortedModel = new SortedTableModel(new ArrayTableModel());
     sortedModel.updateSort(0, SortOrder.ASCENDING);
     const expectedTable = [] as any[];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
   }
 
   /** Tests that table stays sorted when source adds a new row. */
@@ -184,7 +150,7 @@ export class SortedTableModelTester {
       [5, 7],
       [5, 6]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(5);
   }
 
@@ -213,7 +179,7 @@ export class SortedTableModelTester {
       [5, 6],
       [7, 7]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
   }
 
   /** Tests that table stays sorted when the source table removes a row. */
@@ -228,7 +194,7 @@ export class SortedTableModelTester {
       [55, 7],
       [55, 6]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(2);
   }
 
@@ -260,7 +226,7 @@ export class SortedTableModelTester {
       [7, 9],
       [7, 7]
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
   }
 
   /** Tests that table stays sorted when source moves a row. */
@@ -278,7 +244,7 @@ export class SortedTableModelTester {
       [55, 6],
       [3, 4],
     ];
-    Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
+    Expect(sortedModel).toEqualCells(expectedTable);
   }
 
   /** Tests the signal SortedTable sends on a source add. */

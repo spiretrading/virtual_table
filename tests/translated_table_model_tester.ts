@@ -1,7 +1,8 @@
-import {Expect as CoreExpect, Matcher, MatchError, Test} from 'alsatian';
+import {Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, TableModel, Transaction, TranslatedTableModel,
+  RemoveRowOperation, Transaction, TranslatedTableModel,
   UpdateOperation} from '../source';
+import {Expect} from '../test_helpers/table_matcher';
 
 function getTestTable() {
   const matrix = new ArrayTableModel();
@@ -30,67 +31,6 @@ function shuffleRows(table: TranslatedTableModel) {
   table.moveRow(5, 2);
   table.moveRow(3, 4);
 }
-
-class TableMatcher extends Matcher<TableModel | (() => any)> {
-  public toEqualCells(expected: any[][]): void {
-    if(!(this.actualValue instanceof TableModel)) {
-      throw new MatchError('actualValue needs to be a TableModel');
-    }
-    if(this.actualValue.rowCount !== expected.length) {
-      if(this.shouldMatch) {
-        throw new MatchError(
-          `expected number of rows to be the same`,
-          `${expected.length}`,
-          `${this.actualValue.rowCount}`
-        );
-      } else {
-        return;
-      }
-    }
-    for(let i = 0; i < this.actualValue.rowCount; ++i) {
-      if(this.actualValue.columnCount !== expected[i].length) {
-        if(this.shouldMatch) {
-          throw new MatchError(
-            `expected number of columns to be the same`,
-            `${expected[i].length}`,
-            `${this.actualValue.columnCount}`
-          );
-        } else {
-          return;
-        }
-      }
-      for(let j = 0; j < this.actualValue.columnCount; ++j) {
-        if(this.actualValue.get(i, j) !== expected[i][j]) {
-          if(this.shouldMatch) {
-            throw new MatchError(
-              `expected row ${i} column ${j} values to match`,
-              `${expected[i][j]}`,
-              `${this.actualValue.get(i, j)}`
-            );
-          } else {
-            return;
-          }
-        }
-      }
-    }
-    if(!this.shouldMatch) {
-      throw new MatchError(
-        `expected at least one cell to not match`,
-        `${expected}`,
-        `${expected}`);
-    }
-  }
-
-  public toThrow(): void {
-    const expect = CoreExpect(this.actualValue as () => any);
-    if(!this.shouldMatch) {
-      expect.not;
-    }
-    expect.toThrow();
-  }
-}
-
-const Expect = (value: any) => new TableMatcher(value);
 
 /** Tests the TranslatedTableModel. */
 export class TranslatedTableModelTester {
