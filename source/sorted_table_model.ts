@@ -1,7 +1,7 @@
 import * as Kola from 'kola-signals';
 import { Comparator } from './comparator';
-import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
-  Transaction, UpdateOperation} from './operations';
+import { AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
+  Transaction, UpdateOperation } from './operations';
 import { SortOrder } from './sort_order';
 import {TableModel} from './table_model';
 import {TransactionLog} from './transaction_log';
@@ -22,10 +22,10 @@ export class SortedTableModel extends TableModel {
       this.sortOrder.push(SortOrder.NONE);
     }
     this.sortPriority = [];
-    this.transactionLog = new TransactionLog();
     this.translatedTable = new TranslatedTableModel(model);
     this.translatedTable.connect(this.handleSourceOperation);
     this.movesToIgnore = 0;
+    this.transactionLog = new TransactionLog();
   }
 
   /**
@@ -61,19 +61,17 @@ export class SortedTableModel extends TableModel {
 
   /** 
    * Sorts the table using @param column as the column with the highest sort
-   * priority. All previous sort priorities are pushed down a rank.
+   * priority. All previous sortOrders remain and are pushed down a rank.
    * @param column - The column that will now have the highest priority
    * @param sortOrder - The sort order of column.
    */
   public updateSort(column: number, sortOrder: SortOrder) {
-    if(sortOrder === SortOrder.UNSORTABLE) {
-      throw new Error('The column is unsortable.');
-    }
-    if(sortOrder === SortOrder.NONE) {
-      throw new Error('The column is neither ascending or descending.');
-    }
     if(column < 0 || this.columnCount <= column) {
       throw new Error('The column is outside of range.');
+    } else if(sortOrder === SortOrder.UNSORTABLE) {
+      throw new Error('The column is unsortable.');
+    } else if(sortOrder === SortOrder.NONE) {
+      throw new Error('The column is neither ascending or descending.');
     }
     this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
@@ -140,7 +138,7 @@ export class SortedTableModel extends TableModel {
 
   private sourceMove(operation: MoveRowOperation) {
     if(this.movesToIgnore > 0) {
-      --this.movesToIgnore
+      --this.movesToIgnore;
     } else if(operation.source !== operation.destination){
       this.transactionLog.push(operation);
     }
@@ -161,8 +159,7 @@ export class SortedTableModel extends TableModel {
       return this.findInHead(0, source - 1, source);
     } else if(source !== this.rowCount - 1 &&
         this.compareRows(source, source + 1) > 0) {
-      return this.findInTail(source + 1, this.rowCount - 1,
-        source);
+      return this.findInTail(source + 1, this.rowCount - 1, source);
     } else {
       return source;
     }
