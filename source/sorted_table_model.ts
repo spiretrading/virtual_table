@@ -169,7 +169,7 @@ export class SortedTableModel extends TableModel {
   }
 
   private findInHead(start: number, end: number, indexOfValue: number) {
-    while(start <  end) {
+    while(start < end) {
       const middle = Math.floor((start + end) / 2);
     if(this.compareRows(middle, indexOfValue) > 0) {
         end = middle;
