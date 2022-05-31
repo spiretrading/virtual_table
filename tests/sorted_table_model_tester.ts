@@ -30,19 +30,6 @@ function getWideTestTable() {
   return matrix;
 }
 
-function getLongTestTable() {
-  const matrix = new ArrayTableModel();
-  matrix.push([2, 44]);
-  matrix.push([2, 11]);
-  matrix.push([2, 22]);
-  matrix.push([2, 31]);
-  matrix.push([1, 45]);
-  matrix.push([1, 31]);
-  matrix.push([1, 30]);
-  matrix.push([1, 10]);
-  return matrix;
-}
-
 function areCellsEqual(table: TableModel, expectedTable: any[][]) {
   for(let i = 0; i < table.rowCount; ++i) {
     for(let j = 0; j < table.columnCount; ++j) {
@@ -78,7 +65,7 @@ export class SortedTableModelTester {
       [55, 6]
     ];
     Expect(areCellsEqual(table, expectedTable)).toEqual(true);
-    Expect(() => areCellsEqual(getLongTestTable(), expectedTable)).toThrow();
+    Expect(() => areCellsEqual(getSingleDigitTable(), expectedTable)).toThrow();
   }
 
   /** Tests creating a SortedTableModel. */
@@ -211,14 +198,20 @@ export class SortedTableModelTester {
     sourceTable.insert([0, 7], 0);
     sourceTable.insert([2, 2], 4);
     sourceTable.insert([1, 4], 4);
+    sourceTable.insert([3, 5], 4);
+    sourceTable.insert([7, 7], 4);
+    sourceTable.insert([0, 0], 4);
     const expectedTable = [
+      [0, 0],
       [0, 7],
       [1, 4],
       [1, 2],
       [2, 2],
+      [3, 5],
       [3, 4],
       [5, 7],
-      [5, 6]
+      [5, 6],
+      [7, 7]
     ];
     Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
   }
@@ -242,19 +235,32 @@ export class SortedTableModelTester {
   /** Tests that table stays sorted when source updates a row. */
   @Test()
   public testSourceUpdate(): void {
-    const sourceTable = getTestTable();
+    const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
     sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sourceTable.set(3, 0, 2);
-    sourceTable.set(0, 1, 5);
+    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sourceTable.insert([0, 7], 0);
+    sourceTable.insert([2, 2], 4);
+    sourceTable.insert([1, 4], 4);
+    sourceTable.insert([3, 5], 4);
+    sourceTable.insert([7, 7], 4);
+    sourceTable.insert([0, 0], 4);
+    sourceTable.set(0, 0, 7);
+    sourceTable.set(4, 0, 4);
+    sourceTable.set(0, 1, 9);
     const expectedTable = [
+      [1, 4],
+      [1, 2],
+      [2, 2],
+      [3, 5],
       [3, 4],
-      [100, 5],
-      [2, 6],
-      [55, 7]
+      [4, 0],
+      [5, 7],
+      [5, 6],
+      [7, 9],
+      [7, 7]
     ];
     Expect(areCellsEqual(sortedModel, expectedTable)).toEqual(true);
-    Expect(sortedModel.rowCount).toEqual(4);
   }
 
   /** Tests that table stays sorted when source moves a row. */
