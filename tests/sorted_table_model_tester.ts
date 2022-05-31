@@ -64,7 +64,7 @@ export class SortedTableModelTester {
   @Test()
   public testAscendingSort(): void {
     const sortedModel = new SortedTableModel(getTestTable());
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     const expectedTable = [
       [3, 4],
       [55, 7],
@@ -80,7 +80,7 @@ export class SortedTableModelTester {
   @Test()
   public testDescendingSort(): void {
     const sortedModel = new SortedTableModel(getTestTable());
-    sortedModel.updateSort(0, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.DESCENDING);
     const expectedTable = [
       [100, 2],
       [55, 7],
@@ -96,8 +96,10 @@ export class SortedTableModelTester {
   @Test()
   public testPrioritySort(): void {
     const sortedModel = new SortedTableModel(getWideTestTable());
-    sortedModel.updateSort(3, SortOrder.DESCENDING);
-    sortedModel.updateSort(1, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(3, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(3, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.ASCENDING);
     const expectedTable = [
       ['b', 1, 4, 0],
       ['a', 1, 4, -57],
@@ -110,15 +112,15 @@ export class SortedTableModelTester {
     Expect(sortedModel).toEqualCells(expectedTable);;
   }
 
-  /** Tests sorting remains correct after multiple priority changes. */
+  /** Tests sorting correctness after multiple priority changes. */
   @Test()
   public testPrioritySortAgain(): void {
     const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sortedModel.updateSort(0, SortOrder.DESCENDING);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     const expectedTable = [
       [1, 2],
       [3, 4],
@@ -132,7 +134,7 @@ export class SortedTableModelTester {
   @Test()
   public testEmptySort(): void {
     const sortedModel = new SortedTableModel(new ArrayTableModel());
-    Expect(() => sortedModel.updateSort(0, SortOrder.ASCENDING)).toThrow();
+    Expect(() => sortedModel.updateSortOrder(0, SortOrder.ASCENDING)).toThrow();
     const expectedTable = [] as any[];
     Expect(sortedModel).toEqualCells(expectedTable);
   }
@@ -141,9 +143,9 @@ export class SortedTableModelTester {
   @Test()
   public testBadSort(): void {
     const sortedModel = new SortedTableModel(getTestTable());
-    Expect(() => sortedModel.updateSort(0, SortOrder.NONE)).toThrow();
-    Expect(() => sortedModel.updateSort(0, SortOrder.UNSORTABLE)).toThrow();
-    Expect(() => sortedModel.updateSort(10, SortOrder.ASCENDING)).toThrow();
+    Expect(() => sortedModel.updateSortOrder(0, SortOrder.NONE)).toThrow();
+    Expect(() => sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE)).toThrow();
+    Expect(() => sortedModel.updateSortOrder(10, SortOrder.ASCENDING)).toThrow();
     const expectedTable = [
       [100, 2],
       [3, 4],
@@ -158,8 +160,8 @@ export class SortedTableModelTester {
   public testSourceAdd(): void {
     const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     sourceTable.insert([0, 7], 4);
     const expectedTable = [
       [0, 7],
@@ -177,8 +179,8 @@ export class SortedTableModelTester {
   public testSourceManyAdd(): void {
     const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     sourceTable.insert([0, 7], 0);
     sourceTable.insert([2, 2], 4);
     sourceTable.insert([1, 4], 4);
@@ -205,7 +207,7 @@ export class SortedTableModelTester {
   public testSourceRemove(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
     sourceTable.remove(1);
     sourceTable.remove(0);
     const expectedTable = [
@@ -225,8 +227,8 @@ export class SortedTableModelTester {
   public testSourceUpdate(): void {
     const sourceTable = getSingleDigitTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(1, SortOrder.DESCENDING);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     sourceTable.insert([0, 7], 0);
     sourceTable.insert([2, 2], 4);
     sourceTable.insert([1, 4], 4);
@@ -256,7 +258,7 @@ export class SortedTableModelTester {
   public testSourceMove(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(0, SortOrder.DESCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.DESCENDING);
     sourceTable.move(0, 3);
     sourceTable.move(1, 2);
     sourceTable.move(0, 2);
@@ -274,7 +276,7 @@ export class SortedTableModelTester {
   public testSourceAddSignal(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     const operations: Operation[] = [];
     const listener = sortedModel.connect((operation: Operation) => {
       operations.push(operation);
@@ -292,7 +294,7 @@ export class SortedTableModelTester {
   public testSourceRemoveSignal(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     const operations: Operation[] = [];
     const listener = sortedModel.connect((operation: Operation) => {
       operations.push(operation);
@@ -310,7 +312,7 @@ export class SortedTableModelTester {
   public testSourceUpdateSignal(): void {
     const sourceTable = getTestTable();
     const sortedModel = new SortedTableModel(sourceTable);
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     const operations: Operation[] = [];
     const listener = sortedModel.connect((operation: Operation) => {
       operations.push(operation);

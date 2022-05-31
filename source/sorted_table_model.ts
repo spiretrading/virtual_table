@@ -65,7 +65,7 @@ export class SortedTableModel extends TableModel {
    * @param column - The column that will now have the highest priority
    * @param sortOrder - The sort order of column.
    */
-  public updateSort(column: number, sortOrder: SortOrder) {
+  public updateSortOrder(column: number, sortOrder: SortOrder) {
     if(column < 0 || this.columnCount <= column) {
       throw new Error('The column is outside of range.');
     } else if(sortOrder === SortOrder.UNSORTABLE) {
