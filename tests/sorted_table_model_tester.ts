@@ -1,6 +1,6 @@
 import {Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
-  RemoveRowOperation, SortedTableModel, SortOrder, TableModel, Transaction,
+  RemoveRowOperation, SortedTableModel, SortOrder, Transaction,
   UpdateOperation} from '../source';
 import {Expect} from '../test_helpers/table_matcher';
 
@@ -130,8 +130,24 @@ export class SortedTableModelTester {
   @Test()
   public testEmptySort(): void {
     const sortedModel = new SortedTableModel(new ArrayTableModel());
-    sortedModel.updateSort(0, SortOrder.ASCENDING);
+    Expect(() => sortedModel.updateSort(0, SortOrder.ASCENDING)).toThrow();
     const expectedTable = [] as any[];
+    Expect(sortedModel).toEqualCells(expectedTable);
+  }
+
+  /** Tests that impossible sorts are prevented. */
+  @Test()
+  public testBadSort(): void {
+    const sortedModel = new SortedTableModel(getTestTable());
+    Expect(() => sortedModel.updateSort(0, SortOrder.NONE)).toThrow();
+    Expect(() => sortedModel.updateSort(0, SortOrder.UNSORTABLE)).toThrow();
+    Expect(() => sortedModel.updateSort(10, SortOrder.ASCENDING)).toThrow();
+    const expectedTable = [
+      [100, 2],
+      [3, 4],
+      [55, 7],
+      [55, 6]
+    ];
     Expect(sortedModel).toEqualCells(expectedTable);
   }
 
@@ -193,9 +209,13 @@ export class SortedTableModelTester {
     const expectedTable = [
       [55, 7],
       [55, 6]
-    ];
+    ] as any [];
     Expect(sortedModel).toEqualCells(expectedTable);
     Expect(sortedModel.rowCount).toEqual(2);
+    sourceTable.remove(0);
+    sourceTable.remove(0);
+    Expect(sortedModel).toEqualCells([]);
+    Expect(sortedModel.rowCount).toEqual(0);
   }
 
   /** Tests that table stays sorted when source updates a row. */
@@ -305,8 +325,5 @@ export class SortedTableModelTester {
     Expect(firstOperation).not.toBeNull();
     Expect(firstOperation.row).toEqual(0);
     listener.unlisten();
-  }
-
-  public testAddAndSorting(): void {
   }
 }
