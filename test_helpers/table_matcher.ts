@@ -2,15 +2,19 @@ import {Expect as CoreExpect, Matcher, MatchError} from 'alsatian';
 import {TableModel} from '../source';
 
 class TableMatcher<T> extends Matcher<T | (() => any)> {
-  public toEqualCells(expected: any[][]): void {
+  public toEqual(expected: any): void {
     if(!(this.actualValue instanceof TableModel)) {
-      throw new MatchError('actualValue needs to be a TableModel');
+      return CoreExpect(this.actualValue).toEqual(expected);
     }
-    if(this.actualValue.rowCount !== expected.length) {
+    if(!Array.isArray(expected) && !(expected instanceof TableModel)) {
+      throw new MatchError(`expectValue needs to be a TableModel or an array`);
+    }
+    const expectedRowCount = this.expectedRowCount(expected);
+    if(this.actualValue.rowCount !== expectedRowCount) {
       if(this.shouldMatch) {
         throw new MatchError(
           `expected number of rows to be the same`,
-          `${expected.length}`,
+          `${expectedRowCount}`,
           `${this.actualValue.rowCount}`
         );
       } else {
@@ -18,11 +22,12 @@ class TableMatcher<T> extends Matcher<T | (() => any)> {
       }
     }
     for(let i = 0; i < this.actualValue.rowCount; ++i) {
-      if(this.actualValue.columnCount !== expected[i].length) {
+      const expectedColumnCount = this.expectedColumnCount(expected, i);
+      if(this.actualValue.columnCount !== expectedColumnCount) {
         if(this.shouldMatch) {
           throw new MatchError(
             `expected number of columns to be the same`,
-            `${expected[i].length}`,
+            `${expectedColumnCount}`,
             `${this.actualValue.columnCount}`
           );
         } else {
@@ -30,11 +35,12 @@ class TableMatcher<T> extends Matcher<T | (() => any)> {
         }
       }
       for(let j = 0; j < this.actualValue.columnCount; ++j) {
-        if(this.actualValue.get(i, j) !== expected[i][j]) {
+        const expectValue = this.getExpectedCellValue(expected, i, j);
+        if(this.actualValue.get(i, j) !== expectValue) {
           if(this.shouldMatch) {
             throw new MatchError(
               `expected row ${i} column ${j} values to match`,
-              `${expected[i][j]}`,
+              `${expectValue}`,
               `${this.actualValue.get(i, j)}`
             );
           } else {
@@ -46,6 +52,31 @@ class TableMatcher<T> extends Matcher<T | (() => any)> {
     if(!this.shouldMatch) {
       throw new MatchError(
         `expected at least one cell to not match`);
+    }
+  }
+
+  private expectedRowCount(expected: TableModel | any[][]) {
+    if(expected instanceof TableModel) {
+      return expected.rowCount;
+    } else {
+      return expected.length;
+    }
+  }
+
+  private expectedColumnCount(expected: TableModel | any[][], row: number) {
+    if(expected instanceof TableModel) {
+      return expected.columnCount;
+    } else {
+      return expected[row].length;
+    }
+  }
+
+  private getExpectedCellValue(expected: TableModel | any[][], row: number,
+      column: number) {
+    if(expected instanceof TableModel) {
+      return expected.get(row, column);
+    } else {
+      return expected[row][column];
     }
   }
 
