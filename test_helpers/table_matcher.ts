@@ -1,7 +1,7 @@
 import {Expect as CoreExpect, Matcher, MatchError} from 'alsatian';
 import {TableModel} from '../source';
 
-class TableMatcher extends Matcher<TableModel | (() => any)> {
+class TableMatcher<T> extends Matcher<T | (() => any)> {
   public toEqualCells(expected: any[][]): void {
     if(!(this.actualValue instanceof TableModel)) {
       throw new MatchError('actualValue needs to be a TableModel');
@@ -45,9 +45,7 @@ class TableMatcher extends Matcher<TableModel | (() => any)> {
     }
     if(!this.shouldMatch) {
       throw new MatchError(
-        `expected at least one cell to not match`,
-        `${expected}`,
-        `${expected}`);
+        `expected at least one cell to not match`);
     }
   }
 
