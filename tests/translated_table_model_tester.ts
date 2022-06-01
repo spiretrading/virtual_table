@@ -345,23 +345,23 @@ export class TranslatedTableModelTester {
       [3, 4],
       [5, 6]
     ];
-    Expect(source).toEqualCells(expectedTable);
+    Expect(source).toEqual(expectedTable);
     const differentTable = [
       [1, 2],
       [1, -4],
       [0, -6]
     ];
-    Expect(source).not.toEqualCells(differentTable);
+    Expect(source).not.toEqual(differentTable);
     const tooShortTable = [
       [1, 2]
     ];
-    Expect(source).not.toEqualCells(tooShortTable);
+    Expect(source).not.toEqual(tooShortTable);
     const tooNarrowTable = [
       [1],
       [3],
       [5]
     ];
-    Expect(source).not.toEqualCells(tooNarrowTable);
+    Expect(source).not.toEqual(tooNarrowTable);
   }
 
   /** Tests that shuffleRows produces the expected table. */
@@ -380,7 +380,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests a series of moves. */
@@ -404,7 +404,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that removing rows is handled correctly after multiple moves. */
@@ -423,7 +423,7 @@ export class TranslatedTableModelTester {
       [1],
       [6]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that updating cells is handled correctly after multiple moves. */
@@ -445,7 +445,7 @@ export class TranslatedTableModelTester {
       [4],
       [6]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that adding rows is handled correctly after multiple moves. */
@@ -470,7 +470,7 @@ export class TranslatedTableModelTester {
       [9],
       [10]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that inserts are handled correctly after multiple moves. */
@@ -495,7 +495,7 @@ export class TranslatedTableModelTester {
       [9],
       [10]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that updates are performed correctly after rows are added. */
@@ -521,7 +521,7 @@ export class TranslatedTableModelTester {
       [80],
       [9]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 
   /** Tests that remove is performed correctly after a row is inserted. */
@@ -542,6 +542,6 @@ export class TranslatedTableModelTester {
       [6],
       [8]
     ];
-    Expect(translatedTable).toEqualCells(expectedTable);
+    Expect(translatedTable).toEqual(expectedTable);
   }
 }
