@@ -49,6 +49,9 @@ export class TranslatedTableModel extends TableModel {
         destination < 0) {
       throw new RangeError('The index specified is not within range.');
     }
+    if(source === destination) {
+      return;
+    }
     const sourceValue = this.translatedToSourceIndices[source];
     const multiplier = source < destination ? 1 : -1;
     for(let index = source; index != destination; index += multiplier) {
