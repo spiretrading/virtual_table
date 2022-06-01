@@ -11,7 +11,7 @@ class MainDemo extends React.Component<{}, State> {
   constructor(props: {}) {
     super(props);
     this.state = {
-      currentDemo: 'HeaderCellViewDemo'
+      currentDemo: 'TableViewDemo'
     }
   }
 

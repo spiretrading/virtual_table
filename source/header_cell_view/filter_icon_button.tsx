@@ -1,6 +1,6 @@
-import { css, StyleSheet} from 'aphrodite';
+import {css, StyleSheet} from 'aphrodite';
 import * as React from 'react';
-import { Filter } from '../filter';
+import {Filter} from '../filter';
 
 interface Properties {
 

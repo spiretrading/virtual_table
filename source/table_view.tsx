@@ -1,15 +1,22 @@
 import * as React from 'react';
-import { AddRowOperation, MoveRowOperation, Operation,
-  RemoveRowOperation, UpdateOperation } from './operations';
-import { TableModel } from './table_model';
+import {Filter} from './filter';
+import {HeaderCell} from './header_cell';
+import {HeaderCellView} from './header_cell_view';
+import {AddRowOperation, MoveRowOperation, Operation,
+  RemoveRowOperation, Transaction, UpdateOperation} from './operations';
+import {SortOrder} from './sort_order';
+import {TableModel} from './table_model';
 
 interface Properties {
 
   /** The model to display. */
   model: TableModel;
 
-  /** The label for the columns of the table. */
-  labels?: string[];
+  /** The headers for each column. */
+  headerCells: HeaderCell[];
+
+  /** The index of the header with the highest sort priority. */
+  highestPriorityHeader: number;
 
   /** Specifies the CSS class. */
   className?: string;
@@ -43,12 +50,15 @@ export class TableView extends React.Component<Properties, State> {
 
   public render(): JSX.Element {
     const header = [];
-    for(let i = 0; i < this.props.labels.length; ++i) {
+    for(let i = 0; i < this.props.headerCells.length; ++i) {
       header.push(
-        <th style={this.props.style.th}
-            className={this.props.className}
-            key={this.props.labels[i]}>
-          {this.props.labels[i]}
+        <th key={'header' + i}>
+          <HeaderCellView
+            name={this.props.headerCells[i].name}
+            shortName={this.props.headerCells[i].shortName}
+            sortOrder={this.getSortOrderIconType(i)}
+            filter={Filter.UNFILTERABLE}
+            onSort={() => this.props.headerCells[i].sort()}/>
         </th>);
     }
     const startRow = Math.max(0, this.state.topRow - 1);
@@ -139,7 +149,26 @@ export class TableView extends React.Component<Properties, State> {
     this.wrapperRef.current.removeEventListener('scroll', this.onScrollHandler);
   }
 
+  private getSortOrderIconType = (index: number) => {
+    if(this.props.highestPriorityHeader === index) {
+      return this.props.headerCells[index].sortOrder;
+    } else if(this.props.headerCells[index].sortOrder ===
+        SortOrder.UNSORTABLE) {
+      return SortOrder.UNSORTABLE;
+    } else {
+      return SortOrder.NONE;
+    }
+  }
+
   private tableUpdated = (operation: Operation) => {
+    if(operation instanceof Transaction) {
+      operation.operations.forEach(this.checkSignal);
+    } else {
+      this.checkSignal(operation);
+    }
+  }
+
+  private checkSignal = (operation: Operation) => {
     const start = Math.max(0, this.state.topRow - 1);
     const end = Math.min(this.props.model.rowCount,
       Math.abs(this.props.model.rowCount - 1),

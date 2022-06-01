@@ -1,4 +1,4 @@
-import { TestSet, TestRunner } from "alsatian";
+import {TestSet, TestRunner} from "alsatian";
 
 let testSet = TestSet.create();
 testSet.addTestsFromFiles("./build/tests/*.js");

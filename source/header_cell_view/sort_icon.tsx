@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { SortOrder } from '../sort_order';
+import {SortOrder} from '../sort_order';
 
 interface Properties {
 
