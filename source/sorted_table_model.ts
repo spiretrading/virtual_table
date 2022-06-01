@@ -28,6 +28,28 @@ export class SortedTableModel extends TableModel {
     this.transactionLog = new TransactionLog();
   }
 
+  /** 
+   * Sorts the table using @param column as the column with the highest sort
+   * priority. All previous sortOrders remain and are pushed down a rank.
+   * @param column - The column that will now have the highest priority
+   * @param sortOrder - The sort order of column.
+   */
+  public updateSortOrder(column: number, sortOrder: SortOrder) {
+    if(column < 0 || this.columnCount <= column) {
+      throw new Error('The column is outside of range.');
+    } else if(sortOrder === SortOrder.UNSORTABLE) {
+      throw new Error('The column is unsortable.');
+    } else if(sortOrder === SortOrder.NONE) {
+      throw new Error('The column is neither ascending or descending.');
+    }
+    this.sortOrder[column] = sortOrder;
+    if(this.sortPriority.includes(column)) {
+      this.sortPriority.splice(this.sortPriority.indexOf(column), 1);
+    }
+    this.sortPriority.unshift(column);
+    this.sort();
+  }
+
   /**
    * Marks the beginning of a transaction. In cases where a transaction is
    * already being processed, then the sub-transaction gets consolidated into
@@ -57,28 +79,6 @@ export class SortedTableModel extends TableModel {
   public connect(slot: (operation: Operation) => void):
       Kola.Listener<Operation> {
     return this.transactionLog.connect(slot);
-  }
-
-  /** 
-   * Sorts the table using @param column as the column with the highest sort
-   * priority. All previous sortOrders remain and are pushed down a rank.
-   * @param column - The column that will now have the highest priority
-   * @param sortOrder - The sort order of column.
-   */
-  public updateSortOrder(column: number, sortOrder: SortOrder) {
-    if(column < 0 || this.columnCount <= column) {
-      throw new Error('The column is outside of range.');
-    } else if(sortOrder === SortOrder.UNSORTABLE) {
-      throw new Error('The column is unsortable.');
-    } else if(sortOrder === SortOrder.NONE) {
-      throw new Error('The column is neither ascending or descending.');
-    }
-    this.sortOrder[column] = sortOrder;
-    if(this.sortPriority.includes(column)) {
-      this.sortPriority.splice(this.sortPriority.indexOf(column), 1);
-    }
-    this.sortPriority.unshift(column);
-    this.sort();
   }
 
   private sort() {
