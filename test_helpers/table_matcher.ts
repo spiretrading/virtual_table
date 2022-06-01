@@ -4,7 +4,7 @@ import {TableModel} from '../source';
 class TableMatcher<T> extends Matcher<T | (() => any)> {
   public toEqual(expected: any): void {
     if(!(this.actualValue instanceof TableModel)) {
-      return CoreExpect(this.actualValue).toEqual(expected);
+      return super.toEqual(expected);
     }
     if(!Array.isArray(expected) && !(expected instanceof TableModel)) {
       throw new MatchError(`expectValue needs to be a TableModel or an array`);
@@ -35,12 +35,12 @@ class TableMatcher<T> extends Matcher<T | (() => any)> {
         }
       }
       for(let j = 0; j < this.actualValue.columnCount; ++j) {
-        const expectValue = this.getExpectedCellValue(expected, i, j);
-        if(this.actualValue.get(i, j) !== expectValue) {
+        const expectedValue = this.getExpectedCellValue(expected, i, j);
+        if(this.actualValue.get(i, j) !== expectedValue) {
           if(this.shouldMatch) {
             throw new MatchError(
               `expected row ${i} column ${j} values to match`,
-              `${expectValue}`,
+              `${expectedValue}`,
               `${this.actualValue.get(i, j)}`
             );
           } else {
