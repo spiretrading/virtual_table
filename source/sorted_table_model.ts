@@ -50,20 +50,6 @@ export class SortedTableModel extends TableModel {
     this.sort();
   }
 
-  /**
-   * Marks the beginning of a transaction. In cases where a transaction is
-   * already being processed, then the sub-transaction gets consolidated into
-   * the parent transaction.
-   */
-  public beginTransaction(): void {
-    this.transactionLog.beginTransaction();
-  }
-
-  /** Ends a transaction. */
-  public endTransaction(): void {
-    this.transactionLog.endTransaction();
-  }
-
   public get rowCount(): number {
     return this.translatedTable.rowCount;
   }
@@ -127,6 +113,14 @@ export class SortedTableModel extends TableModel {
       operation.operations.forEach(this.handleSourceOperation);
       this.endTransaction();
     }
+  }
+
+  private beginTransaction(): void {
+    this.transactionLog.beginTransaction();
+  }
+
+  private endTransaction(): void {
+    this.transactionLog.endTransaction();
   }
 
   private sourceAdd(operation: AddRowOperation) {
