@@ -49,7 +49,7 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   public render(): JSX.Element {
-    const header = [];this.props.headerCells
+    const header = [];
     for(let i = 0; i < this.props.headerCells.length; ++i) {
       header.push(
         <th key={'header' + i}>
