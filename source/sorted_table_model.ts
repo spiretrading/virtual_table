@@ -17,36 +17,48 @@ export class SortedTableModel extends TableModel {
   constructor(model: TableModel) {
     super();
     this.comparator = new Comparator();
+    this.movesToIgnore = 0;
+    this.sortPriority = [];
+    this.transactionLog = new TransactionLog();
+    this.translatedTable = new TranslatedTableModel(model);
     this.sortOrder = [];
-    for(let i = 0; i < model.columnCount; ++i) {
+    for(let i = 0; i < this.translatedTable.columnCount; ++i) {
       this.sortOrder.push(SortOrder.NONE);
     }
-    this.sortPriority = [];
-    this.translatedTable = new TranslatedTableModel(model);
     this.translatedTable.connect(this.handleSourceOperation);
-    this.movesToIgnore = 0;
-    this.transactionLog = new TransactionLog();
   }
 
-  /** 
-   * Sorts the table using @param column as the column with the highest sort
-   * priority. All previous sortOrders remain and are pushed down a rank.
-   * @param column - The column that will now have the highest priority
+  /**
+   * Returns the index of the column has the highest sort priority,
+   * or -1 if no column has the highest.
+   */
+  public getHighestPriorityColumn(): number {
+    if(this.sortPriority.length > 0) {
+      this.sortPriority[0];
+    } else {
+      return -1;
+    }
+  }
+
+  /**
+   * Changes the sortOrder of the @param column. If sortOrder is NONE or
+   * UNSORTABLE the column will have no sort priority.
+   * If sortOrder is ASCENDING or DESCENDING the table will update the sort
+   * with @param column being given the highest priority.
+   * @param column - The column that is being changed.
    * @param sortOrder - The sort order of column.
    */
   public updateSortOrder(column: number, sortOrder: SortOrder) {
     if(column < 0 || this.columnCount <= column) {
       throw new Error('The column is outside of range.');
-    } else if(sortOrder === SortOrder.UNSORTABLE) {
-      throw new Error('The column is unsortable.');
-    } else if(sortOrder === SortOrder.NONE) {
-      throw new Error('The column is neither ascending or descending.');
     }
-    this.sortOrder[column] = sortOrder;
     if(this.sortPriority.includes(column)) {
       this.sortPriority.splice(this.sortPriority.indexOf(column), 1);
     }
-    this.sortPriority.unshift(column);
+    if(sortOrder !== SortOrder.NONE && sortOrder !== SortOrder.UNSORTABLE) {
+      this.sortPriority.unshift(column);
+    }
+    this.sortOrder[column] = sortOrder;
     this.sort();
   }
 
@@ -161,8 +173,8 @@ export class SortedTableModel extends TableModel {
 
   private findInHead(start: number, end: number, indexOfValue: number) {
     while(start < end) {
-      const middle = Math.floor((start + end) / 2);
-    if(this.compareRows(middle, indexOfValue) > 0) {
+      const middle = Math.floor((start + ((end - start) / 2)));
+      if(this.compareRows(middle, indexOfValue) > 0) {
         end = middle;
       } else {
         start = middle + 1;
@@ -173,7 +185,7 @@ export class SortedTableModel extends TableModel {
 
   private findInTail(start: number, end: number, indexOfValue: number) {
     while(start < end) {
-      const middle = Math.ceil((start + end) / 2);
+      const middle = Math.ceil((start + ((end - start) / 2)));
       if(this.compareRows(indexOfValue, middle) > 0) {
         start = middle;
       } else {
@@ -184,9 +196,9 @@ export class SortedTableModel extends TableModel {
   }
 
   private comparator: Comparator;
-  private translatedTable: TranslatedTableModel;
-  private sortOrder: SortOrder[];
+  private movesToIgnore: number;
   private sortPriority: number[];
   private transactionLog: TransactionLog;
-  private movesToIgnore: number;
+  private sortOrder: SortOrder[];
+  private translatedTable: TranslatedTableModel;
 }
