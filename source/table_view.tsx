@@ -1,11 +1,11 @@
 import * as React from 'react';
+import { Filter } from './filter';
 import { HeaderCell } from './header_cell';
 import { HeaderCellView } from './header_cell_view';
-import { Filter } from './filter';
 import { AddRowOperation, MoveRowOperation, Operation,
   RemoveRowOperation, Transaction, UpdateOperation } from './operations';
-import { TableModel } from './table_model';
 import { SortOrder } from './sort_order';
+import { TableModel } from './table_model';
 
 interface Properties {
 
