@@ -1,5 +1,5 @@
 import * as Kola from 'kola-signals';
-import { Operation } from './operations';
+import {Operation} from './operations';
 
 /** Base class representing a table based data model. */
 export abstract class TableModel {

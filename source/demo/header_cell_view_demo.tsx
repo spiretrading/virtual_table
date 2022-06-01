@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Filter } from '../filter';
-import { HeaderCell } from '../header_cell';
-import { HeaderCellView } from '../header_cell_view';
-import { SortOrder } from '../sort_order';
+import {Filter} from '../filter';
+import {HeaderCell} from '../header_cell';
+import {HeaderCellView} from '../header_cell_view';
+import {SortOrder} from '../sort_order';
 
 interface State {
   width: number;

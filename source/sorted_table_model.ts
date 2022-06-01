@@ -1,8 +1,8 @@
 import * as Kola from 'kola-signals';
-import { Comparator } from './comparator';
-import { AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
-  Transaction, UpdateOperation } from './operations';
-import { SortOrder } from './sort_order';
+import {Comparator} from './comparator';
+import {AddRowOperation, MoveRowOperation, Operation, RemoveRowOperation,
+  Transaction, UpdateOperation} from './operations';
+import {SortOrder} from './sort_order';
 import {TableModel} from './table_model';
 import {TransactionLog} from './transaction_log';
 import {TranslatedTableModel} from './translated_table_model';

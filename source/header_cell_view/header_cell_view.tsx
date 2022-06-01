@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { Filter } from '../filter';
-import { SortOrder } from '../sort_order';
-import { FilterIconButton } from './filter_icon_button';
-import { SortIcon } from './sort_icon';
+import {Filter} from '../filter';
+import {SortOrder} from '../sort_order';
+import {FilterIconButton} from './filter_icon_button';
+import {SortIcon} from './sort_icon';
 
 interface Properties {
 

@@ -1,4 +1,4 @@
-import { SortOrder } from './sort_order';
+import {SortOrder} from './sort_order';
 
 /** Header of a column of a table. */
 export class HeaderCell {

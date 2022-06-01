@@ -1,9 +1,9 @@
 import * as React from 'react';
-import { ArrayTableModel } from '../array_table_model';
-import { HeaderCell } from '../header_cell';
-import { SortOrder } from '../sort_order';
-import { SortedTableModel } from '../sorted_table_model';
-import { TableView } from '../table_view';
+import {ArrayTableModel} from '../array_table_model';
+import {HeaderCell} from '../header_cell';
+import {SortOrder} from '../sort_order';
+import {SortedTableModel } from '../sorted_table_model';
+import {TableView} from '../table_view';
 
 interface State {
   headerCells: HeaderCell[];
@@ -19,7 +19,7 @@ export class TableViewDemo extends React.Component<{}, State> {
       highestPriorityHeader: -1
     }
     this.sourceModel = new ArrayTableModel();
-    this.sortedModel = new SortedTableModel(this.sourceModel );
+    this.sortedModel = new SortedTableModel(this.sourceModel);
   }
   public render(): JSX.Element {
     return <TableView

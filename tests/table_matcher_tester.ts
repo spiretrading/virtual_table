@@ -1,4 +1,4 @@
-import {Focus, Test} from 'alsatian';
+import {Test} from 'alsatian';
 import {ArrayTableModel, TableModel} from '../source';
 import {Expect} from '../test_helpers/table_matcher';
 
