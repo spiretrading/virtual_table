@@ -64,7 +64,7 @@ export class TableViewDemo extends React.Component<{}, State> {
   }
 
   private onSort = (column: number, sortOrder: SortOrder) => {
-    this.sortedModel.updateSort(column, sortOrder);
+    this.sortedModel.updateSortOrder(column, sortOrder);
     this.setState({
       headerCells: this.state.headerCells,
       highestPriorityHeader: column
