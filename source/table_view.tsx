@@ -192,11 +192,13 @@ export class TableView extends React.Component<Properties, State> {
   }
 
   private onScrollHandler = () => {
-    const percent =
-      this.wrapperRef.current.scrollTop / this.wrapperRef.current.scrollHeight;
+    const rawPercent = (this.wrapperRef.current.scrollTop -
+      TableView.HEADER_HEIGHT) / this.wrapperRef.current.scrollHeight;
+    const percent = Math.max(0, rawPercent);
     this.setState({topRow: Math.floor(percent * this.props.model.rowCount)});
   }
 
   private firstRowRef: React.RefObject<HTMLTableRowElement>;
   private wrapperRef: React.RefObject<HTMLDivElement>;
+  private static readonly HEADER_HEIGHT = 35;
 }
