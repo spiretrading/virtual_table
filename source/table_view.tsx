@@ -197,7 +197,7 @@ export class TableView extends React.Component<Properties, State> {
     const adjustedScrollHeight = this.wrapperRef.current.scrollHeight -
       TableView.HEADER_HEIGHT
     const percent = adjustedScrollTop / adjustedScrollHeight;
-    let topRow = Math.max(0, Math.ceil(percent * this.props.model.rowCount));
+    let topRow = Math.max(0, Math.floor(percent * this.props.model.rowCount));
     this.setState({topRow: topRow});
   }
 
