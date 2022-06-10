@@ -1,4 +1,4 @@
-import {Focus, Test} from 'alsatian';
+import {Test} from 'alsatian';
 import {AddRowOperation, ArrayTableModel, MoveRowOperation, Operation,
   RemoveRowOperation, SortedTableModel, SortOrder, Transaction,
   UpdateOperation} from '../source';
@@ -150,7 +150,7 @@ export class SortedTableModelTester {
 
   /** Tests that impossible sorts are prevented. */
   @Test()
-  public testBadSort(): void {
+  public testImpossibleSort(): void {
     const model = new SortedTableModel(getTestTable());
     Expect(() => model.updateSortOrder(10, SortOrder.ASCENDING)).toThrow();
     let expectedTable = [
@@ -161,7 +161,7 @@ export class SortedTableModelTester {
     ];
     Expect(model).toEqual(expectedTable);
     model.updateSortOrder(1, SortOrder.DESCENDING);
-    Expect(() => model.updateSortOrder(4, SortOrder.DESCENDING)).toThrow();
+    Expect(() => model.updateSortOrder(4, SortOrder.NONE)).toThrow();
     expectedTable = [
       [55, 7],
       [55, 6],
@@ -181,10 +181,10 @@ export class SortedTableModelTester {
     sortedModel.updateSortOrder(1, SortOrder.NONE);
     sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE);
     let expectedTable = [
-        [1, 6],
-        [3, 7],
-        [4, 8],
-        [5, 9],
+      [1, 6],
+      [3, 7],
+      [4, 8],
+      [5, 9]
     ];
     Expect(sortedModel).toEqual(expectedTable);
     sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
@@ -198,18 +198,18 @@ export class SortedTableModelTester {
     sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
     sortedModel.updateSortOrder(0, SortOrder.NONE);
     expectedTable = [
-        [5, 9],
-        [4, 8],
-        [3, 7],
-        [1, 6]
+      [5, 9],
+      [4, 8],
+      [3, 7],
+      [1, 6]
     ];
     Expect(sortedModel).toEqual(expectedTable);
     sortedModel.updateSortOrder(1, SortOrder.UNSORTABLE);
     expectedTable = [
-        [5, 9],
-        [4, 8],
-        [3, 7],
-        [1, 6]
+      [5, 9],
+      [4, 8],
+      [3, 7],
+      [1, 6]
     ];
     Expect(sortedModel).toEqual(expectedTable);
   }
