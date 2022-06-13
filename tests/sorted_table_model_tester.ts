@@ -34,7 +34,7 @@ function getWideTestTable() {
   return matrix;
 }
 
-function noDuplicateValuesTable() {
+function getNoDuplicatesTable() {
   const matrix = new ArrayTableModel();
   matrix.push([1, 6]);
   matrix.push([3, 7]);
@@ -177,7 +177,7 @@ export class SortedTableModelTester {
    */
   @Test()
   public testSortRemoval(): void {
-    const sortedModel = new SortedTableModel(noDuplicateValuesTable());
+    const sortedModel = new SortedTableModel(getNoDuplicatesTable());
     sortedModel.updateSortOrder(1, SortOrder.NONE);
     sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE);
     let expectedTable = [
@@ -216,7 +216,7 @@ export class SortedTableModelTester {
 
   /** Tests that getHighestPriorityColumn performs correctly. */
   public testHighestSortPriority(): void {
-    const sortedModel = new SortedTableModel(noDuplicateValuesTable());
+    const sortedModel = new SortedTableModel(getNoDuplicatesTable());
     sortedModel.updateSortOrder(1, SortOrder.NONE);
     sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE);
     Expect(sortedModel.getHighestPriorityColumn()).toEqual(-1);
