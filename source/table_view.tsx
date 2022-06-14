@@ -198,7 +198,7 @@ export class TableView extends React.Component<Properties, State> {
       TableView.HEADER_HEIGHT;
     const percent = scrollTop / scrollHeight;
     const topRow = Math.max(0, Math.floor(percent * this.props.model.rowCount));
-    this.setState({topRow: topRow});
+    this.setState({topRow});
   }
 
   private static readonly HEADER_HEIGHT = 35;
