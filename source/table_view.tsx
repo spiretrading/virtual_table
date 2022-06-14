@@ -44,8 +44,8 @@ export class TableView extends React.Component<Properties, State> {
       topRow: 0
     };
     this.props.model.connect(this.tableUpdated.bind(this));
-    this.firstRowRef = React.createRef<HTMLTableRowElement>();
     this.wrapperRef = React.createRef<HTMLDivElement>();
+    this.firstRowRef = React.createRef<HTMLTableRowElement>();
   }
 
   public render(): JSX.Element {
@@ -191,12 +191,17 @@ export class TableView extends React.Component<Properties, State> {
     }
   }
 
-  private onScrollHandler = () => {
-    const percent =
-      this.wrapperRef.current.scrollTop / this.wrapperRef.current.scrollHeight;
-    this.setState({topRow: Math.floor(percent * this.props.model.rowCount)});
+  private onScrollHandler = () => { 
+    const scrollTop = this.wrapperRef.current.scrollTop -
+      TableView.HEADER_HEIGHT;
+    const scrollHeight = this.wrapperRef.current.scrollHeight -
+      TableView.HEADER_HEIGHT;
+    const percent = scrollTop / scrollHeight;
+    const topRow = Math.max(0, Math.floor(percent * this.props.model.rowCount));
+    this.setState({topRow});
   }
 
-  private firstRowRef: React.RefObject<HTMLTableRowElement>;
+  private static readonly HEADER_HEIGHT = 35;
   private wrapperRef: React.RefObject<HTMLDivElement>;
+  private firstRowRef: React.RefObject<HTMLTableRowElement>;
 }

@@ -34,7 +34,7 @@ export class SortedTableModel extends TableModel {
    */
   public getHighestPriorityColumn(): number {
     if(this.sortPriority.length > 0) {
-      this.sortPriority[0];
+      return this.sortPriority[0];
     } else {
       return -1;
     }

@@ -34,6 +34,15 @@ function getWideTestTable() {
   return matrix;
 }
 
+function getNoDuplicatesTable() {
+  const matrix = new ArrayTableModel();
+  matrix.push([1, 6]);
+  matrix.push([3, 7]);
+  matrix.push([4, 8]);
+  matrix.push([5, 9]);
+  return matrix;
+}
+
 /** Tests the SortedTableModel. */
 export class SortedTableModelTester {
 
@@ -141,18 +150,84 @@ export class SortedTableModelTester {
 
   /** Tests that impossible sorts are prevented. */
   @Test()
-  public testBadSort(): void {
-    const sortedModel = new SortedTableModel(getTestTable());
-    Expect(() => sortedModel.updateSortOrder(0, SortOrder.NONE)).toThrow();
-    Expect(() => sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE)).toThrow();
-    Expect(() => sortedModel.updateSortOrder(10, SortOrder.ASCENDING)).toThrow();
-    const expectedTable = [
+  public testImpossibleSort(): void {
+    const model = new SortedTableModel(getTestTable());
+    Expect(() => model.updateSortOrder(10, SortOrder.ASCENDING)).toThrow();
+    let expectedTable = [
       [100, 2],
       [3, 4],
       [55, 7],
       [55, 6]
     ];
+    Expect(model).toEqual(expectedTable);
+    model.updateSortOrder(1, SortOrder.DESCENDING);
+    Expect(() => model.updateSortOrder(4, SortOrder.NONE)).toThrow();
+    expectedTable = [
+      [55, 7],
+      [55, 6],
+      [3, 4],
+      [100, 2]
+    ];
+    Expect(model).toEqual(expectedTable);
+  }
+
+  /** 
+   * Tests that sorting remains correct when columns are removed from the
+   * sort priority.
+   */
+  @Test()
+  public testSortRemoval(): void {
+    const sortedModel = new SortedTableModel(getNoDuplicatesTable());
+    sortedModel.updateSortOrder(1, SortOrder.NONE);
+    sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE);
+    let expectedTable = [
+      [1, 6],
+      [3, 7],
+      [4, 8],
+      [5, 9]
+    ];
     Expect(sortedModel).toEqual(expectedTable);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    expectedTable = [
+      [5, 9],
+      [4, 8],
+      [3, 7],
+      [1, 6]
+    ];
+    Expect(sortedModel).toEqual(expectedTable);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
+    sortedModel.updateSortOrder(0, SortOrder.NONE);
+    expectedTable = [
+      [5, 9],
+      [4, 8],
+      [3, 7],
+      [1, 6]
+    ];
+    Expect(sortedModel).toEqual(expectedTable);
+    sortedModel.updateSortOrder(1, SortOrder.UNSORTABLE);
+    expectedTable = [
+      [5, 9],
+      [4, 8],
+      [3, 7],
+      [1, 6]
+    ];
+    Expect(sortedModel).toEqual(expectedTable);
+  }
+
+  /** Tests that getHighestPriorityColumn performs correctly. */
+  public testHighestSortPriority(): void {
+    const sortedModel = new SortedTableModel(getNoDuplicatesTable());
+    sortedModel.updateSortOrder(1, SortOrder.NONE);
+    sortedModel.updateSortOrder(0, SortOrder.UNSORTABLE);
+    Expect(sortedModel.getHighestPriorityColumn()).toEqual(-1);
+    sortedModel.updateSortOrder(1, SortOrder.DESCENDING);
+    Expect(sortedModel.getHighestPriorityColumn()).toEqual(1);
+    sortedModel.updateSortOrder(0, SortOrder.ASCENDING);
+    Expect(sortedModel.getHighestPriorityColumn()).toEqual(0);
+    sortedModel.updateSortOrder(0, SortOrder.NONE);
+    Expect(sortedModel.getHighestPriorityColumn()).toEqual(1);
+    sortedModel.updateSortOrder(1, SortOrder.UNSORTABLE);
+    Expect(sortedModel.getHighestPriorityColumn()).toEqual(-1);
   }
 
   /** Tests that table stays sorted when source adds a new row. */
